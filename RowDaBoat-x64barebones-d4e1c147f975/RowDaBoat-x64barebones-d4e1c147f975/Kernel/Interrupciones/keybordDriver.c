@@ -15,15 +15,6 @@ static const char asccode[58][2] =
     {0, 0}, {'\\', '|'}, {'z', 'Z'}, {'x', 'X'}, {'c', 'C'}, {'v', 'V'}, {'b', 'B'}, {'n', 'N'}, 
     {'m', 'M'}, {',', '<'}, {'.', '>'}, {'/', '?'}, {0, 0}, {0, 0}, {0, 0}, {' ', ' '}
 };
-<<<<<<< HEAD
-static const char special[2] = {0,0};
-void keyboardHandler()
-{
-    char scan = getKeyboardScanCode();
-    static int shift=0;
-    if(scan >=0){
-        if(scan == 42)
-=======
 
 static const char latinasccode[86][3] =
 {
@@ -46,21 +37,12 @@ void keyboardHandler()
     static int shift=0;
     if(scan <=0x56){
         if(scan == 0x2A ||scan == 0x36)
->>>>>>> 
         {
             shift=1;
             keyboardHandler();
         }else if(scan == 14)
         {
             deleteChar();
-<<<<<<< HEAD
-        }
-        else{
-            printChar(asccode[scan][shift]);
-            shift=0;
-        }
-    }
-=======
         }else if(scan == 0x38)
         {
             shift=2;
@@ -83,7 +65,6 @@ void keyboardHandler()
     }
     
 
->>>>>>> 
 
 
 }

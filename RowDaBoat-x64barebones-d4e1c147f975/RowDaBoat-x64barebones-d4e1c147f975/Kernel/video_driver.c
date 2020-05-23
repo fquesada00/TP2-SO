@@ -66,11 +66,7 @@ void printChar(char c)
     char *bitmap = font8x8_basic[c];
     int set;
     if((currentscreen_info->framebuffer-start)%(WIDTH*3) == 0 && currentscreen_info->framebuffer != start)
-<<<<<<< HEAD
-        newLine();
-=======
         currentscreen_info->framebuffer+=(8*WIDTH*3);
->>>>>>> 
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -92,11 +88,7 @@ void deleteChar()
 {
     if(currentscreen_info->framebuffer == start)
         return;
-<<<<<<< HEAD
-    if((currentscreen_info->framebuffer-start)%(WIDTH*3) == 1)
-=======
     if((currentscreen_info->framebuffer-start)%(WIDTH*3) == 0)
->>>>>>> 
     {
         currentscreen_info->framebuffer-=WIDTH*3*8;
     }
@@ -163,11 +155,7 @@ void puts(char *string)
 void newLine(){
 
     uint32_t auxi =(screen_info->framebuffer - start)%(WIDTH*3);
-<<<<<<< HEAD
-    currentscreen_info->framebuffer+=(8*WIDTH*3) - auxi ;
-=======
     currentscreen_info->framebuffer+=(WIDTH*3) - auxi ;
->>>>>>> 
 
 }
 void aux(int d,char * buffer)
