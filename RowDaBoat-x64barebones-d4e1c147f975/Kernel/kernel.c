@@ -97,12 +97,6 @@ int main(){
 	newLine();
 	puts("[Finished]");
 	clear();
-<<<<<<< HEAD
-=======
-	puts("Linea 1");
-	newLine();
-	puts("Linea 2");
->>>>>>> 
 	while (1);
 	
 	
