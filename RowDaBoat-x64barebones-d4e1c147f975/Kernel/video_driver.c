@@ -65,6 +65,8 @@ void printChar(char c)
 {
     char *bitmap = font8x8_basic[c];
     int set;
+    //TODO
+    //Next line print char fix
     if((currentscreen_info->framebuffer-start)%(WIDTH*3) == 0 && currentscreen_info->framebuffer != start)
         currentscreen_info->framebuffer+=(8*WIDTH*3);
     for (int i = 0; i < 8; i++)
