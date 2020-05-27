@@ -96,9 +96,10 @@ int main(){
 	puts((char*)sampleDataModuleAddress);
 	newLine();
 	puts("[Finished]");
+	write_pixel(1024,0,255,0,0);
 	clear();
-	while (1);
-	
+	//write_pixel(1023,0,255,0,0);
+	while(1);
 	
 	
 }

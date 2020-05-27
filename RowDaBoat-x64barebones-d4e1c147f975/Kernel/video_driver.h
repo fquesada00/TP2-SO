@@ -10,4 +10,5 @@ void clear();
 void aux(int d,char * buffer);
 void debug();
 void deleteChar();
+void cursor();
 #endif

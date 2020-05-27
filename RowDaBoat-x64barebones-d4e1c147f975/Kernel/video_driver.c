@@ -42,9 +42,9 @@ struct vbe_mode_info_structure
     uint16_t off_screen_mem_size; // size of memory in the framebuffer but not being displayed on the screen
     uint8_t reserved1[206];
 } __attribute__((packed));
-static  const struct vbe_mode_info_structure *screen_info = (void *)0x5C00;
-static struct vbe_mode_info_structure * currentscreen_info= (void *)0x5C00;
-static uint32_t start =0xFD000000;
+static const struct vbe_mode_info_structure *screen_info = (void *)0x5C00;
+static struct vbe_mode_info_structure *currentscreen_info = (void *)0x5C00;
+static uint32_t start = 0xFD000000;
 char *getAbsolutePixelDataPosition(int x, int y)
 {
     return (char *)(start + (x + y * WIDTH) * 3);
@@ -54,11 +54,11 @@ char *getRelativePixelDataPosition(int x, int y)
     return (char *)(currentscreen_info->framebuffer + (x + y * WIDTH) * 3);
 }
 
-void write_pixel(int x, int y,char r,char g, char b)
+void write_pixel(int x, int y, char r, char g, char b)
 {
     char *pos = getAbsolutePixelDataPosition(x, y);
-    pos[0] = b;   //azul
-    pos[1] = g;   //verde
+    pos[0] = b; //azul
+    pos[1] = g; //verde
     pos[2] = r; //rojo
 }
 void printChar(char c)
@@ -67,8 +67,7 @@ void printChar(char c)
     int set;
     //TODO
     //Next line print char fix
-    if((currentscreen_info->framebuffer-start)%(WIDTH*3) == 0 && currentscreen_info->framebuffer != start)
-        currentscreen_info->framebuffer+=(8*WIDTH*3);
+
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -83,18 +82,22 @@ void printChar(char c)
             }
         }
     }
+    if (((currentscreen_info->framebuffer) - start) % (WIDTH * 3) == (WIDTH - 8) * 3)
+    {
+        currentscreen_info->framebuffer += (8 * WIDTH * 3);
+    }
     currentscreen_info->framebuffer += 24;
 }
 
 void deleteChar()
 {
-    if(currentscreen_info->framebuffer == start)
+    if (currentscreen_info->framebuffer == start)
         return;
-    if((currentscreen_info->framebuffer-start)%(WIDTH*3) == 0)
+    if ((currentscreen_info->framebuffer - start) % (WIDTH * 3) == 0)
     {
-        currentscreen_info->framebuffer-=WIDTH*3*8;
+        currentscreen_info->framebuffer -= WIDTH * 3 * 8;
     }
-    currentscreen_info->framebuffer-=24;
+    currentscreen_info->framebuffer -= 24;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -109,15 +112,15 @@ void deleteChar()
 
 void upLine(int line)
 {
-    if(line != 0)
+    if (line != 0)
     {
-        for(int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; i++)
         {
-            for(int j = 0; j < WIDTH;j++)
+            for (int j = 0; j < WIDTH; j++)
             {
 
-                char * lineSrc = getAbsolutePixelDataPosition(j,i+line);
-                write_pixel(j,i+line-1,lineSrc[2],lineSrc[1],lineSrc[0]);
+                char *lineSrc = getAbsolutePixelDataPosition(j, i + line);
+                write_pixel(j, i + line - 1, lineSrc[2], lineSrc[1], lineSrc[0]);
             }
         }
     }
@@ -128,19 +131,19 @@ void clear()
     for (int i = 0; i < HEIGHT; i++)
         for (int j = 0; j < WIDTH; j++)
         {
-            write_pixel(j,i,0,0,0);
+            write_pixel(j, i, 0, 0, 0);
         }
-    
+
     currentscreen_info->framebuffer = start;
 }
 
 void clearLine(int line)
 {
-    for (int i = 0; i < 8 ; i++)
+    for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < WIDTH; j++)
         {
-            write_pixel(j,i+(line*9),0,0,0);
+            write_pixel(j, i + (line * 9), 0, 0, 0);
         }
     }
 }
@@ -154,27 +157,43 @@ void puts(char *string)
     }
 }
 
-void newLine(){
-
-    uint32_t auxi =(screen_info->framebuffer - start)%(WIDTH*3);
-    currentscreen_info->framebuffer+=(WIDTH*3) - auxi ;
-
-}
-void aux(int d,char * buffer)
+void newLine()
 {
-    buffer[0] = d%10 + '0';
-    buffer[1]=0;
+
+    uint32_t auxi = (screen_info->framebuffer - start) % (WIDTH * 3);
+    currentscreen_info->framebuffer += (WIDTH * 3 * 9) - auxi;
+}
+void aux(int d, char *buffer)
+{
+    buffer[0] = d % 10 + '0';
+    buffer[1] = 0;
     return buffer;
 }
 void debug()
 {
-    for(int i = 0;i < HEIGHT;i++)
+    for (int i = 0; i < HEIGHT; i++)
     {
-        if(i%3==0)
-            write_pixel(0,i,255,0,0);
-        else if(i%3 ==1)
-            write_pixel(0,i,0,255,0);
+        if (i % 3 == 0)
+            write_pixel(0, i, 255, 0, 0);
+        else if (i % 3 == 1)
+            write_pixel(0, i, 0, 255, 0);
         else
-            write_pixel(0,i,0,0,255);
+            write_pixel(0, i, 0, 0, 255);
     }
 }
+/*
+void cursor(int ticks)
+{
+    char color;
+    if(ticks % 18 == 0 )
+     color =255;
+    else color =0;
+    for (int i = 0; i < 8; i++)
+    {
+        char * pos = currentscreen_info->framebuffer+WIDTH*3*i;
+        pos[0]=color;
+        pos[1]=color;
+        pos[2]=color;
+    }
+    
+}*/
