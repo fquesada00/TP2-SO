@@ -25,6 +25,7 @@ static const char latinasccode[0x56][3] =
         {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, 
         {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {'<', '>', '|'}
     };
+
 void keyboardHandler()
 {
     signed long scan = getKeyboardScanCode();
@@ -71,19 +72,23 @@ void keyboardHandler()
     {
         shift = 0;
     }
-
+    //Buffer circular
     if(buff_size >= 256)
         buff_size = 0;
 }
 
+/* Si donde se inserto el anterior menos la pos donde recupera el 
+** ultimo char es 0, el buffer esta vacio */
 int is_buffer_empty()
 {
-    return buff_size == 0;
+    return (buff_size-current) == 0;
 }
 
+/* Buffer circular, cuando llega a 256 chars, vuelve al principio
+** y sobreescribe */
 char get_buffer()
 {
-    if(current == 256)
+    if(current >= 256)
         current = 0;
     return keyboard_buffer[current++];
 }
