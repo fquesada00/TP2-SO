@@ -46,8 +46,6 @@ struct vbe_mode_info_structure
 /*Estructura para escribir pixeles en pantalla*/
 static struct vbe_mode_info_structure *currentscreen_info = (void *)0x5C00;
 
-//TODO
-//MEJORAR PARA NO PONER EL VALOR ABSOLUTO SINO UN PUNTERO
 /*Posicion de inicio de la pantalla*/
 static uint32_t start = 0xFD000000;
 
