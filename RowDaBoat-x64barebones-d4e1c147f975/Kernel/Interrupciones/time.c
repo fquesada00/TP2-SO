@@ -1,9 +1,7 @@
 #include <time.h>
-#include "../video_driver.h"
 static unsigned long ticks = 0;
 void timer_handler() {
 	ticks++;
-	//cursor(ticks);
 }
 
 int ticks_elapsed() {

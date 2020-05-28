@@ -3,7 +3,7 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <naiveConsole.h>
-#include "video_driver.h"
+#include "Video_Driver/video_driver.h"
 #include "Interrupciones/idtLoader.h"
 #include "Interrupciones/time.h"
 extern uint8_t text;
@@ -98,8 +98,7 @@ int main(){
 	puts("[Finished]");
 	write_pixel(1024,0,255,0,0);
 	clear();
-	//write_pixel(1023,0,255,0,0);
-	while(1);
+	
 	
 	
 }
