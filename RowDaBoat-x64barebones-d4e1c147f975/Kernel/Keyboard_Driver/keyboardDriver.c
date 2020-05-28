@@ -88,8 +88,6 @@ int is_buffer_empty()
 ** y sobreescribe */
 char get_buffer()
 {
-    if(is_buffer_empty)
-        return 0;
     if(current >= 256)
         current = 0;
     return keyboard_buffer[current++];
