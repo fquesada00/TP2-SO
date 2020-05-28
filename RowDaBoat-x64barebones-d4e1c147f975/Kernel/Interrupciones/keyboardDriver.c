@@ -78,12 +78,14 @@ void keyboardHandler()
 
 int is_buffer_empty()
 {
-    return buff_size == 0;
+    return (buff_size-current) == 0;
 }
 
 char get_buffer()
 {
-    if(current == 256)
+    if(is_buffer_empty)
+        return 0;
+    if(current >= 256)
         current = 0;
     return keyboard_buffer[current++];
 }
