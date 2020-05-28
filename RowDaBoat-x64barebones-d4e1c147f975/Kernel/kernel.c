@@ -98,6 +98,8 @@ int main(){
 	puts("[Finished]");
 	write_pixel(1024,0,255,0,0);
 	clear();
+	while (1);
+	
 	
 	
 	
