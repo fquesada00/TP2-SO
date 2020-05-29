@@ -12,11 +12,14 @@ GLOBAL _irq02Handler
 GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
-
+GLOBAL _irq80Handler
+GLOBAL _syscallHandler
 GLOBAL _exception0Handler
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
+EXTERN screenNumber
+EXTERN get_buffer
 
 SECTION .text
 
@@ -139,6 +142,105 @@ _irq05Handler:
 	irqHandlerMaster 5
 
 
+; -----------------------------------------------------------------------------
+;KERNEL SYSCALL HANDLER INTERRUPT 80h										
+;Params
+;	rax -> syscall number
+;Ret								
+;	rax -> syscall asociated value					
+_syscallHandler:
+	push rbp
+	mov rbp,rsp
+	push rbx
+	cmp rax,0 ;syscall read
+	je syscall_read
+	cmp rax,1 ;syscall write
+	je syscall_write
+	cmp rax,2 ;syscall screen
+	je syscall_screen
+	pop rbx
+	pop rbp
+	mov rsp,rbp
+	ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;SYSCALL READ -> #0
+;Params
+;	rdi -> 0 standard input
+;	rsi -> buffer to copy n bytes from standard input
+;	rdx -> n bytes to read from standard input
+;Ret
+;	rax -> total bytes read
+;Flags
+;	readFlag -> 0 something went wrong & 1 everything ok POR AHI ESTO ES AL PEDO
+syscall_read:
+	push rbp
+	mov rbp,rsp
+	push rbx
+	cmp rdx,0
+	je end ;if 0 bytes, jump
+	mov rbx,0
+.loop:
+	call get_buffer ;rax with one byte from buffer
+	cmp rax,0
+	je check_bytes_read ;if char is null, check bytes left are 0
+	cmp rbx,rdx ;then check bytes left are diff to 0
+	je read_fine
+	mov si, al ;CHEQUEAR ;copy byte into buffer
+	inc rsi
+	inc rbx
+	jmp loop
+.check_bytes_read:
+	cmp rbx,rdx 
+	je read_fine ;if equals, then everything work out fine
+	jmp end ;then they are bytes left to be read but pointer is null
+.read_fine:
+	mov [readFlag],1
+.end:
+	mov rax,rbx ;charge bytes read
+	pop rbx
+	mov rsp,rbp
+	pop rbp
+	ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;SYSCALL WRITE -> #1 
+;Params
+;	rdi -> 1 standard output
+;	rsi -> buffer to read n bytes
+;	rdx -> n bytes to read from buffer
+;Ret
+;	rax -> total bytes written
+syscall_write:
+	push rbp
+	mov rbp,rsp
+
+	pop rbp
+	mov rsp,rbp
+	ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;SYSCALL SCREEN_NUMBER -> #2
+;Params
+;	-
+;Ret
+;	rax -> screen number
+syscall_screen:
+	push rbp
+	mov rbp,rsp
+	call screenNumber
+	pop rbp
+	mov rsp,rbp
+	ret
+; -----------------------------------------------------------------------------
+
+
 ;Zero Division Exception
 _exception0Handler:
 	exceptionHandler 0
@@ -150,3 +252,6 @@ haltcpu:
 
 SECTION .bss
 	aux resq 1
+
+SECTION .data
+	readFlag db 0

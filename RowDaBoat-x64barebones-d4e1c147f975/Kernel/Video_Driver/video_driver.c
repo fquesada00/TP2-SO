@@ -185,3 +185,8 @@ void newLine()
     uint32_t auxi = (currentscreen_info->framebuffer - start) % (WIDTH * 3);
     currentscreen_info->framebuffer += (WIDTH * 3 * 8) - auxi;
 }
+int current_screen;
+
+int screenNumber(){
+    return current_screen;
+}
