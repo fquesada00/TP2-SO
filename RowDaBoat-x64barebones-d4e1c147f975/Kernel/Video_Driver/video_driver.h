@@ -8,4 +8,6 @@ void newLine();
 void clearLine(int line);
 void clear();
 void deleteChar();
+void upLine(int line);
+void scrollUp();
 #endif

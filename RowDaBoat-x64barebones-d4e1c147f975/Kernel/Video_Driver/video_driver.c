@@ -46,8 +46,6 @@ struct vbe_mode_info_structure
 /*Estructura para escribir pixeles en pantalla*/
 static struct vbe_mode_info_structure *currentscreen_info = (void *)0x5C00;
 
-//TODO
-//MEJORAR PARA NO PONER EL VALOR ABSOLUTO SINO UN PUNTERO
 /*Posicion de inicio de la pantalla*/
 static uint32_t start = 0xFD000000;
 
@@ -129,7 +127,7 @@ void deleteChar()
         }
     }
 }
-//TOCHECK
+/*Copia la linea deseada a la posicion superior. Funcion auxiliar para el scroll*/
 void upLine(int line)
 {
     if (line != 0)
@@ -139,12 +137,13 @@ void upLine(int line)
             for (int j = 0; j < WIDTH; j++)
             {
 
-                char *lineSrc = getAbsolutePixelDataPosition(j, i + line);
-                write_pixel(j, i + line - 1, lineSrc[2], lineSrc[1], lineSrc[0]);
+                char *lineSrc = getAbsolutePixelDataPosition(j, i + line*8);
+                write_pixel(j, i + (line-1)*8, lineSrc[2], lineSrc[1], lineSrc[0]);
             }
         }
     }
 }
+
 /*Vacia la pantalla*/
 void clear()
 {
@@ -164,9 +163,16 @@ void clearLine(int line)
     {
         for (int j = 0; j < WIDTH; j++)
         {
-            write_pixel(j, i + (line * 9), 0, 0, 0);
+            write_pixel(j, i + (line * 8), 0, 0, 0);
         }
     }
+}
+void scrollUp()
+{
+    int i;
+    for(i = 1;i<96;i++)
+        upLine(i);
+    clearLine(i-1);
 }
 /*Imprime un string a pantalla*/
 void puts(char *string)
