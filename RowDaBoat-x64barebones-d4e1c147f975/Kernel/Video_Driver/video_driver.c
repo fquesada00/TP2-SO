@@ -1,9 +1,10 @@
 #include <stdint.h>
 #include "video_driver.h"
 #include "font8x8_basic.h"
-#define MARGIN 8
+#define SCREENS 2
 #define WIDTH 1024
-#define HEIGHT 680
+#define SCREEN_WIDTH (WIDTH/SCREENS)
+#define HEIGHT 768
 struct vbe_mode_info_structure
 {
     uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
@@ -48,6 +49,17 @@ static struct vbe_mode_info_structure *currentscreen_info = (void *)0x5C00;
 
 /*Posicion de inicio de la pantalla*/
 static uint32_t start = 0xFD000000;
+static int current[SCREENS]={0};
+static int current_screen=0;
+
+void init_video()
+{
+    for(int j = 0;j < SCREENS-1;j++)
+    {
+        for(int i  = 0;i<HEIGHT;i++)
+            write_pixel(WIDTH/SCREENS + j*SCREEN_WIDTH,i,255,255,255);
+    }
+}
 
 /*Obtiene un puntero al pixel deseado a partir de la posicion inicial*/
 char *getAbsolutePixelDataPosition(int x, int y)
@@ -58,7 +70,7 @@ char *getAbsolutePixelDataPosition(int x, int y)
 /*Obtiene un puntero al pixel deseado a parti de la posicion actual de donde se esta escribiendo*/
 char *getRelativePixelDataPosition(int x, int y)
 {
-    return (char *)(currentscreen_info->framebuffer + (x + y * WIDTH) * 3);
+    return (char *)(currentscreen_info->framebuffer + current[current_screen] + SCREEN_WIDTH*current_screen + (x + y * WIDTH) * 3);
 }
 
 
@@ -72,7 +84,7 @@ void write_pixel(int x, int y, char r, char g, char b)
 }
 
 /*Escribe el caracter a la posicion actual de la pantalla y aumenta el current*/
-void printChar(char c)
+void putChar(char c)
 {
     //Accedo al mapa de bits de la fuente y tomo el mapa del caracter deseado
     char *bitmap = font8x8_basic[c];
@@ -94,24 +106,24 @@ void printChar(char c)
         }
     }
     //Si estoy al final de la linea pongo mi current en la siguiente linea de caracteres
-    if (((currentscreen_info->framebuffer) - start) % (WIDTH * 3) == (WIDTH - 8) * 3)
+    if ((/*(currentscreen_info->framebuffer) - start)*/ current[current_screen] % (SCREEN_WIDTH * 3) == (SCREEN_WIDTH * (current_screen+1) - 8) * 3))
     {
-        currentscreen_info->framebuffer += (8 * WIDTH * 3);
+        /*currentscreen_info->framebuffer*/current[current_screen] += (8 * WIDTH *(current_screen+1) * (SCREENS-1) * 3) - SCREEN_WIDTH * 3;
     }
     //Aumento el current en 1 caracter
-    currentscreen_info->framebuffer += 24;
+    /*currentscreen_info->framebuffer*/current[current_screen] += 24;
 }
 
 /*Borro el caracter en la posicion anterior a mi current*/
 void deleteChar()
 {
     //Si estoy al comienzo de todo no hago nada
-    if (currentscreen_info->framebuffer == start)
+    if (/*currentscreen_info->framebuffer == start*/current[current_screen] == 0)
         return;
     //Si estoy al comienzo de una linea que no es la primera me muevo una linea de caracteres para arriba
-    if ((currentscreen_info->framebuffer - start) % (WIDTH * 3) == 0)
+    if (/*(currentscreen_info->framebuffer - start) % (WIDTH * 3) == 0*/ current[current_screen] % SCREEN_WIDTH * 3 == 0)
     {
-        currentscreen_info->framebuffer -= WIDTH * 3 * 8;
+        /*currentscreen_info->framebuffer*/current[current_screen] -= WIDTH * 3 * 8 - SCREEN_WIDTH*3;
     }
     //Me voy un caracter para atras
     currentscreen_info->framebuffer -= 24;
@@ -153,7 +165,7 @@ void clear()
             write_pixel(j, i, 0, 0, 0);
         }
 
-    currentscreen_info->framebuffer = start;
+    /*currentscreen_info->framebuffer = start;*/current[current_screen]=0;
 }
 //TOCHECK
 /*Elimina una linea*/
@@ -179,7 +191,7 @@ void puts(char *string)
 {
     while (*string != 0)
     {
-        printChar(*string);
+        putChar(*string);
         string++;
     }
 }
@@ -188,11 +200,9 @@ void puts(char *string)
 void newLine()
 {
 
-    uint32_t auxi = (currentscreen_info->framebuffer - start) % (WIDTH * 3);
-    currentscreen_info->framebuffer += (WIDTH * 3 * 8) - auxi;
+    uint32_t auxi = /*(currentscreen_info->framebuffer - start) % (WIDTH * 3);*/current[current_screen] % (SCREEN_WIDTH *3);
+    /*currentscreen_info->framebuffer*/current[current_screen] += (WIDTH * 3 * 8) - auxi;
 }
-int current_screen;
-
 int screenNumber(){
     return current_screen;
 }

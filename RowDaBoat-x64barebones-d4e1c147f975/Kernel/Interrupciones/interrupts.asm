@@ -20,7 +20,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN screenNumber
 EXTERN get_buffer
-EXTERN putchar ;TODO
+EXTERN putChar ;TODO
 
 SECTION .text
 
@@ -182,23 +182,23 @@ syscall_read:
 	push rbx
 	mov rbx,0
 	cmp rdx,0
-	je read_fine ;if 0 bytes, everything work out fine, jump
+	jle .read_fine ;if 0 bytes, everything work out fine, jump
 .loop:
 	call get_buffer ;rax with one byte from buffer
 	cmp rax,0
-	je check_bytes_read ;if char is null, check bytes left are 0
+	je .check_bytes_read ;if char is null, check bytes left are 0
 	cmp rbx,rdx ;then check bytes left are diff to 0
-	je read_fine
-	mov si, al ;CHEQUEAR ;copy byte into buffer
+	je .read_fine
+	mov byte [rsi], al ;CHEQUEAR ;copy byte into buffer
 	inc rsi
 	inc rbx
-	jmp loop
+	jmp .loop
 .check_bytes_read:
 	cmp rbx,rdx 
-	je read_fine ;if equals, then everything work out fine
-	jmp end ;then they are bytes left to be read but pointer is null
+	je .read_fine ;if equals, then everything work out fine
+	jmp .end ;then they are bytes left to be read but pointer is null
 .read_fine:
-	mov [readFlag],1
+	mov byte[readFlag],1
 .end:
 	mov rax,rbx ;charge bytes read
 	pop rbx
@@ -224,24 +224,26 @@ syscall_write:
 	push rbx
 	mov rbx,0
 	cmp rdx,0 
-	je write_fine ;if 0 bytes, everything work out fine, jump
+	jle .write_fine ;if 0 bytes, everything work out fine, jump
 .loop:
-	cmp rsi,0
-	je check_bytes_written ;if null, then check bytes left to be written are 0
+	cmp byte[rsi],0
+	je .check_bytes_written ;if null, then check bytes left to be written are 0
 	cmp rbx,rdx ;then check bytes left are diff to 0
-	je write_fine 
-	push si ;CHEQUEAR ;push char to be written
-	call putchar ;print to STDOUT
-	add rsp,8 
+	je .write_fine 
+	push rdi ;CHEQUEAR ;push char to be written
+	mov rdi,0
+	mov di,si
+	call putChar ;print to STDOUT
+	pop rdi
 	inc rsi
 	inc rbx
-	jmp loop
+	jmp .loop
 .check_bytes_written:
 	cmp rbx,rdx
-	je write_fine ;if equals, then everything work out fine
-	jmp end ;then 
+	je .write_fine ;if equals, then everything work out fine
+	jmp .end ;then 
 .write_fine:
-	mov [writeFlag],1
+	mov byte [writeFlag],1
 .end:
 	mov rax,rbx
 	pop rbx

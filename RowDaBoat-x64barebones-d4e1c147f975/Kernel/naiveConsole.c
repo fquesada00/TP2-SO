@@ -52,7 +52,7 @@ void ncPrintBase(uint64_t value, uint32_t base)
 	int i = 0;
 	while (buffer[i] != 0)
 	{
-		printChar(buffer[i++]);
+		putChar(buffer[i++]);
 	}
 	
     //puts(buffer);

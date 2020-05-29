@@ -9,9 +9,9 @@ static int current = 0;
 static const char latinasccode[0x56][3] =
     {
         {0, 0, 0}, {0, 0, 0}, {'1', '!', '|'}, {'2', '"', '@'}, {'3', '#', 0},
-        {'4', '$', '~'}, {'5', '%', 0}, {'6', '&', '¬'}, {'7', '/', '{'},
+        {'4', '$', '~'}, {'5', '%', 0}, {'6', '&', 0}, {'7', '/', '{'},
         {'8', '(', '['}, {'9', ')', ']'}, {'0', '=', '}'}, {'\'', '?', '\\'}, 
-        {'¿', '¡', '¸'}, {'\b', '\b', 0}, {'\t', '\t', 0}, {'q', 'Q', '@'}, 
+        {'¿', '¡', 0}, {'\b', '\b', 0}, {'\t', '\t', 0}, {'q', 'Q', '@'}, 
         {'w', 'W', 0}, {'e', 'E', 0}, {'r', 'R', 0}, {'t', 'T', 0}, {'y', 'Y', 0}, 
         {'u', 'U', 0}, {'i', 'I', 0}, {'o', 'O', 0}, {'p', 'P', 0}, {'´', '¨', '¨'}, 
         {'+', '*', '~'}, {'\n', '\n', 0}, {0, 0, 0}, {'a', 'A', 0}, {'s', 'S', 0}, 
@@ -63,7 +63,7 @@ void keyboardHandler()
         //Resto
         else
         {
-            //printChar(latinasccode[scan][shift]);
+            //putChar(latinasccode[scan][shift]);
             keyboard_buffer[buff_size++]=latinasccode[scan][shift];
         }
     }
@@ -88,6 +88,8 @@ int is_buffer_empty()
 ** y sobreescribe */
 char get_buffer()
 {
+    if(is_buffer_empty())
+        return 0;
     if(current >= 256)
         current = 0;
     return keyboard_buffer[current++];
