@@ -15,6 +15,7 @@ GLOBAL _irq05Handler
 GLOBAL _irq80Handler
 GLOBAL _syscallHandler
 GLOBAL _exception0Handler
+GLOBAL _exception6Handler
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
@@ -73,8 +74,6 @@ SECTION .text
 	popState
 	iretq
 %endmacro
-
-
 
 %macro exceptionHandler 1
 	pushState
@@ -241,7 +240,7 @@ syscall_write:
 .check_bytes_written:
 	cmp rbx,rdx
 	je .write_fine ;if equals, then everything work out fine
-	jmp .end ;then 
+	jmp .end 
 .write_fine:
 	mov byte [writeFlag],1
 .end:
@@ -272,6 +271,10 @@ syscall_screen:
 ;Zero Division Exception
 _exception0Handler:
 	exceptionHandler 0
+
+;Invalid Op Code Exception
+_exception6Handler:
+	exceptionHandler 6
 
 haltcpu:
 	cli
