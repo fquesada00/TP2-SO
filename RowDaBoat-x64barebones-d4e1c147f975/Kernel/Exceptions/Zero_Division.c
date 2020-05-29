@@ -2,7 +2,6 @@
 
 extern void registers(void);
 
-//TODO
 void zero_division_handler(){
     registers();
 }
