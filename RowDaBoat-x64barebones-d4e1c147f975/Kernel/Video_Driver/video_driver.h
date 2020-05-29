@@ -10,4 +10,5 @@ void clear();
 void deleteChar();
 void upLine(int line);
 void scrollUp();
+void init_video();
 #endif
