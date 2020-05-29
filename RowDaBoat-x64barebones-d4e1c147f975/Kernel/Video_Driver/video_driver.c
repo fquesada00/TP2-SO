@@ -54,8 +54,11 @@ static int current_screen=0;
 
 void init_video()
 {
-    for(int i  = 0;i<HEIGHT;i++)
-        write_pixel(WIDTH/SCREENS,i,255,255,255);
+    for(int j = 0;j < SCREENS-1;j++)
+    {
+        for(int i  = 0;i<HEIGHT;i++)
+            write_pixel(WIDTH/SCREENS + j*SCREEN_WIDTH,i,255,255,255);
+    }
 }
 
 /*Obtiene un puntero al pixel deseado a partir de la posicion inicial*/
@@ -81,7 +84,7 @@ void write_pixel(int x, int y, char r, char g, char b)
 }
 
 /*Escribe el caracter a la posicion actual de la pantalla y aumenta el current*/
-void printChar(char c)
+void putChar(char c)
 {
     //Accedo al mapa de bits de la fuente y tomo el mapa del caracter deseado
     char *bitmap = font8x8_basic[c];
@@ -188,7 +191,7 @@ void puts(char *string)
 {
     while (*string != 0)
     {
-        printChar(*string);
+        putChar(*string);
         string++;
     }
 }
@@ -200,8 +203,6 @@ void newLine()
     uint32_t auxi = /*(currentscreen_info->framebuffer - start) % (WIDTH * 3);*/current[current_screen] % (SCREEN_WIDTH *3);
     /*currentscreen_info->framebuffer*/current[current_screen] += (WIDTH * 3 * 8) - auxi;
 }
-int current_screen;
-
 int screenNumber(){
     return current_screen;
 }

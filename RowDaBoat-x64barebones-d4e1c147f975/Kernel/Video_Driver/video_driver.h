@@ -2,7 +2,7 @@
 #define VIDEO_DRIVER_H_
 #include <stdint.h>
 void write_pixel(int x, int y,char r,char g, char b);
-void printChar(char c);
+void putChar(char c);
 void puts(char * string);
 void newLine();
 void clearLine(int line);
