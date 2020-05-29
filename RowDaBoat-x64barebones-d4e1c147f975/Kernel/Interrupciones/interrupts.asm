@@ -20,6 +20,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN screenNumber
 EXTERN get_buffer
+EXTERN putchar ;TODO
 
 SECTION .text
 
@@ -179,9 +180,9 @@ syscall_read:
 	push rbp
 	mov rbp,rsp
 	push rbx
-	cmp rdx,0
-	je end ;if 0 bytes, jump
 	mov rbx,0
+	cmp rdx,0
+	je read_fine ;if 0 bytes, everything work out fine, jump
 .loop:
 	call get_buffer ;rax with one byte from buffer
 	cmp rax,0
@@ -215,12 +216,37 @@ syscall_read:
 ;	rdx -> n bytes to read from buffer
 ;Ret
 ;	rax -> total bytes written
+;Flags
+;	writeFlag-> 0 something went wrong & 1 everything ok POR AHI ESTO ES AL PEDO
 syscall_write:
 	push rbp
 	mov rbp,rsp
-
-	pop rbp
+	push rbx
+	mov rbx,0
+	cmp rdx,0 
+	je write_fine ;if 0 bytes, everything work out fine, jump
+.loop:
+	cmp rsi,0
+	je check_bytes_written ;if null, then check bytes left to be written are 0
+	cmp rbx,rdx ;then check bytes left are diff to 0
+	je write_fine 
+	push si ;CHEQUEAR ;push char to be written
+	call putchar ;print to STDOUT
+	add rsp,8 
+	inc rsi
+	inc rbx
+	jmp loop
+.check_bytes_written:
+	cmp rbx,rdx
+	je write_fine ;if equals, then everything work out fine
+	jmp end ;then 
+.write_fine:
+	mov [writeFlag],1
+.end:
+	mov rax,rbx
+	pop rbx
 	mov rsp,rbp
+	pop rbp
 	ret
 ; -----------------------------------------------------------------------------
 
@@ -255,3 +281,4 @@ SECTION .bss
 
 SECTION .data
 	readFlag db 0
+	writeFlag db 0
