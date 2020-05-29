@@ -1,13 +1,25 @@
+#include "Zero_Division.h"
+#include "Invalid_Op_Code.h"
 
 #define ZERO_EXCEPTION_ID 0
+#define INVALID_OP_CODE 1
 
 static void zero_division();
+static void invalid_op_code();
 
 void exceptionDispatcher(int exception) {
 	if (exception == ZERO_EXCEPTION_ID)
 		zero_division();
+	else if(exception == INVALID_OP_CODE)
+		invalid_op_code();
 }
+
 //TODO
 static void zero_division() {
-	// Handler para manejar excepcíon
+	zero_division_handler();
+}
+
+//TODO
+static void invalid_op_code(){
+	invalid_op_code_handler();
 }

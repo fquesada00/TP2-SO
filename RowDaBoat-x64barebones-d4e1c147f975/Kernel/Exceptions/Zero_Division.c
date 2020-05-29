@@ -2,5 +2,6 @@
 
 //TODO
 void zero_division_handler(){
-
+    puts("Exception: Zero Division.");
+    
 }
