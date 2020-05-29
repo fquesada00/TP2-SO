@@ -18,9 +18,11 @@ registers:
     mov rbp,rsp
     push rcx
     push rax
+    push rbx
     lea rcx,[rbp + 8*8] ;rcx -> r15
     mov rax,15
-    mul 8
+    mov rbx,8
+    mul rbx
     add rcx,rax ;rcx -> rip
     mov rax,16 ;acumulador
 .loop:
@@ -31,6 +33,7 @@ registers:
     dec rax
     jmp .loop
 .end:    
+    pop rbx
     pop rax
     pop rcx
     mov rsp,rbp

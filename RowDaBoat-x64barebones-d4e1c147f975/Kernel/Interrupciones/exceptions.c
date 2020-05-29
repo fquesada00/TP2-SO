@@ -1,5 +1,5 @@
-#include "Zero_Division.h"
-#include "Invalid_Op_Code.h"
+#include "../Exceptions/Zero_Division.h"
+#include "../Exceptions/Invalid_Op_Code.h"
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OP_CODE 6
@@ -14,7 +14,7 @@ void exceptionDispatcher(int exception) {
 		invalid_op_code();
 }
 
-//TODO
+
 static void zero_division() {
 	zero_division_handler();
 }

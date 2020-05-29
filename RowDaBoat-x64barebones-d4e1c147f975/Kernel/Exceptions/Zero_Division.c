@@ -2,6 +2,11 @@
 
 extern void registers(void);
 
+//NO VA ACA Y ESTA MAL
+void printf(char* s,...){
+    return;
+}
+
 void zero_division_handler(){
     registers();
 }
