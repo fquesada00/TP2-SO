@@ -65,6 +65,6 @@ void printreg(int reg, int val){
         break;
     }
 
-    printf("%d",val);
+    printf("%d\n",val);
 
 }

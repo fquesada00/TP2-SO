@@ -1,5 +1,7 @@
 GLOBAL registers
 
+EXTERN printreg
+
 SECTION .text
 
 %macro regDispatcher 2
@@ -7,6 +9,7 @@ SECTION .text
     push rsi
 	mov rdi, %1 ;pasaje de parametro 1 -> # reg
 	mov rsi, %2 ;pasaje de parametro 2 -> value of # reg
+    call printreg
     pop rsi
     pop rdi
 %endmacro

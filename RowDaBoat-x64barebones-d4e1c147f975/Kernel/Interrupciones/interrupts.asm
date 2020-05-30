@@ -226,7 +226,7 @@ syscall_write:
 	jle .write_fine ;if 0 bytes, everything work out fine, jump
 .loop:
 	cmp byte[rsi],0
-	je .check_bytes_written ;if null, then check bytes left to be written are 0
+	je .check_bytes_written ;if null, then check bytes left to be written are 0 or less
 	cmp rbx,rdx ;then check bytes left are diff to 0
 	je .write_fine 
 	push rdi ;CHEQUEAR ;push char to be written
@@ -239,7 +239,7 @@ syscall_write:
 	jmp .loop
 .check_bytes_written:
 	cmp rbx,rdx
-	je .write_fine ;if equals, then everything work out fine
+	jle .write_fine ;if equals or less, then everything work out fine
 	jmp .end 
 .write_fine:
 	mov byte [writeFlag],1
