@@ -178,6 +178,7 @@ _syscallHandler:
 syscall_read:
 	push rbp
 	mov rbp,rsp
+	mov [readFlag],0 ;reset flag
 	push rbx
 	mov rbx,0
 	cmp rdx,0
@@ -194,7 +195,7 @@ syscall_read:
 	jmp .loop
 .check_bytes_read:
 	cmp rbx,rdx 
-	je .read_fine ;if equals, then everything work out fine
+	jle .read_fine ;if equals or less, then everything work out fine
 	jmp .end ;then they are bytes left to be read but pointer is null
 .read_fine:
 	mov byte[readFlag],1
@@ -220,6 +221,7 @@ syscall_read:
 syscall_write:
 	push rbp
 	mov rbp,rsp
+	mov [writeFlag],0 ;reset flag
 	push rbx
 	mov rbx,0
 	cmp rdx,0 
