@@ -96,7 +96,7 @@ void write_pixel(int x, int y, char r, char g, char b)
 /*Escribe el caracter a la posicion actual de la pantalla y aumenta el current*/
 void putChar(char c)
 {
-    /*
+    
     if (c == '\n')
         newLine();
     else if (c == '\b')
@@ -106,7 +106,7 @@ void putChar(char c)
     else if (c == 2)
         changeScreen(1);
     else
-    {*/
+    {
         //Accedo al mapa de bits de la fuente y tomo el mapa del caracter deseado
         char *bitmap = font8x8_basic[c];
         int set;
@@ -135,7 +135,7 @@ void putChar(char c)
         }
         //Aumento el current en 1 caracter
         /*currentscreen_info->framebuffer*/ current[current_screen] += PIXELSIZE * CHARSIZE;
-   // }
+    }
 }
 
 /*Borro el caracter en la posicion anterior a mi current*/

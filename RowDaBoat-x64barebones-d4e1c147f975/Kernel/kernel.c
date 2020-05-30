@@ -99,6 +99,15 @@ int main(){
 	puts((char*)sampleDataModuleAddress);
 	newLine();
 	puts("[Finished]");
+	while (1)
+	{
+		char c = get_buffer();
+		if(c)
+		{
+			putChar(c);
+		}
+	}
+	
 	
 	
 	
