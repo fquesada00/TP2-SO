@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include <stdarg.h>
-#define MAX_INT_BYTES 40 // 1 int -> 4 bytes on 64 bit structure
+#include "standardlib.h"
+
+static char buffer[64] = {'0'};
 
 //aca no puse el int fd como 1er parametro -> PREGUNTAR
 extern int syswrite(const char * buff, int bytes); 
-extern char * numToStr(int);
 extern int strlen(char*);
 
 /* return 1 if s iS greater than v
@@ -24,55 +25,81 @@ int strcmp(const char * s, const char * v){
 void printf(const char * fmt, ...){
     va_list arg_list;
     va_start(arg_list, fmt);
-    int q;
-    char w;
-    double e;
-    char * p;
-    while(fmt){
-        if(*fmt == '%'){
-            fmt++;
-            if(!fmt) //ERROR
-            switch (*fmt)
+    int i = 0, start, flagPercentage = 0;
+    
+    while(fmt[i]){
+        if(!flagPercentage) start = i;//% %d%
+        while(fmt[i] && (fmt[i]!='%' || flagPercentage)){
+            i++;
+            flagPercentage = 0;
+        }
+        if(i!=start) syswrite(fmt + start, (i-start) * sizeof(char));
+        if(fmt[i] == '%'){
+            switch (fmt[i+1])
             {
             case 'd':
-                syswrite(numToStr(va_arg(arg_list, int)), MAX_INT_BYTES);
+                int number = va_arg(arg_list, int);
+                int lenght = uintToBase(number, buffer, 10);
+                syswrite(buffer, lenght * sizeof(char));
+                i+=2;
                 break;
             case 'c':
-                syswrite(va_arg(arg_list, char), 1);
+                char auxChar[2]={0};
+                auxChar[0]=va_arg(arg_list, char);
+                syswrite(auxChar, 2 * sizeof(char));
+                i+=2;
                 break;
             //TODO
             case 'f':
+
+                i+=2;
                 break;
             case 's':
-                p = va_arg(arg_list, char *);
-                syswrite(p, strlen(p) * sizeof(char));
+                char * auxPointer = va_arg(arg_list, char *);
+                syswrite(auxPointer,  strlen(auxPointer) * sizeof(char));
+                i+=2;
                 break;
             default:
+                flagPercentage = 1;
                 break;
             }
         }
-        //TODO
-        else if(*fmt == '\n'){
-
-        }
-        //TODO
-        else if(*fmt == '\t'){
-
-        }
-        //TODO
-        else if(*fmt == '\b'){
-
-        }
-        else{
-            syswrite(fmt, sizeof(char)); //lee de a 1 byte (1 char)
-        }
-        fmt++;
     }
-
     va_end(arg_list);
 }
 
+static int uintToBase(uint64_t value, char * buffer, uint32_t base)
+{
+	char *p = buffer;
+	char *p1, *p2;
+	uint32_t digits = 0;
 
+	//Calculate characters for each digit
+	do
+	{
+		uint32_t remainder = value % base;
+		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
+		digits++;
+	}
+	while (value /= base);
+
+	// Terminate string in buffer.
+	*p = 0;
+
+	//Reverse string in buffer.
+	p1 = buffer;
+	p2 = p - 1;
+	while (p1 < p2)
+	{
+		char tmp = *p1;
+		*p1 = *p2;
+		*p2 = tmp;
+		p1++;
+		p2--;
+	}
+
+    return digits;
+}
 
 
 void processorInfo(){
