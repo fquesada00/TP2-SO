@@ -4,8 +4,10 @@
 
 static char buffer[64] = {'0'};
 
-// asumimos fd=1 
+// asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char * buff, int bytes); 
+// asumimos fd=0 STDIN
+extern int sysread(int fd, char * buff, int bytes); 
 extern int strlen(char*);
 
 /* return 1 if s iS greater than v

@@ -19,6 +19,19 @@ syswrite:
 
 
 ; -----------------------------------------------------------------------------
+;int sysread(int fd (en 0 por default), const char * buff, int bytes)
+sysread:
+    push rbp
+    mov rbp,rsp
+    mov rax,0 ;id syscall read
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
 ;Params
 ;   rdi -> char * string
 ;Ret
