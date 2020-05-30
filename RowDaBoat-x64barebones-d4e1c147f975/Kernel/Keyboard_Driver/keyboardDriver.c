@@ -30,6 +30,7 @@ void keyboardHandler()
 {
     signed long scan = getKeyboardScanCode();
     static int shift = 0;
+    static int control = 0;
     //Los codigos de los scan code de apretar una tecla van de 0 a 0x56
     if (scan >= 0 && scan <= 0x56)
     {
@@ -38,11 +39,6 @@ void keyboardHandler()
         {
             shift = 1;
         }
-        /*Backspace
-        else if (scan == 14)
-        {
-            deleteChar();
-        }*/
         //Alt
         else if (scan == 0x38)
         {
@@ -53,17 +49,23 @@ void keyboardHandler()
         else if (scan == 0x3A)
         {
             shift = !shift;
-        }
-        /*Enter
-        else if (scan == 0x1C)
+        }else if(scan == 0x1D)
         {
-            newLine();
-            keyboardHandler();
-        }*/
+            control=1;
+        }
+        else if(control)
+        {
+            if(scan == 0x02)
+            {
+                keyboard_buffer[buff_size++] = 1;
+            }else if( scan == 0x03)
+            {
+                keyboard_buffer[buff_size++] = 2;
+            }
+        }
         //Resto
         else
         {
-            //putChar(latinasccode[scan][shift]);
             keyboard_buffer[buff_size++]=latinasccode[scan][shift];
         }
     }
@@ -72,6 +74,11 @@ void keyboardHandler()
     {
         shift = 0;
     }
+    else 
+    {
+        control = 0;
+    }
+    
     //Buffer circular
     if(buff_size >= 256)
         buff_size = 0;

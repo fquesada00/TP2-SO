@@ -4,6 +4,7 @@
 #include <moduleLoader.h>
 #include <naiveConsole.h>
 #include "Video_Driver/video_driver.h"
+#include "Keyboard_Driver/keyboardDriver.h"
 #include "Interrupciones/idtLoader.h"
 #include "Interrupciones/time.h"
 extern uint8_t text;
@@ -38,6 +39,7 @@ void * getStackBase()
 void * initializeKernelBinary()
 {
 	char buffer[10];
+	putChar('a');
 	puts("[x64BareBones]");
 	newLine();
 	puts("CPU Vendor:");
@@ -79,6 +81,7 @@ void * initializeKernelBinary()
 
 int main(){
 	load_idt();
+	init_video();
 	puts("[Kernel Main]");
 	newLine();
 	puts("Sample code module at 0x");
@@ -96,9 +99,6 @@ int main(){
 	puts((char*)sampleDataModuleAddress);
 	newLine();
 	puts("[Finished]");
-	write_pixel(1024,0,255,0,0);
-	clear();
-	init_video();
 	
 	
 	

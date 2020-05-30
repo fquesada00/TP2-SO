@@ -11,4 +11,5 @@ void deleteChar();
 void upLine(int line);
 void scrollUp();
 void init_video();
+void changeScreen(int num);
 #endif
