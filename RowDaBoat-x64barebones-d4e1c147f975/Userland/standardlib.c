@@ -4,8 +4,8 @@
 
 static char buffer[64] = {'0'};
 
-//aca no puse el int fd como 1er parametro -> PREGUNTAR
-extern int syswrite(const char * buff, int bytes); 
+// asumimos fd=1 
+extern int syswrite(int fd, const char * buff, int bytes); 
 extern int strlen(char*);
 
 /* return 1 if s iS greater than v
@@ -33,20 +33,20 @@ void printf(const char * fmt, ...){
             i++;
             flagPercentage = 0;
         }
-        if(i!=start) syswrite(fmt + start, (i-start) * sizeof(char));
+        if(i!=start) syswrite(1, fmt + start, (i-start) * sizeof(char));
         if(fmt[i] == '%'){
             switch (fmt[i+1])
             {
             case 'd':
                 int number = va_arg(arg_list, int);
                 int lenght = uintToBase(number, buffer, 10);
-                syswrite(buffer, lenght * sizeof(char));
+                syswrite(1, buffer, lenght * sizeof(char));
                 i+=2;
                 break;
             case 'c':
                 char auxChar[2]={0};
                 auxChar[0]=va_arg(arg_list, char);
-                syswrite(auxChar, 2 * sizeof(char));
+                syswrite(1, auxChar, 2 * sizeof(char));
                 i+=2;
                 break;
             //TODO
@@ -56,7 +56,7 @@ void printf(const char * fmt, ...){
                 break;
             case 's':
                 char * auxPointer = va_arg(arg_list, char *);
-                syswrite(auxPointer,  strlen(auxPointer) * sizeof(char));
+                syswrite(1, auxPointer,  strlen(auxPointer) * sizeof(char));
                 i+=2;
                 break;
             default:

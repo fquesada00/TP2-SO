@@ -10,8 +10,6 @@ SECTION .text
 syswrite:
     push rbp
     mov rbp,rsp
-    mov rdi,rdi ;absurdo
-    mov rsi,rsi ;absurdo
     mov rax,1 ;id syscall write
     int 80h
     mov rsp,rbp
