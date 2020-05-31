@@ -58,7 +58,7 @@ static struct vbe_mode_info_structure *currentscreen_info = (void *)0x5C00;
 static uint32_t start = 0xFD000000;
 static int current[SCREENS] = {START_POS};
 static int current_screen = START_SCREEN;
-
+static int chars_written[SCREENS]={0};
 void init_video()
 {
     for (int j = 0; j < SCREENS - 1; j++)
@@ -69,6 +69,7 @@ void init_video()
     for (int i = 0; i < SCREENS; i++)
     {
         current[i] = START_POS;
+        chars_written[i]=0;
     }
 }
 
@@ -101,6 +102,8 @@ void putChar(char c)
         newLine();
     else if (c == '\b')
         deleteChar();
+    else if( c == '\t')
+        puts("  ");
     else if (c == 1)
         changeScreen(0);
     else if (c == 2)
@@ -135,6 +138,7 @@ void putChar(char c)
         }
         //Aumento el current en 1 caracter
         /*currentscreen_info->framebuffer*/ current[current_screen] += PIXELSIZE * CHARSIZE;
+        chars_written[current_screen]++;
     }
 }
 
@@ -142,7 +146,7 @@ void putChar(char c)
 void deleteChar()
 {
     //Si estoy al comienzo de todo no hago nada
-    if (/*currentscreen_info->framebuffer == start*/ current[current_screen] == START_POS)
+    if (/*currentscreen_info->framebuffer == start current[current_screen] == START_POS*/ chars_written[current_screen] <= 0)
         return;
     //Si estoy al comienzo de una linea que no es la primera me muevo una linea de caracteres para arriba
     if (/*(currentscreen_info->framebuffer - start) % (WIDTH * 3) == 0*/ current[current_screen] % SCREEN_WIDTH * PIXELSIZE == 0)
@@ -152,6 +156,7 @@ void deleteChar()
     //Me voy un caracter para atras
     //currentscreen_info->framebuffer -= 24;
     current[current_screen] -= PIXELSIZE * CHARSIZE;
+    chars_written[current_screen]--;
     for (int i = 0; i < CHARSIZE; i++)
     {
         for (int j = 0; j < CHARSIZE; j++)
@@ -229,6 +234,7 @@ void newLine()
     /*currentscreen_info->framebuffercurrent[current_screen] += (WIDTH * 3 * 8) - auxi;*/
     scrollUp();
     current[current_screen] = START_POS;
+    chars_written[current_screen] = 0;
 }
 int screenNumber()
 {

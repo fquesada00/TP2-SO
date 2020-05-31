@@ -81,7 +81,6 @@ void * initializeKernelBinary()
 
 int main(){
 	load_idt();
-	init_video();
 	puts("[Kernel Main]");
 	newLine();
 	puts("Sample code module at 0x");
@@ -99,6 +98,8 @@ int main(){
 	puts((char*)sampleDataModuleAddress);
 	newLine();
 	puts("[Finished]");
+	newLine();
+	init_video();
 	while (1)
 	{
 		char c = get_buffer();
