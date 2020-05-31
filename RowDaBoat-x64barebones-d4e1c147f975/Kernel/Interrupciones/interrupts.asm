@@ -20,7 +20,7 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN screenNumber
 EXTERN get_buffer
-EXTERN putChar ;TODO
+EXTERN putsN ;TODO
 EXTERN printreg
 
 SECTION .text
@@ -162,15 +162,25 @@ _syscallHandler:
 	push rbp
 	mov rbp,rsp
 	cmp rax,0 ;syscall read
-	je syscall_read
+	je .read
 	cmp rax,1 ;syscall write
-	je syscall_write
+	je .write
 	cmp rax,2 ;syscall screen
-	je syscall_screen
+	je .screen
 	cmp rax,3 ;syscall registers
-	je syscall_registers
-	pop rbp
+	je .register
+	jmp .end
+.read call syscall_read
+	jmp .end
+.write call syscall_write
+	jmp .end
+.screen call syscall_screen
+	jmp .end
+.register call syscall_registers
+	jmp .end
+.end
 	mov rsp,rbp
+	pop rbp
 	ret
 ; -----------------------------------------------------------------------------
 
@@ -228,36 +238,47 @@ syscall_read:
 ;	rax -> total bytes written
 ;Flags
 ;	writeFlag-> 0 something went wrong & 1 everything ok POR AHI ESTO ES AL PEDO
+;syscall_write:
+;	push rbp
+;	mov rbp,rsp
+;	mov byte [writeFlag],0 ;reset flag
+;	push rbx
+;	mov rbx,0
+;	cmp rdx,0 
+;	;jle .write_fine ;if 0 bytes, everything work out fine, jump
+;	mov rdi,rsi
+;	call puts
+;.loop:
+;	cmp byte[rsi],0
+;	je .check_bytes_written ;if null, then check bytes left to be written are 0 or less
+;	cmp rbx,rdx ;then check bytes left are diff to 0
+;	je .write_fine 
+;	push rdi ;CHEQUEAR ;push char to be written
+;	mov rdi,0
+;	mov di,si
+;	call putChar ;print to STDOUT
+;	pop rdi
+;	inc rsi
+;	inc rbx
+;	jmp .loop
+;.check_bytes_written:
+;	cmp rbx,rdx
+;	jle .write_fine ;if equals or less, then everything work out fine
+;	jmp .end 
+;.write_fine:
+;	mov byte [writeFlag],1
+;.end:
+;	mov rax,rbx
+;	pop rbx
+;	mov rsp,rbp
+;	pop rbp
+;	ret
 syscall_write:
 	push rbp
 	mov rbp,rsp
-	mov byte [writeFlag],0 ;reset flag
-	push rbx
-	mov rbx,0
-	cmp rdx,0 
-	jle .write_fine ;if 0 bytes, everything work out fine, jump
-.loop:
-	cmp byte[rsi],0
-	je .check_bytes_written ;if null, then check bytes left to be written are 0 or less
-	cmp rbx,rdx ;then check bytes left are diff to 0
-	je .write_fine 
-	push rdi ;CHEQUEAR ;push char to be written
-	mov rdi,0
-	mov di,si
-	call putChar ;print to STDOUT
-	pop rdi
-	inc rsi
-	inc rbx
-	jmp .loop
-.check_bytes_written:
-	cmp rbx,rdx
-	jle .write_fine ;if equals or less, then everything work out fine
-	jmp .end 
-.write_fine:
-	mov byte [writeFlag],1
-.end:
-	mov rax,rbx
-	pop rbx
+	mov rdi,rsi
+	mov rsi,rdx
+	call putsN
 	mov rsp,rbp
 	pop rbp
 	ret

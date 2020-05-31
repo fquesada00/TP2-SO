@@ -12,4 +12,5 @@ void upLine(int line);
 void scrollUp();
 void init_video();
 void changeScreen(int num);
+void putsN(char * buffer, int n);
 #endif

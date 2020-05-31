@@ -47,7 +47,7 @@ SECTION .text
 	pop rax
 %endmacro
 
-
+;REHACER
 ; -----------------------------------------------------------------------------
 inforeg:
     push rbp
@@ -182,21 +182,21 @@ processorName:
     push rdi ;no se si es necesario
     mov rax,0x80000002 ;extended processor name string
     cpuid
-    mov [rdi],rbx
-    mov [rdi + 8],rdx
-    mov [rdi + 16],rcx
+    mov [rdi],ebx
+    mov [rdi + 8],edx
+    mov [rdi + 16],ecx
     call printf
     mov rax,0x80000003 ;extended processor name string
     cpuid
-    mov [rdi],rbx
-    mov [rdi + 8],rdx
-    mov [rdi + 16],rcx
+    mov [rdi],ebx
+    mov [rdi + 8],edx
+    mov [rdi + 16],ecx
     call printf
     mov rax,0x80000004 ;extended processor name string
     cpuid
-    mov [rdi],rbx
-    mov [rdi + 8],rdx
-    mov [rdi + 16],rcx
+    mov [rdi],ebx
+    mov [rdi + 8],edx
+    mov [rdi + 16],ecx
     call printf
     pop rdi
     pop rcx

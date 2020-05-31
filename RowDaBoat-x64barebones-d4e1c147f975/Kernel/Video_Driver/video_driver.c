@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "video_driver.h"
 #include "font8x8_basic.h"
+#include "../../Userland/standardlib.h"
 #define SCREENS 2
 #define WIDTH 1024
 #define SCREEN_WIDTH (WIDTH / SCREENS)
@@ -11,7 +12,7 @@
 #define LINES (HEIGHT / CHARSIZE)
 #define COLS ((WIDTH) / CHARSIZE)
 #define START_POS WIDTH *PIXELSIZE *CHARSIZE *(LINES - 1)
-#define START_SCREEN 0
+#define START_SCREEN 1
 struct vbe_mode_info_structure
 {
     uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
@@ -74,21 +75,21 @@ void init_video()
 }
 
 /*Obtiene un puntero al pixel deseado a partir de la posicion inicial*/
-char *getAbsolutePixelDataPosition(int x, int y)
+uint32_t getAbsolutePixelDataPosition(int x, int y)
 {
-    return (char *)(start + (x + y * WIDTH) * PIXELSIZE);
+    return (start + (x + y * WIDTH) * PIXELSIZE);
 }
 
 /*Obtiene un puntero al pixel deseado a parti de la posicion actual de donde se esta escribiendo*/
-char *getRelativePixelDataPosition(int x, int y)
+uint32_t getRelativePixelDataPosition(int x, int y)
 {
-    return (char *)(currentscreen_info->framebuffer + current[current_screen] + (SCREEN_WIDTH + 1) * current_screen * PIXELSIZE + (x + y * WIDTH) * PIXELSIZE);
+    return (currentscreen_info->framebuffer + current[current_screen] + (SCREEN_WIDTH + 1) * current_screen * PIXELSIZE + (x + y * WIDTH) * PIXELSIZE);
 }
 
 /*Pinta un pixel a partir de una direccion absoluta*/
 void write_pixel(int x, int y, char r, char g, char b)
 {
-    char *pos = getAbsolutePixelDataPosition(x, y);
+    char * pos = (char*) (getAbsolutePixelDataPosition(x, y));
     pos[0] = b; //azul
     pos[1] = g; //verde
     pos[2] = r; //rojo
@@ -111,17 +112,17 @@ void putChar(char c)
     else
     {
         //Accedo al mapa de bits de la fuente y tomo el mapa del caracter deseado
-        char *bitmap = font8x8_basic[c];
+        char * bitmap = font8x8_basic[c];
         int set;
 
         for (int i = 0; i < CHARSIZE; i++)
         {
             for (int j = 0; j < CHARSIZE; j++)
             {
-                set = bitmap[i] & (1 << j);
+                set = bitmap[i/(CHARSIZE/8)] & (1 << j/(CHARSIZE/8));
                 if (set)
                 {
-                    char *pos = getRelativePixelDataPosition(j, i);
+                    char * pos = (char*) (getRelativePixelDataPosition(j, i));
                     //Pinto de color Blanco los pixeles
                     pos[0] = 255;
                     pos[1] = 255;
@@ -161,7 +162,7 @@ void deleteChar()
     {
         for (int j = 0; j < CHARSIZE; j++)
         {
-            char *pos = getRelativePixelDataPosition(j, i);
+            char *pos = (char*) (getRelativePixelDataPosition(j, i));
             //"Borro" el pixel
             pos[0] = 0;
             pos[1] = 0;
@@ -179,7 +180,7 @@ void upLine(int line)
             for (int j = (SCREEN_WIDTH)*current_screen; j < SCREEN_WIDTH * (current_screen + 1); j++)
             {
 
-                char *lineSrc = getAbsolutePixelDataPosition(j, i + line * CHARSIZE);
+                char *lineSrc = (char*) (getAbsolutePixelDataPosition(j, i + line * CHARSIZE));
                 write_pixel(j, i + (line - 1) * CHARSIZE, lineSrc[2], lineSrc[1], lineSrc[0]);
             }
         }
@@ -195,17 +196,17 @@ void clear()
             write_pixel(j, i, 0, 0, 0);
         }
 
-    /*currentscreen_info->framebuffer = start;*/ current[current_screen] = 0;
+    /*currentscreen_info->framebuffer = start;*/ current[current_screen] = START_POS;
 }
 //TOCHECK
 /*Elimina una linea*/
 void clearLine(int line)
 {
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < CHARSIZE; i++)
     {
-        for (int j = SCREEN_WIDTH*current_screen + 1; j < SCREEN_WIDTH*(current_screen+1); j++)
+        for (int j = SCREEN_WIDTH*current_screen ; j < SCREEN_WIDTH*(current_screen+1); j++)
         {
-            write_pixel(j, i + (line * 8), 0, 0, 0);
+            write_pixel(j, i + (line * CHARSIZE), 0, 0, 0);
         }
     }
 }
@@ -230,12 +231,22 @@ void puts(char *string)
 void newLine()
 {
     /*
-    uint32_t auxi = /*(currentscreen_info->framebuffer - start) % (WIDTH * 3);*/ current[current_screen] % (SCREEN_WIDTH * 3);
+    uint32_t auxi = /*(currentscreen_info->framebuffer - start) % (WIDTH * 3);*/;
     /*currentscreen_info->framebuffercurrent[current_screen] += (WIDTH * 3 * 8) - auxi;*/
     scrollUp();
     current[current_screen] = START_POS;
     chars_written[current_screen] = 0;
 }
+
+void putsN(char * buffer, int n)
+{
+    for (int i = 0; i < n && buffer[i]; i++)
+    {
+        putChar(buffer[i]);
+    }
+    return;    
+}
+
 int screenNumber()
 {
     return current_screen;

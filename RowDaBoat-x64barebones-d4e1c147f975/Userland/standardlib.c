@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "standardlib.h"
-
+#include <stdint.h>
 static char buffer[64] = {'0'};
 
 // asumimos fd=1 STDOUT
@@ -26,13 +26,49 @@ int strcmp(const char * s, const char * v){
     else if(!s && v) return -1;
     return 0;
 }
-
+/*
+void printf(const char * fmt,...)
+{
+    va_list arg_param;
+    va_start(arg_param,fmt);
+    int i = 0,start=0,numLenght;
+    char auxbuff[64];
+    while (fmt[i])
+    {
+        if(fmt[i]!='%')
+            i++;
+        else
+        {
+            if(i!=start)
+                syswrite(1,fmt+start,i-start);
+            switch (fmt[i+1])
+            {
+            case 'd':
+                numLenght= uintToBase(va_arg(arg_param,int),auxbuff,10);
+                syswrite(1,auxbuff,numLenght);
+                i+=2;
+                break;
+            
+            default:
+                break;
+            }
+        start = i;
+        }
+    }
+    syswrite(1,fmt+start,i-start);
+    
+}
+*/
 // variable params
 void printf(const char * fmt, ...){
     va_list arg_list;
     va_start(arg_list, fmt);
     int i = 0, start, flagPercentage = 0;
     int pEntera = 0, pDecimal = 0;
+    int number,lenght;
+    char auxChar[2]={0};
+    char * auxPointer;
+    double num;
     while(fmt[i]){
         if(!flagPercentage) start = i;//% %d%
         while(fmt[i] && (fmt[i]!='%' || flagPercentage)){
@@ -41,33 +77,28 @@ void printf(const char * fmt, ...){
         }
         if(i!=start) syswrite(1, fmt + start, (i-start) * sizeof(char));
         if(fmt[i] == '%'){
-            if(!fmt[i+1] && fmt[i+1]!='d' && fmt[i+1]!='c' && fmt[i+1]!='s'){
-                if(fmt[i+1]!='f'){ //then is . or a number
-                    if(fmt[i+1]=='.'){
-                        pDecimal; //hay que hacer un strToNum
-                    }
-                }
-            }
             switch (fmt[i+1])
             {
             case 'd':
-                int number = va_arg(arg_list, int);
-                int lenght = uintToBase(number, buffer, 10);
+                number = va_arg(arg_list, int);
+                lenght = uintToBase(number, buffer, 10);
                 syswrite(1, buffer, lenght * sizeof(char));
                 i+=2;
                 break;
             case 'c':
-                char auxChar[2] = {0};
-                auxChar[0] = va_arg(arg_list, char);
-                syswrite(1, auxChar, 2 * sizeof(char));
+                auxChar[0] = va_arg(arg_list, int);
+                syswrite(1, auxChar, 2 * sizeof(int));
                 i+=2;
                 break;
             //TODO
             case 'f':
+                num = va_arg(arg_list,double);
+                lenght = doubleToString(num,buffer);
+                syswrite(1,buffer,lenght * sizeof(char));
                 i+=2;
                 break;
             case 's':
-                char * auxPointer = va_arg(arg_list, char *);
+                auxPointer = va_arg(arg_list, char *);
                 syswrite(1, auxPointer,  strlen(auxPointer) * sizeof(char));
                 i+=2;
                 break;
@@ -80,7 +111,42 @@ void printf(const char * fmt, ...){
     va_end(arg_list);
 }
 
-static int uintToBase(uint64_t value, char * buffer, uint32_t base)
+int doubleToString(double num, char * buffer)
+{
+    int integer_part = num;
+    double decimal_part = num - integer_part;
+    int digits = 0;
+    char * p = buffer,* p1,* p2;
+    int aux;
+    do{
+        int remainder = integer_part % 10;
+		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
+		digits++;
+    }while(integer_part/=10);
+    *p++='.';
+    p1 = buffer;
+	p2 = p - 1;
+	while (p1 < p2)
+	{
+		char tmp = *p1;
+		*p1 = *p2;
+		*p2 = tmp;
+		p1++;
+		p2--;
+	}
+    for(int i = 0;i < 4;i++)
+    {
+        decimal_part*=10;
+        aux=decimal_part;
+        decimal_part-=aux;
+        *p++ = (aux < 10) ? aux + '0' : aux + 'A' - 10;
+		digits++;
+    }
+    *p=0;
+    return digits;
+}
+
+int uintToBase(uint64_t value, char * buffer, uint32_t base)
 {
 	char *p = buffer;
 	char *p1, *p2;
@@ -117,8 +183,11 @@ static int uintToBase(uint64_t value, char * buffer, uint32_t base)
 void processorInfo(){
     printf("Marca/Nombre del procesador extendido: ");
     processorName();
+    printf("\n");
     printf("Modelo de procesador: ");
     processorModel();
+    printf("\n");
+
 }
 
 
