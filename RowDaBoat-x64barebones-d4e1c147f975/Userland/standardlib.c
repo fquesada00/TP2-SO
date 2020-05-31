@@ -123,7 +123,7 @@ int doubleToString(double num, char * buffer)
 		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
 		digits++;
     }while(integer_part/=10);
-    *p++='.';
+    *p='.';
     p1 = buffer;
 	p2 = p - 1;
 	while (p1 < p2)
@@ -134,6 +134,7 @@ int doubleToString(double num, char * buffer)
 		p1++;
 		p2--;
 	}
+    p++;
     for(int i = 0;i < 4;i++)
     {
         decimal_part*=10;
