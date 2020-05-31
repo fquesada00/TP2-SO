@@ -135,7 +135,7 @@ int doubleToString(double num, char * buffer)
 		p2--;
 	}
     p++;
-    for(int i = 0;i < 4;i++)
+    for(int i = 0;i < 5;i++)
     {
         decimal_part*=10;
         aux=decimal_part;
@@ -199,4 +199,11 @@ void printMemoryFromAddress(long int address){
 
 void printRegisters(){
     inforeg();
+}
+
+void putchar(unsigned char c)
+{
+    char buffer[2]={0};
+    buffer[0]=c;
+    syswrite(1,&c,1);
 }
