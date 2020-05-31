@@ -9,8 +9,12 @@ extern int syswrite(int fd, const char * buff, int bytes);
 // asumimos fd=0 STDIN
 extern int sysread(int fd, char * buff, int bytes); 
 extern int strlen(char*);
+extern void printmem(long int);
+extern void inforeg(void);
+extern void processorName(void);
+extern void processorModel(void);
 
-/* return 1 if s iS greater than v
+/* return 1 if s is greater than v
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
 int strcmp(const char * s, const char * v){
@@ -28,7 +32,7 @@ void printf(const char * fmt, ...){
     va_list arg_list;
     va_start(arg_list, fmt);
     int i = 0, start, flagPercentage = 0;
-    
+    int pEntera = 0, pDecimal = 0;
     while(fmt[i]){
         if(!flagPercentage) start = i;//% %d%
         while(fmt[i] && (fmt[i]!='%' || flagPercentage)){
@@ -37,6 +41,13 @@ void printf(const char * fmt, ...){
         }
         if(i!=start) syswrite(1, fmt + start, (i-start) * sizeof(char));
         if(fmt[i] == '%'){
+            if(!fmt[i+1] && fmt[i+1]!='d' && fmt[i+1]!='c' && fmt[i+1]!='s'){
+                if(fmt[i+1]!='f'){ //then is . or a number
+                    if(fmt[i+1]=='.'){
+                        pDecimal; //hay que hacer un strToNum
+                    }
+                }
+            }
             switch (fmt[i+1])
             {
             case 'd':
@@ -46,14 +57,13 @@ void printf(const char * fmt, ...){
                 i+=2;
                 break;
             case 'c':
-                char auxChar[2]={0};
-                auxChar[0]=va_arg(arg_list, char);
+                char auxChar[2] = {0};
+                auxChar[0] = va_arg(arg_list, char);
                 syswrite(1, auxChar, 2 * sizeof(char));
                 i+=2;
                 break;
             //TODO
             case 'f':
-
                 i+=2;
                 break;
             case 's':
@@ -105,5 +115,18 @@ static int uintToBase(uint64_t value, char * buffer, uint32_t base)
 
 
 void processorInfo(){
+    printf("Marca/Nombre del procesador extendido: ");
+    processorName();
+    printf("Modelo de procesador: ");
+    processorModel();
+}
 
+
+void printMemoryFromAddress(long int address){
+    printmem(address);
+}
+
+
+void printRegisters(){
+    inforeg();
 }

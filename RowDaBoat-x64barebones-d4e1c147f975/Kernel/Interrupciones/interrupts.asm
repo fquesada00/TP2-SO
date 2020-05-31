@@ -12,7 +12,6 @@ GLOBAL _irq02Handler
 GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
-GLOBAL _irq80Handler
 GLOBAL _syscallHandler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
@@ -22,6 +21,7 @@ EXTERN exceptionDispatcher
 EXTERN screenNumber
 EXTERN get_buffer
 EXTERN putChar ;TODO
+EXTERN printreg
 
 SECTION .text
 
@@ -85,6 +85,16 @@ SECTION .text
 	iretq
 %endmacro
 
+;no se si se puede poner extern en una macro
+%macro regDispatcher 2
+    push rdi
+    push rsi
+	mov rdi, %1 ;pasaje de parametro 1 -> # reg
+	mov rsi, %2 ;pasaje de parametro 2 -> value of # reg
+    call printreg
+    pop rsi
+    pop rdi
+%endmacro
 
 _hlt:
 	sti
@@ -151,14 +161,14 @@ _irq05Handler:
 _syscallHandler:
 	push rbp
 	mov rbp,rsp
-	push rbx
 	cmp rax,0 ;syscall read
 	je syscall_read
 	cmp rax,1 ;syscall write
 	je syscall_write
 	cmp rax,2 ;syscall screen
 	je syscall_screen
-	pop rbx
+	cmp rax,3 ;syscall registers
+	je syscall_registers
 	pop rbp
 	mov rsp,rbp
 	ret
@@ -178,7 +188,7 @@ _syscallHandler:
 syscall_read:
 	push rbp
 	mov rbp,rsp
-	mov [readFlag],0 ;reset flag
+	mov byte [readFlag],0 ;reset flag
 	push rbx
 	mov rbx,0
 	cmp rdx,0
@@ -221,7 +231,7 @@ syscall_read:
 syscall_write:
 	push rbp
 	mov rbp,rsp
-	mov [writeFlag],0 ;reset flag
+	mov byte [writeFlag],0 ;reset flag
 	push rbx
 	mov rbx,0
 	cmp rdx,0 
@@ -269,6 +279,34 @@ syscall_screen:
 	ret
 ; -----------------------------------------------------------------------------
 
+
+; -----------------------------------------------------------------------------
+;SYSCALL PRINT_REGS -> #3
+;Params
+;	-
+;Ret
+;	-
+syscall_registers:
+	push rbp
+	mov rbp,rsp
+	push rax
+	push rbx
+	lea rbx,[rbp + 8*19] ;rbx -> rip
+	mov rax,16 ;acumulador
+.loop:
+	cmp rax,0
+	je .end ;no regs left
+	regDispatcher rax, [rbx]
+	sub rbx,8
+	dec rax
+	jmp .loop
+.end:
+	pop rbx
+	pop rax
+	mov rsp,rbp
+	pop rbp
+	ret
+; -----------------------------------------------------------------------------
 
 ;Zero Division Exception
 _exception0Handler:
