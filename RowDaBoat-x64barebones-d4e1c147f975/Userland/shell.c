@@ -23,6 +23,8 @@ void shell()
         printf("fuera");
         putchar('\n');
         command[i]=0;
+        printf("%d",strcmp(command,"processor") == 0);
+        printf("%d",strcmp(command,"processor") == 0);
         if(strcmp(command,"processor") == 0)
             processorInfo();
         else if(strcmp(command,"printmem"))

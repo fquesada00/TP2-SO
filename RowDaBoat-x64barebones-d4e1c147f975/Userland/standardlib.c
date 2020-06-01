@@ -32,12 +32,12 @@ int strcmp(const char * s, const char * v){
 
 void printf(const char * fmt,...)
 {
-    char auxChar[2]={0};
+    int auxChar[2]={0};
     char * auxPointer;
     double num;
     va_list arg_param;
     va_start(arg_param,fmt);
-    int i = 0,start=0,numLenght;
+    int i = 0,start=0,numLenght,val,negative=0;
     char auxbuff[64];
     while (fmt[i])
     {
@@ -50,14 +50,17 @@ void printf(const char * fmt,...)
             switch (fmt[i+1])
             {
             case 'd':
-                numLenght= uintToBase(va_arg(arg_param,int),auxbuff,10);
-                syswrite(1,auxbuff,numLenght);
+                negative=0; 
+                val = va_arg(arg_param,int);
+                if(val < 0){negative = 1;val =-val;auxbuff[0]='-';}
+                numLenght= uintToBase(val,auxbuff+negative,10);
+                syswrite(1,auxbuff,numLenght+negative);
                 i+=2;
                 start = i;
                 break;
             case 'c':
                 auxChar[0] = va_arg(arg_param, int);
-                syswrite(1, auxChar, 2 * sizeof(int));
+                syswrite(1, auxChar, sizeof(int));
                 i+=2;
                 start = i;
                 break;
@@ -280,9 +283,9 @@ int getScreen()
     return sys_GetScreen();
 }
 
-char getchar()
+int getchar()
 {
-    char buffer[1];
+    int buffer[1]={0};
     sysread(0,buffer,1);
     return buffer[0];
 }

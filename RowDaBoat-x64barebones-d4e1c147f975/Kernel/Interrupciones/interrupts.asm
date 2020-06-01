@@ -163,6 +163,14 @@ _irq05Handler:
 _syscallHandler:
 	push rbp
 	mov rbp,rsp
+	push rax
+	mov rdi,0x97
+	push rsi
+	push rdx
+	call putChar
+	pop rdx
+	pop rsi
+	pop rax
 	cmp rax,0 ;syscall read
 	je .read
 	cmp rax,1 ;syscall write

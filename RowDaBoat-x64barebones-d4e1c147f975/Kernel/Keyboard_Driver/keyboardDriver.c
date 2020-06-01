@@ -1,12 +1,12 @@
 #include "keyboardDriver.h"
 extern char getKeyboardScanCode();
-static char keyboard_buffer[256];
+static int keyboard_buffer[256];
 static int buff_size = 0;
 static int current = 0;
 
 //TODO
 //Buscar la fuente
-static const char latinasccode[0x56][3] =
+static const int latinasccode[0x56][3] =
     {
         {0, 0, 0}, {0, 0, 0}, {'1', '!', '|'}, {'2', '"', '@'}, {'3', '#', 0}, {'4', '$', '~'}, {'5', '%', 0}, {'6', '&', 0}, {'7', '/', '{'}, {'8', '(', '['}, {'9', ')', ']'}, {'0', '=', '}'}, {'\'', '?', '\\'}, {'¿', '¡', 0}, {'\b', '\b', 0}, {'\t', '\t', 0}, {'q', 'Q', '@'}, {'w', 'W', 0}, {'e', 'E', 0}, {'r', 'R', 0}, {'t', 'T', 0}, {'y', 'Y', 0}, {'u', 'U', 0}, {'i', 'I', 0}, {'o', 'O', 0}, {'p', 'P', 0}, {0, 0, 0}, {'+', '*', '~'}, {'\n', '\n', 0}, {0, 0, 0}, {'a', 'A', 0}, {'s', 'S', 0}, {'d', 'D', 0}, {'f', 'F', 0}, {'g', 'G', 0}, {'h', 'H', 0}, {'j', 'J', 0}, {'k', 'K', 0}, {'l', 'L', 0}, {'ñ', 'Ñ', 0}, {'{', '[', '^'}, {'|', '°', '¬'}, {0, 0, 0}, {'}', ']', '`'}, {'z', 'Z', 0}, {'x', 'X', 0}, {'c', 'C', 0}, {'v', 'V', 0}, {'b', 'B', 0}, {'n', 'N', 0}, {'m', 'M', 0}, {',', ';', 0}, {'.', ':', 0}, {'-', '_', 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {' ', ' ', ' '}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {'<', '>', '|'}};
 
@@ -27,7 +27,7 @@ void keyboardHandler()
         else if (scan == 0x38)
         {
             shift = 2;
-            keyboardHandler();
+           // keyboardHandler();
         }
         //Block Mayusc
         else if (scan == 0x3A)
@@ -62,6 +62,7 @@ void keyboardHandler()
     else
     {
         control = 0;
+        shift = 0;
     }
 
     //Buffer circular
@@ -78,7 +79,7 @@ int is_buffer_empty()
 
 /* Buffer circular, cuando llega a 256 chars, vuelve al principio
 ** y sobreescribe */
-char get_buffer()
+int get_buffer()
 {
     if (is_buffer_empty())
         return 0;
