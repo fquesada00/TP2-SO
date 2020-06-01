@@ -2,22 +2,33 @@
 
 void shell()
 {
-    char command[256];
+    char command[256]={0};
     int i = 0;
-    int c = 0;
+    char c = 0;
     while (strcmp(command,"quit") != 0)
     {
-        printf("User:> ");
+        command[0]=0;
+        printf("\nUser:> ");
         i=0;
-        while ((c=getchar()) != '/n')
+        while ((c=getchar()) != '\n')
         {
-            putchar(c);
-            command[i++] = c;
+            if(c != '\b'){
+                command[i++] = c;
+                putchar(c);
+            }else if(i > 0){
+                i--;
+                putchar(c);
+            }
         }
-        printf("Sali");
+        printf("fuera");
+        putchar('\n');
         command[i]=0;
-        if(strcmp(command,"processor"))
+        if(strcmp(command,"processor") == 0)
             processorInfo();
+        else if(strcmp(command,"printmem"))
+        {
+            printMemoryFromAddress(0);
+        }
     }
     
 }

@@ -20,7 +20,8 @@ extern int sys_GetScreen();
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
 int strcmp(const char * s, const char * v){
-    for(int i = 0 ; s[i]!='\0' && v[i]!='\0' ; i++){
+    int i=0;
+    for(; s[i]!='\0' && v[i]!='\0' ; i++){
         if(s[i] > v[i]) return 1;
         else if(s[i] < v[i]) return -1;
     }
@@ -247,7 +248,11 @@ void processorInfo(){
 
 
 void printMemoryFromAddress(long int address){
-    printmem(address);
+    char * p =(char *) address;
+    for (int i = 0; i < 32; i++)
+    {
+        printf("%d = %d\n",p,*p++);
+    }
 }
 
 
@@ -269,19 +274,22 @@ char * intToStr(int n){
     return p;
 }*/
 
+
 int getScreen()
 {
     return sys_GetScreen();
 }
 
-int getchar()
+char getchar()
 {
-    int buffer[1];
+    char buffer[1];
     sysread(0,buffer,1);
     return buffer[0];
 }
 
-void putchar(int c)
+void putchar(char c)
 {
-    syswrite(1,&c,1);
+    buffer[0]=c;
+    buffer[1]=0;
+    syswrite(1,buffer,1);
 }

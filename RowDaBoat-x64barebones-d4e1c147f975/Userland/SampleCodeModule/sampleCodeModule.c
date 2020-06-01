@@ -11,6 +11,7 @@ int main() {
 	while (1)
 	{
 		shell();
+		printf("Exit Shell\n");
 	}
 	
 	
