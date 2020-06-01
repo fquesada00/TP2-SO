@@ -8,4 +8,7 @@ void processorInfo(void);
 void printMemoryFromAddress(long int);
 void printRegisters(void);
 char * intToStr(int);
+int getScreen();
+int getchar();
+void putchar(int c);
 #endif

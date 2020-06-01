@@ -6,6 +6,7 @@ GLOBAL inforeg
 GLOBAL printmem
 GLOBAL processorModel
 GLOBAL processorName
+GLOBAL sys_GetScreen
 
 EXTERN printf
 
@@ -227,6 +228,16 @@ processorModel:
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+
+sys_GetScreen:
+    push rbp
+    mov rbp,rsp
+    mov rax,2
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
 
 SECTION .bss
     processorBufferName resw 20

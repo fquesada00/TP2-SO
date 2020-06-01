@@ -1,16 +1,18 @@
 /* sampleCodeModule.c */
 #include "../standardlib.h"
-char * v = (char*)0xB8000 + 79 * 2;
-
-static int var1 = 0;
-static int var2 = 0;
-
+extern void shell();
+typedef void(*function)();
+typedef struct{
+	function programa;
+	int screen;
+} ProgramType;
 
 int main() {
-	processorInfo();
-	printf("\n \n \n \n \n \n \n \n");
-	printf("\n \n \n \n \n \n \n \n");
-	printf("\n \n \n \n \n \n \n \n");
-	printf("\n \n \n \n \n \n \n \n");
-	return 0;
+	while (1)
+	{
+		shell();
+	}
+	
+	
+
 }

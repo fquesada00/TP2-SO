@@ -60,6 +60,7 @@ static uint32_t start = 0xFD000000;
 static int current[SCREENS] = {START_POS};
 static int current_screen = START_SCREEN;
 static int chars_written[SCREENS]={0};
+static int screens_in_use;
 void init_video()
 {
     for (int j = 0; j < SCREENS - 1; j++)
@@ -249,7 +250,9 @@ void putsN(char * buffer, int n)
 
 int screenNumber()
 {
-    return current_screen;
+    if(screens_in_use>=SCREENS)
+        return -1;
+    return screens_in_use++;
 }
 void changeScreen(int num)
 {

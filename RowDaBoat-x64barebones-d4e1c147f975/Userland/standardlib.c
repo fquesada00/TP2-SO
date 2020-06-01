@@ -14,6 +14,7 @@ extern void printmem(long int);
 extern void inforeg(void);
 extern char * processorName(char*);
 extern int processorModel(void);
+extern int sys_GetScreen();
 
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
@@ -237,3 +238,20 @@ char * intToStr(int n){
     }
     return p;
 }*/
+
+int getScreen()
+{
+    return sys_GetScreen();
+}
+
+int getchar()
+{
+    int buffer[1];
+    sysread(0,buffer,1);
+    return buffer[0];
+}
+
+void putchar(int c)
+{
+    syswrite(1,&c,1);
+}
