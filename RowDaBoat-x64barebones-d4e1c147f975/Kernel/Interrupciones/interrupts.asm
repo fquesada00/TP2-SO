@@ -24,7 +24,7 @@ EXTERN putsN ;TODO
 EXTERN printreg
 EXTERN putChar
 EXTERN puts
-
+EXTERN syscall_read
 SECTION .text
 
 %macro pushState 0
@@ -199,33 +199,42 @@ _syscallHandler:
 ;	rdx -> n bytes to read from standard input
 ;Ret
 ;	rax -> total bytes read
-syscall_read:
-	push rbp
-	mov rbp,rsp
-	push rbx
-	mov rbx,0 ;acumulador
-	cmp rdx,0
-	jle .end;if 0 bytes, finish
-.loop:
-	push rsi
-	push rdx
-	call get_buffer ;rax with one byte from buffer
-	pop rdx
-	pop rsi
-	cmp rax,0
-	je .end;if char is null, finish
-	cmp rbx,rdx ;then check bytes left are diff to 0
-	je .end
-	mov byte [rsi], al ;CHEQUEAR ;copy byte into buffer
-	inc rsi
-	inc rbx
-	jmp .loop
-.end:
-	mov rax,rbx ;charge bytes read
-	pop rbx
-	mov rsp,rbp
-	pop rbp
-	ret
+;syscall_read:
+;	push rbp
+;	mov rbp,rsp
+;	push rbx
+;	mov rbx,0 ;acumulador
+;	cmp rdx,0
+;	jle .end;if 0 bytes, finish
+;.loop:
+;	call is_buffer_empty
+;	cmp rax,1
+;	je .wait
+;.continue:
+;	push rsi
+;	push rdx
+;	call get_buffer ;rax with one byte from buffer
+;	pop rdx
+;	pop rsi
+;	cmp rax,0
+;	je .end;if char is null, finish
+;	cmp rbx,rdx ;then check bytes left are diff to 0
+;	je .end
+;	mov byte [rsi], al ;CHEQUEAR ;copy byte into buffer
+;	inc rsi
+;	inc rbx
+;	jmp .loop
+;
+;.wait:
+;	call haltcpu
+;	jmp .continue
+;
+;.end:
+;	mov rax,rbx ;charge bytes read
+;	pop rbx
+;	mov rsp,rbp
+;	pop rbp
+;	ret
 ; -----------------------------------------------------------------------------
 
 

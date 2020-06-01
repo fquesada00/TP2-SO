@@ -14,17 +14,18 @@ extern void printmem(long int);
 extern void inforeg(void);
 extern char * processorName(char*);
 extern int processorModel(void);
+extern int sys_GetScreen();
 
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
 int strcmp(const char * s, const char * v){
-    for( ; s && v ; s++, v++){
-        if(*s > *v) return 1;
-        else if(*s < *v) return -1;
+    for(int i = 0 ; s[i]!='\0' && v[i]!='\0' ; i++){
+        if(s[i] > v[i]) return 1;
+        else if(s[i] < v[i]) return -1;
     }
-    if(s && !v) return 1;
-    else if(!s && v) return -1;
+    if(s[i]=='\0' && v[i]!='\0') return -1;
+    else if(s[i]!='\0' && v[i]=='\0') return 1;
     return 0;
 }
 
@@ -267,3 +268,20 @@ char * intToStr(int n){
     }
     return p;
 }*/
+
+int getScreen()
+{
+    return sys_GetScreen();
+}
+
+int getchar()
+{
+    int buffer[1];
+    sysread(0,buffer,1);
+    return buffer[0];
+}
+
+void putchar(int c)
+{
+    syswrite(1,&c,1);
+}
