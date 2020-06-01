@@ -8,7 +8,6 @@ GLOBAL processorModel
 GLOBAL processorName
 
 EXTERN printf
-EXTERN intToStr
 
 SECTION .text
 
@@ -72,15 +71,18 @@ printmem:
     push rbp
     mov rbp,rsp
     push rbx
-    push rdi
+    mov rbx,0 ;acumulador
 .loop:
-    cmp rdi,0 
-    je .end ;if null, then finish
+    cmp rbx,32
+    je .end
+    push rdi
+    mov rdi,[rdi]
     call printf
-    add rdi,0x20 ;32 bytes move, no sera 32 bits -> 4 bytes ?????¡¡¡¡¡
+    pop rdi
+    inc rdi ;next byte
+    inc rbx
     jmp .loop
 .end:
-    pop rdi
     pop rbx
     mov rsp,rbp
     pop rbp
@@ -173,15 +175,14 @@ numlen:
 
 
 ; -----------------------------------------------------------------------------
+;Params
+;   rdi -> char * buffer
+;Ret
+;   -
 processorName:
     push rbp
     mov rbp,rsp
-    push rax
     push rbx
-    push rdx
-    push rcx
-    push rdi ;no se si es necesario
-    mov rdi,processorBufferName
     mov rax,0x80000002 ;extended processor name string
     cpuid
     mov [rdi],eax
@@ -200,12 +201,8 @@ processorName:
     mov [rdi + 36],ebx
     mov [rdi + 40],edx
     mov [rdi + 44],ecx
-    call printf
-    pop rdi
-    pop rcx
-    pop rdx
+    mov byte [rdi + 45], 0
     pop rbx
-    pop rax
     mov rsp,rbp
     pop rbp
     ret
@@ -213,28 +210,19 @@ processorName:
 
 
 ; -----------------------------------------------------------------------------
+;Params
+;   -
+;Ret
+;   rax -> int processor model
 processorModel:
     push rbp
     mov rbp,rsp
-    push rax
     push rbx
-    push rdx
-    push rcx
-    push rdi ;no se si es necesario
-    mov rdi,processorBufferModel
-    mov rax,1 ;processor type , model , stepping info
+    mov rax,1 
     cpuid
-    shr rax,4
-    and rax,0x0000000F
-    mov rdi,rax ;processor model
-    call intToStr
-    mov rdi,rax
-    call printf
-    pop rdi
-    pop rcx
-    pop rdx
+    shr rax,4 
+    and rax,0x0000000F ;first 4 bits -> processor model
     pop rbx
-    pop rax
     mov rsp,rbp
     pop rbp
     ret

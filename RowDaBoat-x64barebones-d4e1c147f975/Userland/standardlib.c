@@ -3,7 +3,6 @@
 #include "standardlib.h"
 #include <stdint.h>
 static char buffer[64] = {'0'};
-static char bufferInt[64] = {0};
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char * buff, int bytes); 
@@ -13,8 +12,8 @@ extern int strlen(char*);
 extern int numlen(int);
 extern void printmem(long int);
 extern void inforeg(void);
-extern void processorName(void);
-extern void processorModel(void);
+extern char * processorName(char*);
+extern int processorModel(void);
 
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
@@ -210,13 +209,9 @@ int uintToBase(uint64_t value, char * buffer, uint32_t base)
 
 
 void processorInfo(){
-    printf("Marca/Nombre del procesador extendido: ");
-    processorName();
-    printf("\n");
-    printf("Modelo de procesador: ");
-    processorModel();
-    printf("\n");
-
+    processorName(buffer);
+    printf("Marca del procesador: %s\n", buffer);
+    printf("Modelo de procesador: %d\n", processorModel());
 }
 
 
@@ -229,6 +224,8 @@ void printRegisters(){
     inforeg();
 }
 
+
+/*
 char * intToStr(int n){
     int lenght = numlen(n);
     char * p = bufferInt;
@@ -239,4 +236,4 @@ char * intToStr(int n){
         n/=10;
     }
     return p;
-}
+}*/
