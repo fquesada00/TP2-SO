@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "standardlib.h"
 #include <stdint.h>
-static char buffer[256] = {'0'};
+static char buffer[256] = {0};
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char * buff, int bytes); 
@@ -285,14 +285,17 @@ int getScreen()
 
 int getchar()
 {
+   // putChar('a');
     int buffer[1]={0};
     sysread(0,buffer,1);
+    //putChar('b');
     return buffer[0];
 }
 
-void putchar(char c)
+void putchar(int c)
 {
-    buffer[0]=c;
-    buffer[1]=0;
-    syswrite(1,buffer,1);
+    char buff[2];
+    buff[0]=c;
+    buff[1]=0;
+    syswrite(1,buff,1);
 }

@@ -20,16 +20,13 @@ void shell()
                 putchar(c);
             }
         }
-        printf("fuera");
         putchar('\n');
         command[i]=0;
-        printf("%d",strcmp(command,"processor") == 0);
-        printf("%d",strcmp(command,"processor") == 0);
         if(strcmp(command,"processor") == 0)
             processorInfo();
-        else if(strcmp(command,"printmem"))
+        else if(strcmp(command,"printmem") == 0)
         {
-            printMemoryFromAddress(0);
+            printMemoryFromAddress(0x5C00);
         }
     }
     

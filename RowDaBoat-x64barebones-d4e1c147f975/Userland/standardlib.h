@@ -9,5 +9,5 @@ void printMemoryFromAddress(long int);
 void printRegisters(void);
 int getScreen();
 int getchar();
-void putchar(char c);
+void putchar(int c);
 #endif

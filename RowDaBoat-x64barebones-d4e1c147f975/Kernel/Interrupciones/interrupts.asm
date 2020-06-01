@@ -25,6 +25,7 @@ EXTERN printreg
 EXTERN putChar
 EXTERN puts
 EXTERN syscall_read
+EXTERN syscall_write
 SECTION .text
 
 %macro pushState 0
@@ -163,14 +164,6 @@ _irq05Handler:
 _syscallHandler:
 	push rbp
 	mov rbp,rsp
-	push rax
-	mov rdi,0x97
-	push rsi
-	push rdx
-	call putChar
-	pop rdx
-	pop rsi
-	pop rax
 	cmp rax,0 ;syscall read
 	je .read
 	cmp rax,1 ;syscall write
@@ -254,37 +247,37 @@ _syscallHandler:
 ;	rdx -> n bytes to read from buffer
 ;Ret
 ;	rax -> total bytes written
-syscall_write:
-	push rbp
-	mov rbp,rsp
-	push rbx
-	push rdi
-	mov rbx,0 ;acumulador
-	cmp rdx,0 
-	jle .end;if 0 bytes, finish
-	mov rdi,rsi
-.loop:
-	cmp byte[rsi],0
-	je .end;if null, finish
-	cmp rbx,rdx ;then check bytes left are diff to 0
-	je .end
-	push rsi
-	push rdx
-	mov rdi,0
-	mov di,[rsi]
-	call putChar ;print to STDOUT
-	pop rdx
-	pop rsi
-	inc rsi
-	inc rbx
-	jmp .loop
-.end:
-	mov rax,rbx
-	pop rdi
-	pop rbx
-	mov rsp,rbp
-	pop rbp
-	ret
+;syscall_write:
+;	push rbp
+;	mov rbp,rsp
+;	push rbx
+;	push rdi
+;	mov rbx,0 ;acumulador
+;	cmp rdx,0 
+;	jle .end;if 0 bytes, finish
+;	mov rdi,rsi
+;.loop:
+;	cmp byte[rsi],0
+;	je .end;if null, finish
+;	cmp rbx,rdx ;then check bytes left are diff to 0
+;	je .end
+;	push rsi
+;	push rdx
+;	mov rdi,0
+;	mov di,[rsi]
+;	call putChar ;print to STDOUT
+;	pop rdx
+;	pop rsi
+;	inc rsi
+;	inc rbx
+;	jmp .loop
+;.end:
+;	mov rax,rbx
+;	pop rdi
+;	pop rbx
+;	mov rsp,rbp
+;	pop rbp
+;	ret
 ;syscall_write:
 ;	push rbp
 ;	mov rbp,rsp
