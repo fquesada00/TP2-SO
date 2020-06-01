@@ -20,7 +20,8 @@ extern int sys_GetScreen();
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
 int strcmp(const char * s, const char * v){
-    for(int i = 0 ; s[i]!='\0' && v[i]!='\0' ; i++){
+    int i = 0;
+    for( ; s[i]!='\0' && v[i]!='\0' ; i++){
         if(s[i] > v[i]) return 1;
         else if(s[i] < v[i]) return -1;
     }
@@ -36,7 +37,7 @@ void printf(const char * fmt,...)
     double num;
     va_list arg_param;
     va_start(arg_param,fmt);
-    int i = 0,start=0,numLenght;
+    int i = 0,start=0,numLenght=0;
     char auxbuff[64];
     while (fmt[i])
     {
@@ -85,12 +86,19 @@ void printf(const char * fmt,...)
     va_end(arg_param);
 }
 
-void scanf(const char * fmt, ...){
+int scanf(const char * fmt, ...){
     va_list arg_param;
     va_start(arg_param,fmt);
-    int i = 0, start = 0;
+    int i = 0, start = 0, numLenght;
+    char auxChar[2]={0};
+    char * auxPointer;
+    double num;
+    char c;
+    int negative, number;
     while(fmt[i]){
         if(fmt[i]!='%'){
+            c = getchar();
+            if(c!=fmt[i]) //ERROR
             i++;
         }
         else{
@@ -99,10 +107,31 @@ void scanf(const char * fmt, ...){
             }
             switch (fmt[i+1])
             {
+            case 'c':
+                *((char *) va_arg(arg_param, char *)) = getchar(); 
+                i+=2;
+                start = i;
             case 'd':
-                
+                negative = 0;
+                number = 0;
+                while(((c = getchar())>='0' && c<='9') || c=='-'){
+                    if(c=='-') negative = 1;
+                    else{
+                        number *= 10;
+                        number += (c - '0');
+                    }
+                }
+                if(negative) number *= -1;
+                if(fmt[i + 2] != c) //ERROR
+                *((int *) va_arg(arg_param, int *)) = number;
+                i+=2;
+                start = i;
                 break;
-            
+            case 'f':
+                break;
+            case 's':
+                *((char**) va_arg(arg_param, char**)) = auxPointer;
+                break;
             default:
                 start = i++;
                 break;
@@ -111,9 +140,24 @@ void scanf(const char * fmt, ...){
         }
     }
     if(i!=start) sysread(0, buffer + start, i - start);
+    return 0;
 }
 
-
+/*
+int readNumber(){
+    char c;
+    int negative = 0, firstChar = 1, number = 0;
+    while(((c = getchar())>='0' && c<='9') || (c=='-' && firstChar)){
+        if(c=='-') negative = 1;
+        else{
+            number *= 10;
+            number += (c - '0');
+        }
+    }
+    if(negative) number *= -1;
+    return number;
+}
+*/
 
 // variable params
 /*
@@ -274,14 +318,14 @@ int getScreen()
     return sys_GetScreen();
 }
 
-int getchar()
+char getchar()
 {
-    int buffer[1];
+    char buffer[1];
     sysread(0,buffer,1);
     return buffer[0];
 }
 
-void putchar(int c)
+void putchar(char c)
 {
     syswrite(1,&c,1);
 }

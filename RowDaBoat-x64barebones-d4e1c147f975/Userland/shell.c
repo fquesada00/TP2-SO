@@ -8,7 +8,7 @@ void shell()
     while (strcmp(command,"quit") != 0)
     {
         printf("User:> ");
-        i=0;
+        /*i=0;
         while ((c=getchar()) != '/n')
         {
             putchar(c);
@@ -18,6 +18,7 @@ void shell()
         command[i]=0;
         if(strcmp(command,"processor"))
             processorInfo();
+        */
     }
     
 }
