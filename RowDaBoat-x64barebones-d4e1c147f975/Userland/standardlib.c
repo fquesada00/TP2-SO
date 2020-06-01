@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "standardlib.h"
 #include <stdint.h>
-static char buffer[64] = {'0'};
+static char buffer[256] = {'0'};
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char * buff, int bytes); 
@@ -83,6 +83,36 @@ void printf(const char * fmt,...)
     if(i!=start) syswrite(1,fmt+start,i-start);
     va_end(arg_param);
 }
+
+void scanf(const char * fmt, ...){
+    va_list arg_param;
+    va_start(arg_param,fmt);
+    int i = 0, start = 0;
+    while(fmt[i]){
+        if(fmt[i]!='%'){
+            i++;
+        }
+        else{
+            if(i!=start){
+                sysread(0, buffer + start, i - start);
+            }
+            switch (fmt[i+1])
+            {
+            case 'd':
+                
+                break;
+            
+            default:
+                start = i++;
+                break;
+            }
+
+        }
+    }
+    if(i!=start) sysread(0, buffer + start, i - start);
+}
+
+
 
 // variable params
 /*
