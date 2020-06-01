@@ -11,7 +11,7 @@
 #define PIXELSIZE 3
 #define LINES (HEIGHT / CHARSIZE)
 #define COLS ((WIDTH) / CHARSIZE)
-#define START_POS WIDTH *PIXELSIZE *CHARSIZE *(LINES - 1)
+#define START_POS  WIDTH *PIXELSIZE *CHARSIZE *(LINES - 1)
 #define START_SCREEN 1
 struct vbe_mode_info_structure
 {

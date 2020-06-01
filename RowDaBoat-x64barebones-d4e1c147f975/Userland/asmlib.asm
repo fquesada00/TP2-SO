@@ -8,6 +8,7 @@ GLOBAL processorModel
 GLOBAL processorName
 
 EXTERN printf
+EXTERN intToStr
 
 SECTION .text
 
@@ -151,7 +152,7 @@ numlen:
     mov rbx,0 ;accum
     cmp rdi,0 ;if null, finish
     je .end
-    mov rax,[rdi] ;charge number
+    mov rax,rdi ;charge number
 .loop:
     mov rcx,10 ;divisor
     mov rdx,0 ;resto
@@ -180,23 +181,25 @@ processorName:
     push rdx
     push rcx
     push rdi ;no se si es necesario
+    mov rdi,processorBufferName
     mov rax,0x80000002 ;extended processor name string
     cpuid
-    mov [rdi],ebx
-    mov [rdi + 8],edx
-    mov [rdi + 16],ecx
-    call printf
+    mov [rdi],eax
+    mov [rdi + 4],ebx
+    mov [rdi + 8],ecx
+    mov [rdi + 12],edx
     mov rax,0x80000003 ;extended processor name string
     cpuid
-    mov [rdi],ebx
-    mov [rdi + 8],edx
-    mov [rdi + 16],ecx
-    call printf
+    mov [rdi + 16],eax
+    mov [rdi + 20],ebx
+    mov [rdi + 24],edx
+    mov [rdi + 28],ecx
     mov rax,0x80000004 ;extended processor name string
     cpuid
-    mov [rdi],ebx
-    mov [rdi + 8],edx
-    mov [rdi + 16],ecx
+    mov [rdi + 32],eax
+    mov [rdi + 36],ebx
+    mov [rdi + 40],edx
+    mov [rdi + 44],ecx
     call printf
     pop rdi
     pop rcx
@@ -218,10 +221,14 @@ processorModel:
     push rdx
     push rcx
     push rdi ;no se si es necesario
+    mov rdi,processorBufferModel
     mov rax,1 ;processor type , model , stepping info
     cpuid
-    add rax,1 ;add 1 byte
-    mov [rdi],rax ;processor model
+    shr rax,4
+    and rax,0x0000000F
+    mov rdi,rax ;processor model
+    call intToStr
+    mov rdi,rax
     call printf
     pop rdi
     pop rcx
@@ -232,3 +239,7 @@ processorModel:
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+
+SECTION .bss
+    processorBufferName resw 20
+    processorBufferModel resw 20

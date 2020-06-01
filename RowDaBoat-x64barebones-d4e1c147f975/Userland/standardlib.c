@@ -3,12 +3,14 @@
 #include "standardlib.h"
 #include <stdint.h>
 static char buffer[64] = {'0'};
+static char bufferInt[64] = {0};
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char * buff, int bytes); 
 // asumimos fd=0 STDIN
 extern int sysread(int fd, char * buff, int bytes); 
 extern int strlen(char*);
+extern int numlen(int);
 extern void printmem(long int);
 extern void inforeg(void);
 extern void processorName(void);
@@ -26,9 +28,12 @@ int strcmp(const char * s, const char * v){
     else if(!s && v) return -1;
     return 0;
 }
-/*
+
 void printf(const char * fmt,...)
 {
+    char auxChar[2]={0};
+    char * auxPointer;
+    double num;
     va_list arg_param;
     va_start(arg_param,fmt);
     int i = 0,start=0,numLenght;
@@ -47,19 +52,41 @@ void printf(const char * fmt,...)
                 numLenght= uintToBase(va_arg(arg_param,int),auxbuff,10);
                 syswrite(1,auxbuff,numLenght);
                 i+=2;
+                start = i;
                 break;
-            
+            case 'c':
+                auxChar[0] = va_arg(arg_param, int);
+                syswrite(1, auxChar, 2 * sizeof(int));
+                i+=2;
+                start = i;
+                break;
+            case 'f':
+                num = va_arg(arg_param,double);
+                numLenght = doubleToString(num,buffer);
+                syswrite(1,buffer,numLenght * sizeof(char));
+                i+=2;
+                start = i;
+                break;
+            case 's':
+                auxPointer = va_arg(arg_param, char *);
+                syswrite(1, auxPointer,  strlen(auxPointer) * sizeof(char));
+                i+=2;
+                start = i;
+                break;
             default:
+                start = i++;
                 break;
+
             }
-        start = i;
+
         }
     }
-    syswrite(1,fmt+start,i-start);
-    
+    if(i!=start) syswrite(1,fmt+start,i-start);
+    va_end(arg_param);
 }
-*/
+
 // variable params
+/*
 void printf(const char * fmt, ...){
     va_list arg_list;
     va_start(arg_list, fmt);
@@ -69,8 +96,8 @@ void printf(const char * fmt, ...){
     char auxChar[2]={0};
     char * auxPointer;
     double num;
-    while(fmt[i]){
-        if(!flagPercentage) start = i;//% %d%
+    while(fmt[i]){ //%%
+        if(!flagPercentage) start = i;
         while(fmt[i] && (fmt[i]!='%' || flagPercentage)){
             i++;
             flagPercentage = 0;
@@ -110,6 +137,7 @@ void printf(const char * fmt, ...){
     }
     va_end(arg_list);
 }
+*/
 
 int doubleToString(double num, char * buffer)
 {
@@ -135,7 +163,7 @@ int doubleToString(double num, char * buffer)
 		p2--;
 	}
     p++;
-    for(int i = 0;i < 4;i++)
+    for(int i = 0;i < 5;i++)
     {
         decimal_part*=10;
         aux=decimal_part;
@@ -199,4 +227,16 @@ void printMemoryFromAddress(long int address){
 
 void printRegisters(){
     inforeg();
+}
+
+char * intToStr(int n){
+    int lenght = numlen(n);
+    char * p = bufferInt;
+    while (lenght)
+    {
+        int remainder = n % 10;
+        p[--lenght] = remainder + '0';
+        n/=10;
+    }
+    return p;
 }

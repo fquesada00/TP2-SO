@@ -22,6 +22,8 @@ EXTERN screenNumber
 EXTERN get_buffer
 EXTERN putsN ;TODO
 EXTERN printreg
+EXTERN putChar
+EXTERN puts
 
 SECTION .text
 
@@ -170,15 +172,19 @@ _syscallHandler:
 	cmp rax,3 ;syscall registers
 	je .register
 	jmp .end
-.read call syscall_read
+.read:
+	call syscall_read
 	jmp .end
-.write call syscall_write
+.write: 
+	call syscall_write
 	jmp .end
-.screen call syscall_screen
+.screen:
+	call syscall_screen
 	jmp .end
-.register call syscall_registers
+.register:
+	call syscall_registers
 	jmp .end
-.end
+.end:
 	mov rsp,rbp
 	pop rbp
 	ret
@@ -193,32 +199,27 @@ _syscallHandler:
 ;	rdx -> n bytes to read from standard input
 ;Ret
 ;	rax -> total bytes read
-;Flags
-;	readFlag -> 0 something went wrong & 1 everything ok POR AHI ESTO ES AL PEDO
 syscall_read:
 	push rbp
 	mov rbp,rsp
-	mov byte [readFlag],0 ;reset flag
 	push rbx
-	mov rbx,0
+	mov rbx,0 ;acumulador
 	cmp rdx,0
-	jle .read_fine ;if 0 bytes, everything work out fine, jump
+	jle .end;if 0 bytes, finish
 .loop:
+	push rsi
+	push rdx
 	call get_buffer ;rax with one byte from buffer
+	pop rdx
+	pop rsi
 	cmp rax,0
-	je .check_bytes_read ;if char is null, check bytes left are 0
+	je .end;if char is null, finish
 	cmp rbx,rdx ;then check bytes left are diff to 0
-	je .read_fine
+	je .end
 	mov byte [rsi], al ;CHEQUEAR ;copy byte into buffer
 	inc rsi
 	inc rbx
 	jmp .loop
-.check_bytes_read:
-	cmp rbx,rdx 
-	jle .read_fine ;if equals or less, then everything work out fine
-	jmp .end ;then they are bytes left to be read but pointer is null
-.read_fine:
-	mov byte[readFlag],1
 .end:
 	mov rax,rbx ;charge bytes read
 	pop rbx
@@ -236,52 +237,46 @@ syscall_read:
 ;	rdx -> n bytes to read from buffer
 ;Ret
 ;	rax -> total bytes written
-;Flags
-;	writeFlag-> 0 something went wrong & 1 everything ok POR AHI ESTO ES AL PEDO
-;syscall_write:
-;	push rbp
-;	mov rbp,rsp
-;	mov byte [writeFlag],0 ;reset flag
-;	push rbx
-;	mov rbx,0
-;	cmp rdx,0 
-;	;jle .write_fine ;if 0 bytes, everything work out fine, jump
-;	mov rdi,rsi
-;	call puts
-;.loop:
-;	cmp byte[rsi],0
-;	je .check_bytes_written ;if null, then check bytes left to be written are 0 or less
-;	cmp rbx,rdx ;then check bytes left are diff to 0
-;	je .write_fine 
-;	push rdi ;CHEQUEAR ;push char to be written
-;	mov rdi,0
-;	mov di,si
-;	call putChar ;print to STDOUT
-;	pop rdi
-;	inc rsi
-;	inc rbx
-;	jmp .loop
-;.check_bytes_written:
-;	cmp rbx,rdx
-;	jle .write_fine ;if equals or less, then everything work out fine
-;	jmp .end 
-;.write_fine:
-;	mov byte [writeFlag],1
-;.end:
-;	mov rax,rbx
-;	pop rbx
-;	mov rsp,rbp
-;	pop rbp
-;	ret
 syscall_write:
 	push rbp
 	mov rbp,rsp
+	push rbx
+	push rdi
+	mov rbx,0 ;acumulador
+	cmp rdx,0 
+	jle .end;if 0 bytes, finish
 	mov rdi,rsi
-	mov rsi,rdx
-	call putsN
+.loop:
+	cmp byte[rsi],0
+	je .end;if null, finish
+	cmp rbx,rdx ;then check bytes left are diff to 0
+	je .end
+	push rsi
+	push rdx
+	mov rdi,0
+	mov di,[rsi]
+	call putChar ;print to STDOUT
+	pop rdx
+	pop rsi
+	inc rsi
+	inc rbx
+	jmp .loop
+.end:
+	mov rax,rbx
+	pop rdi
+	pop rbx
 	mov rsp,rbp
 	pop rbp
 	ret
+;syscall_write:
+;	push rbp
+;	mov rbp,rsp
+;	mov rdi,rsi
+;	mov rsi,rdx
+;	call putsN
+;	mov rsp,rbp
+;	pop rbp
+;	ret
 ; -----------------------------------------------------------------------------
 
 
@@ -341,10 +336,3 @@ haltcpu:
 	cli
 	hlt
 	ret
-
-SECTION .bss
-	aux resq 1
-
-SECTION .data
-	readFlag db 0
-	writeFlag db 0

@@ -7,6 +7,10 @@ static int var2 = 0;
 
 
 int main() {
-	printf("Hola mundo %f\n",123.0);
+	processorInfo();
+	printf("\n \n \n \n \n \n \n \n");
+	printf("\n \n \n \n \n \n \n \n");
+	printf("\n \n \n \n \n \n \n \n");
+	printf("\n \n \n \n \n \n \n \n");
 	return 0;
 }
