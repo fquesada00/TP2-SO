@@ -7,12 +7,35 @@ void shell()
     char c = 0;
     int n,l,k;
     int le = 10;
+    char * p;
     while (strcmp(command,"quit") != 0)
     {
         command[0]=0;
         printf("\nUser:> ");
         i=0;
-    
+        /*while(1){
+            scanf("%c",&c);
+            printf("Letra ingresada: %c\n",c);
+            while(le){
+                printf("\n \n \n");
+                le--;
+            }
+            le = 10;
+        }*/
+        while(1){
+            printf("\nUser:> ");
+            //scanf("%d",&n);
+            scanf("hola %s + %d",&p,&n);
+            printf("hola %s + %d",p,n);
+            //printf("%d\n",n);
+            //scanf("%d+%d*%d",&n,&l,&k);
+            //printf("Cuenta: %d+%d*%d",n,l,k);
+            /*while(le){
+                printf("\n \n \n");
+                le--;
+            }
+            le = 10;*/
+       }
         
         while ((c=getchar()) != '\n')
         {

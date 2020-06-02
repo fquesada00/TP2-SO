@@ -97,29 +97,37 @@ int scanf(const char * fmt, ...){
     char * auxPointer;
     double num;
     char c;
-    int negative, number;
-    int backspace = 0;
+    int negative, number, idx = 0, reset = 0;
     while(fmt[i]){
         if(fmt[i]!='%'){
             c = getchar();
-            if(c=='\b') backspace = 1;
-            if(!backspace && c!=fmt[i]){
+            if(c=='\b'){
+                if(i>0){
+                    i--;
+                    putchar(c);
+                }
+                continue;
+            }
+            else if(c!=fmt[i]){
                 putchar(c);
                 printf("\nERROR: tipeo cualquier cosa\n");
                 return;
-            } //ERROR
-            if(backspace){
-                if(i>0) i--;
             } 
+            putchar(c);
+            i++;
         }
         else{
-            /*if(i!=start){
-                sysread(0, buffer + start, i - start);
-            }*/
+            c = getchar();
+            if(c=='\b'){
+                if(i>0){
+                    i--;
+                    putchar(c);
+                    continue;
+                }
+            }
             switch (fmt[i+1])
             {
             case 'c':
-                c = getchar();
                 *((char*) va_arg(arg_param, char*)) = c;
                 i+=2;
                 start = i;
@@ -127,22 +135,47 @@ int scanf(const char * fmt, ...){
             case 'd':
                 negative = 0;
                 number = 0;
-                while(((c = getchar())>='0' && c<='9') || c=='-'){
+                idx = 0;
+                while((c>='0' && c<='9') || c=='-'){
                     putchar(c);
-                    if(c=='-') negative = 1;
+                    idx++;
+                    if(c=='-' && idx==1) negative = 1;
                     else{
                         number *= 10;
                         number += (c - '0');
                     }
+                    c = getchar();
+                    /*while ((c = getchar())=='\b'){
+                        if(idx>0){
+                            putchar(c);
+                            idx--;
+                        }
+                        else{
+                            if(i>0){
+                                putchar(c);
+                                i--;
+                                reset = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if(reset) break;*/
                 }
+                //if(reset) break;
                 //printf("Tu numero es %d y el siguiente char: %c",number,c);
                 if(negative) number *= -1;
+                if(fmt[i + 2]==0){
+                    *((int *) va_arg(arg_param, int *)) = number;
+
+                    return;
+                }
                 if(fmt[i + 2] != c){
                     putchar(c);
                     printf("\nERROR: tipeo cualquier cosa\n");
                     return;
                 } //ERROR
                 *((int *) va_arg(arg_param, int *)) = number;
+                putchar(c);
                 i+=3;
                 start = i;
                 break;
@@ -151,16 +184,17 @@ int scanf(const char * fmt, ...){
                 break;
             case 's':
                 j = 0;
-                while((c=getchar()!=' ' && c!='\0' && c!='\n')){
+                while((c!=' ' && c!='\n')){
                     auxPointer[j++] = c;
+                    putchar(c);
+                    c = getchar();
                 }
                 auxPointer[j]='\0';
-                if(' '!=c){ //c=' '
-                    putchar(c);
-                    printf("\nERROR: Tipeo cualquier cosa\n");
+                *((char**) va_arg(arg_param, char**)) = auxPointer;
+                if(fmt[i + 2]==0){
                     return;
                 }
-                *((char**) va_arg(arg_param, char**)) = auxPointer;
+                putchar(c);
                 i+=3;
                 start = i;
                 break;
@@ -170,7 +204,6 @@ int scanf(const char * fmt, ...){
             }
 
         }
-        putchar(c);
     }
     /*if(i!=start) sysread(0, buffer + start, i - start);*/
     return 0;
