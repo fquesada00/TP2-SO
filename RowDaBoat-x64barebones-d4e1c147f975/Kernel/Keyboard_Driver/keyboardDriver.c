@@ -1,6 +1,6 @@
 #include "keyboardDriver.h"
 extern char getKeyboardScanCode();
-static char keyboard_buffer[256];
+static int keyboard_buffer[256];
 static int buff_size = 0;
 static int current = 0;
 
@@ -27,7 +27,7 @@ void keyboardHandler()
         else if (scan == 0x38)
         {
             shift = 2;
-            keyboardHandler();
+           // keyboardHandler();
         }
         //Block Mayusc
         else if (scan == 0x3A)
@@ -49,7 +49,6 @@ void keyboardHandler()
                 keyboard_buffer[buff_size++] = 2;
             }
         }
-        //Resto
         else
         {
             keyboard_buffer[buff_size++] = latinasccode[scan][shift];
@@ -63,6 +62,7 @@ void keyboardHandler()
     else
     {
         control = 0;
+        shift = 0;
     }
 
     //Buffer circular
@@ -79,7 +79,7 @@ int is_buffer_empty()
 
 /* Buffer circular, cuando llega a 256 chars, vuelve al principio
 ** y sobreescribe */
-char get_buffer()
+int get_buffer()
 {
     if (is_buffer_empty())
         return 0;

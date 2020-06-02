@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "standardlib.h"
 #include <stdint.h>
-static char buffer[256] = {'0'};
+static char buffer[256] = {0};
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char * buff, int bytes); 
@@ -20,8 +20,13 @@ extern int sys_GetScreen();
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
 int strcmp(const char * s, const char * v){
+<<<<<<< HEAD
     int i = 0;
     for( ; s[i]!='\0' && v[i]!='\0' ; i++){
+=======
+    int i=0;
+    for(; s[i]!='\0' && v[i]!='\0' ; i++){
+>>>>>>> 0abf163e986ff192622ba3d022df991cc7966920
         if(s[i] > v[i]) return 1;
         else if(s[i] < v[i]) return -1;
     }
@@ -32,12 +37,16 @@ int strcmp(const char * s, const char * v){
 
 void printf(const char * fmt,...)
 {
-    char auxChar[2]={0};
+    int auxChar[2]={0};
     char * auxPointer;
     double num;
     va_list arg_param;
     va_start(arg_param,fmt);
+<<<<<<< HEAD
     int i = 0,start=0,numLenght=0;
+=======
+    int i = 0,start=0,numLenght,val,negative=0;
+>>>>>>> 0abf163e986ff192622ba3d022df991cc7966920
     char auxbuff[64];
     while (fmt[i])
     {
@@ -50,14 +59,17 @@ void printf(const char * fmt,...)
             switch (fmt[i+1])
             {
             case 'd':
-                numLenght= uintToBase(va_arg(arg_param,int),auxbuff,10);
-                syswrite(1,auxbuff,numLenght);
+                negative=0; 
+                val = va_arg(arg_param,int);
+                if(val < 0){negative = 1;val =-val;auxbuff[0]='-';}
+                numLenght= uintToBase(val,auxbuff+negative,10);
+                syswrite(1,auxbuff,numLenght+negative);
                 i+=2;
                 start = i;
                 break;
             case 'c':
                 auxChar[0] = va_arg(arg_param, int);
-                syswrite(1, auxChar, 2 * sizeof(int));
+                syswrite(1, auxChar, sizeof(int));
                 i+=2;
                 start = i;
                 break;
@@ -291,7 +303,11 @@ void processorInfo(){
 
 
 void printMemoryFromAddress(long int address){
-    printmem(address);
+    char * p =(char *) address;
+    for (int i = 0; i < 32; i++)
+    {
+        printf("%d = %d\n",p,*p++);
+    }
 }
 
 
@@ -313,6 +329,7 @@ char * intToStr(int n){
     return p;
 }*/
 
+
 int getScreen()
 {
     return sys_GetScreen();
@@ -320,12 +337,21 @@ int getScreen()
 
 char getchar()
 {
+<<<<<<< HEAD
     char buffer[1];
+=======
+   // putChar('a');
+    int buffer[1]={0};
+>>>>>>> 0abf163e986ff192622ba3d022df991cc7966920
     sysread(0,buffer,1);
+    //putChar('b');
     return buffer[0];
 }
 
 void putchar(char c)
 {
-    syswrite(1,&c,1);
+    char buff[2];
+    buff[0]=c;
+    buff[1]=0;
+    syswrite(1,buff,1);
 }

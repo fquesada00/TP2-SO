@@ -38,52 +38,19 @@ void * getStackBase()
 
 void * initializeKernelBinary()
 {
-	char buffer[10];
-	putChar('a');
-	puts("[x64BareBones]");
-	newLine();
-	puts("CPU Vendor:");
-	puts(cpuVendor(buffer));
-	newLine();
-
-	puts("[Loading modules]");
-	newLine();
 	void * moduleAddresses[] = {
 		sampleCodeModuleAddress,
 		sampleDataModuleAddress
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
-	puts("[Done]");
-	newLine();
-	newLine();
-
-	puts("[Initializing kernel's binary]");
-	newLine();
 	clearBSS(&bss, &endOfKernel - &bss);
-	puts("  text: 0x");
-	ncPrintHex((uint64_t)&text);
-	newLine();
-	puts("  rodata: 0x");
-	ncPrintHex((uint64_t)&rodata);
-	newLine();
-	puts("  data: 0x");
-	ncPrintHex((uint64_t)&data);
-	newLine();
-	puts("  bss: 0x");
-	ncPrintHex((uint64_t)&bss);
-	newLine();
-	puts("[Done]");
-	newLine();
-	newLine();
 	return getStackBase();
 }
 
 int main(){
 	load_idt();
 	init_video();
-	puts("[Kernel Main]");
-	newLine();
 	puts("Sample code module at 0x");
 	ncPrintHex((uint64_t)sampleCodeModuleAddress);
 	newLine();

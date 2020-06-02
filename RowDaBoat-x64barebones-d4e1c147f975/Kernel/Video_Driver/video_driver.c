@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "video_driver.h"
 #include "font8x8_basic.h"
-#include "../../Userland/standardlib.h"
 #define SCREENS 2
 #define WIDTH 1024
 #define SCREEN_WIDTH (WIDTH / SCREENS)
