@@ -10,27 +10,9 @@ void shell()
     while (strcmp(command,"quit") != 0)
     {
         command[0]=0;
-        //printf("\nUser:> ");
+        printf("\nUser:> ");
         i=0;
-        /*while(1){
-            scanf("%c",&c);
-            printf("Letra ingresada: %c\n",c);
-            while(le){
-                printf("\n \n \n");
-                le--;
-            }
-            le = 10;
-        }*/
-        while(1){
-            printf("\nUser:> ");
-            scanf("(%d+%d",&n,&l);
-            printf("Cuenta: (%d+%d)*%d",n,l,k);
-            /*while(le){
-                printf("\n \n \n");
-                le--;
-            }
-            le = 10;*/
-       }
+    
         
         while ((c=getchar()) != '\n')
         {
