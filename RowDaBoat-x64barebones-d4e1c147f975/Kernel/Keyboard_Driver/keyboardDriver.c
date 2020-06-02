@@ -27,7 +27,6 @@ void keyboardHandler()
         else if (scan == 0x38)
         {
             shift = 2;
-           // keyboardHandler();
         }
         //Block Mayusc
         else if (scan == 0x3A)
@@ -71,14 +70,14 @@ void keyboardHandler()
 }
 
 /* Si donde se inserto el anterior menos la pos donde recupera el 
-** ultimo char es 0, el buffer esta vacio */
+* ultimo char es 0, el buffer esta vacio */
 int is_buffer_empty()
 {
     return (buff_size - current) == 0;
 }
 
 /* Buffer circular, cuando llega a 256 chars, vuelve al principio
-** y sobreescribe */
+*  y sobreescribe */
 int get_buffer()
 {
     if (is_buffer_empty())

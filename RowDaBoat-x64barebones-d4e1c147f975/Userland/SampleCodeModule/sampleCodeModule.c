@@ -10,5 +10,6 @@ typedef struct
 
 int main()
 {
+	
 	shell();
 }
