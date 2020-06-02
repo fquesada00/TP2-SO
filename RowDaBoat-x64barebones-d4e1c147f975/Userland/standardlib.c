@@ -20,13 +20,8 @@ extern int sys_GetScreen();
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
 int strcmp(const char * s, const char * v){
-<<<<<<< HEAD
     int i = 0;
     for( ; s[i]!='\0' && v[i]!='\0' ; i++){
-=======
-    int i=0;
-    for(; s[i]!='\0' && v[i]!='\0' ; i++){
->>>>>>> 0abf163e986ff192622ba3d022df991cc7966920
         if(s[i] > v[i]) return 1;
         else if(s[i] < v[i]) return -1;
     }
@@ -42,11 +37,7 @@ void printf(const char * fmt,...)
     double num;
     va_list arg_param;
     va_start(arg_param,fmt);
-<<<<<<< HEAD
-    int i = 0,start=0,numLenght=0;
-=======
     int i = 0,start=0,numLenght,val,negative=0;
->>>>>>> 0abf163e986ff192622ba3d022df991cc7966920
     char auxbuff[64];
     while (fmt[i])
     {
@@ -101,48 +92,77 @@ void printf(const char * fmt,...)
 int scanf(const char * fmt, ...){
     va_list arg_param;
     va_start(arg_param,fmt);
-    int i = 0, start = 0, numLenght;
+    int i = 0, start = 0, numLenght,j = 0;
     char auxChar[2]={0};
     char * auxPointer;
     double num;
     char c;
     int negative, number;
+    int backspace = 0;
     while(fmt[i]){
         if(fmt[i]!='%'){
             c = getchar();
-            if(c!=fmt[i]) //ERROR
-            i++;
+            if(c=='\b') backspace = 1;
+            if(!backspace && c!=fmt[i]){
+                putchar(c);
+                printf("\nERROR: tipeo cualquier cosa\n");
+                return;
+            } //ERROR
+            if(backspace){
+                if(i>0) i--;
+            } 
         }
         else{
-            if(i!=start){
+            /*if(i!=start){
                 sysread(0, buffer + start, i - start);
-            }
+            }*/
             switch (fmt[i+1])
             {
             case 'c':
-                *((char *) va_arg(arg_param, char *)) = getchar(); 
+                c = getchar();
+                *((char*) va_arg(arg_param, char*)) = c;
                 i+=2;
                 start = i;
+                break;
             case 'd':
                 negative = 0;
                 number = 0;
                 while(((c = getchar())>='0' && c<='9') || c=='-'){
+                    putchar(c);
                     if(c=='-') negative = 1;
                     else{
                         number *= 10;
                         number += (c - '0');
                     }
                 }
+                //printf("Tu numero es %d y el siguiente char: %c",number,c);
                 if(negative) number *= -1;
-                if(fmt[i + 2] != c) //ERROR
+                if(fmt[i + 2] != c){
+                    putchar(c);
+                    printf("\nERROR: tipeo cualquier cosa\n");
+                    return;
+                } //ERROR
                 *((int *) va_arg(arg_param, int *)) = number;
-                i+=2;
+                i+=3;
                 start = i;
                 break;
             case 'f':
+                *((double *) va_arg(arg_param, double *)) = num;
                 break;
             case 's':
+                j = 0;
+                while((c=getchar()!=' ' && c!='\0' && c!='\n')){
+                    auxPointer[j++] = c;
+                }
+                auxPointer[j]='\0';
+                if(' '!=c){ //c=' '
+                    putchar(c);
+                    printf("\nERROR: Tipeo cualquier cosa\n");
+                    return;
+                }
                 *((char**) va_arg(arg_param, char**)) = auxPointer;
+                i+=3;
+                start = i;
                 break;
             default:
                 start = i++;
@@ -150,8 +170,9 @@ int scanf(const char * fmt, ...){
             }
 
         }
+        putchar(c);
     }
-    if(i!=start) sysread(0, buffer + start, i - start);
+    /*if(i!=start) sysread(0, buffer + start, i - start);*/
     return 0;
 }
 
@@ -337,14 +358,8 @@ int getScreen()
 
 char getchar()
 {
-<<<<<<< HEAD
-    char buffer[1];
-=======
-   // putChar('a');
-    int buffer[1]={0};
->>>>>>> 0abf163e986ff192622ba3d022df991cc7966920
+    char buffer[1]={0};
     sysread(0,buffer,1);
-    //putChar('b');
     return buffer[0];
 }
 
