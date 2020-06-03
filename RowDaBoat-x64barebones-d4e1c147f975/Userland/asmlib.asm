@@ -6,6 +6,7 @@ GLOBAL inforeg
 GLOBAL printmem
 GLOBAL processorModel
 GLOBAL processorName
+GLOBAL processorExtendedName
 GLOBAL sys_GetScreen
 GLOBAL processorFamily
 
@@ -186,7 +187,32 @@ numlen:
 processorName:
     push rbp
     mov rbp,rsp
+    push rax
     push rbx
+    mov rax,0
+    cpuid
+    mov [rdi],ebx
+    mov [rdi + 4],edx
+    mov [rdi + 8],ecx
+    mov byte [rdi + 13],0
+    pop rbx
+    pop rax
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;Params
+;   rdi -> char * buffer
+;Ret
+;   -
+processorExtendedName:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push rax
     mov rax,0x80000002 ;extended processor name string
     cpuid
     mov [rdi],eax
@@ -206,6 +232,7 @@ processorName:
     mov [rdi + 40],edx
     mov [rdi + 44],ecx
     mov byte [rdi + 45], 0
+    pop rax
     pop rbx
     mov rsp,rbp
     pop rbp

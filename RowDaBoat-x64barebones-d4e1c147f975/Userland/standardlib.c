@@ -12,7 +12,8 @@ extern int strlen(char *);
 extern int numlen(int);
 extern void printmem(long int);
 extern void inforeg(void);
-extern char *processorName(char *);
+extern char *processorName(char*);
+extern char *processorExtendedName(char *);
 extern int processorModel(void);
 extern int processorFamily(void);
 extern int sys_GetScreen();
@@ -494,9 +495,11 @@ int uintToBase(uint64_t value, char *buffer, uint32_t base)
 
 void processorInfo()
 {
-    char buffer[256];
+    char buffer[256] = {0};
     processorName(buffer);
     printf("Marca del procesador: %s\n", buffer);
+    processorExtendedName(buffer);
+    printf("Marca del procesador extendida: %s\n", buffer);
     printf("Familia del procesador: %d\n",processorFamily());
     printf("Modelo de procesador: %d\n",processorModel());
 }
