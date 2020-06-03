@@ -7,26 +7,25 @@ void shell()
     char c = 0;
     int n,l,k;
     int le = 10;
+    double d=0;
     char * p;
-    while (strcmp(command,"quit") != 0)
-    {
-        command[0]=0;
-        printf("\nUser:> ");
-        i=0;
-        /*while(1){
-            scanf("%c",&c);
-            printf("Letra ingresada: %c\n",c);
-            while(le){
-                printf("\n \n \n");
-                le--;
-            }
-            le = 10;
-        }*/
+    while(1){
+    printf("\nIngrese numero:");
+    scanf("%f",&d);
+    printf("\nNumero leido: %f\n",d);
+    }
+    return;
+    //while (strcmp(command,"quit") != 0)
+   // {
+   //     command[0]=0;
+   //     printf("\nUser:> ");
+   //     i=0;
+        /*
         while(1){
             printf("\nUser:> ");
             //scanf("%d",&n);
-            scanf("hola %s + %d",&p,&n);
-            printf("hola %s + %d",p,n);
+            //scanf("%f",&d);
+            printf("\nNumber read: %f",d);
             //printf("%d\n",n);
             //scanf("%d+%d*%d",&n,&l,&k);
             //printf("Cuenta: %d+%d*%d",n,l,k);
@@ -34,7 +33,7 @@ void shell()
                 printf("\n \n \n");
                 le--;
             }
-            le = 10;*/
+            le = 10;
        }
         
         while ((c=getchar()) != '\n')
@@ -55,6 +54,6 @@ void shell()
         {
             printMemoryFromAddress(0x5C00);
         }
-    }
+    }*/
     
 }
