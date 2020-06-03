@@ -7,6 +7,7 @@ GLOBAL printmem
 GLOBAL processorModel
 GLOBAL processorName
 GLOBAL sys_GetScreen
+GLOBAL processorFamily
 
 EXTERN printf
 
@@ -61,6 +62,8 @@ inforeg:
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+
+
 
 
 ; -----------------------------------------------------------------------------
@@ -222,12 +225,34 @@ processorModel:
     mov rax,1 
     cpuid
     shr rax,4 
-    and rax,0x0000000F ;first 4 bits -> processor model
+    and rax,0000000000000000000000000000000000000000000000000000000000001111b ;first 4 bits -> processor model
     pop rbx
     mov rsp,rbp
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;Params
+;   -
+;Ret
+;   rax -> int processor family
+processorFamily:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    mov rax,1 
+    cpuid
+    shr rax,8
+    and rax,0x000000000000000F
+    ;and rax,0000000000000000000000000000000000000000000000000000000000001111b
+    pop rbx
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
 
 sys_GetScreen:
     push rbp

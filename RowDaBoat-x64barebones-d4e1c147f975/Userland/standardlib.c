@@ -3,35 +3,6 @@
 #include "standardlib.h"
 #include <stdint.h>
 #define MAX_PARAM 32
-//static char buffer[256] = {0};
-
-
-
-
-
-
-                    /*while ((c = getcharacter())=='\b'){
-                        if(idx>0){
-                            putchar(c);
-                            idx--;
-                        }
-                        else{
-                            if(i>0){
-                                putchar(c);
-                                i--;
-                                reset = 1;
-                                break;
-                            }
-                        }
-                    }
-                    if(reset) break;
-                }*/
-                //if(reset) break;
-                //printformat("Tu numero es %d y el siguiente char: %c",number,c);
-
-
-
-
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char *buff, int bytes);
@@ -43,6 +14,7 @@ extern void printmem(long int);
 extern void inforeg(void);
 extern char *processorName(char *);
 extern int processorModel(void);
+extern int processorFamily(void);
 extern int sys_GetScreen();
 
 /* return 1 if s is greater than v
@@ -215,7 +187,7 @@ int scanf(const char *fmt, ...)
                 {
                     while(c=='\b'){
                         if(idx>0){
-                            idx--
+                            idx--;
                             putchar(c);
                         }
                     }
@@ -528,7 +500,8 @@ void processorInfo()
     char buffer[256];
     processorName(buffer);
     printf("Marca del procesador: %s\n", buffer);
-    printf("Modelo de procesador: %d\n", processorModel());
+    printf("Familia del procesador: %d\n",processorFamily());
+    printf("Modelo de procesador: %d\n",processorModel());
 }
 
 void printMemoryFromAddress(long int address)
@@ -577,3 +550,19 @@ void putchar(char c)
     buff[1] = 0;
     syswrite(1, buff, 1);
 }
+
+
+
+
+
+/*
+int n1,n2
+char c
+
+if((scanf(%f)==1 && scanf( %c )==1 && scanf(%f)==1) || 
+(scanf(%c)==1 && scanf( %f )==1 && scanf(%c)==1 && scanf(%f)==1) || (scanf(%c)==1))
+(2+3)
+
+(E op E)
+E=n
+*/
