@@ -174,13 +174,31 @@ _syscallHandler:
 	je .register
 	jmp .end
 .read:
+	push rdi
+	push rsi
+	push rdx
 	call syscall_read
+	pop rdx
+	pop rsi
+	pop rdx
 	jmp .end
 .write: 
+	push rdi
+	push rsi
+	push rdx
 	call syscall_write
+	pop rdx
+	pop rsi
+	pop rdx
 	jmp .end
 .screen:
+	push rdi
+	push rsi
+	push rdx
 	call syscall_screen
+	pop rdx
+	pop rsi
+	pop rdx
 	jmp .end
 .register:
 	call syscall_registers

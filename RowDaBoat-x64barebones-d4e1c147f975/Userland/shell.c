@@ -12,7 +12,7 @@ void shell()
     processorInfo();
     while(1){
     printf("\nIngrese numero:");
-    scanf("%f",&d);
+    scanf("%f ",&d);
     printf("\nNumero leido: %f\n",d);
     }
     return;
