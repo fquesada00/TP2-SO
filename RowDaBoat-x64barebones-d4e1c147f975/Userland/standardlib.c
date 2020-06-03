@@ -38,7 +38,7 @@ int strcmp(const char *s, const char *v)
 
 void printf(const char *fmt, ...)
 {
-    int auxChar[2] = {0};
+    char auxChar[2] = {0};
     char buffer[256]={0};
     char *auxPointer;
     double num;
@@ -72,7 +72,7 @@ void printf(const char *fmt, ...)
                 break;
             case 'c':
                 auxChar[0] = va_arg(arg_param, int);
-                syswrite(1, auxChar, sizeof(int));
+                syswrite(1, auxChar, 1);
                 i += 2;
                 start = i;
                 break;
@@ -231,18 +231,15 @@ int scanf(const char *fmt, ...)
                     }
                     if (c == '.')
                     {
+                        
                         if (decimal == 0)
                         {
                             decimal = 1;
-                            c=getchar();
-                            continue;
                         }
                         else
                             break;
                     }
-                    buff[0]='a';
-                    //syswrite(1,buff,1);
-                    if (!decimal)
+                    else if (!decimal)
                     {
                         n *= 10;
                         n += (c - '0');
