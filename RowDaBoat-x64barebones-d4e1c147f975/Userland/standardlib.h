@@ -12,4 +12,5 @@ char getchar();
 void putchar(char c);
 int scanf(const char *,...);
 int doubleToString(double,char*);
+int strlen(char * s);
 #endif

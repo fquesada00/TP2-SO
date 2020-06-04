@@ -126,22 +126,22 @@ sysread:
 ;   rdi -> char * string
 ;Ret
 ;   rax -> string lenght
-strlen:
-    push rbp
-    mov rbp,rsp
-    push rdi
-    mov rax,0
-.loop:
-    cmp byte [rdi],0
-    je .end ;if null, then finish
-    inc rax
-    inc rdi
-    jmp .loop
-.end:
-    pop rdi
-    mov rsp,rbp
-    pop rbp
-    ret
+;strlen:
+;    push rbp
+;    mov rbp,rsp
+;    push rdi
+;    mov rax,0
+;.loop:
+;    cmp byte [rdi],0
+;    je .end ;if null, then finish
+;    inc rax
+;    inc rdi
+;    jmp .loop
+;.end:
+;    pop rdi
+;    mov rsp,rbp
+;    pop rbp
+;    ret
 ; -----------------------------------------------------------------------------
 
 
