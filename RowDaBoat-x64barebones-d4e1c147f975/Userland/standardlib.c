@@ -15,7 +15,6 @@ extern void inforeg(void);
 extern char *processorName(char *);
 extern int processorModel(void);
 extern int sys_GetScreen();
-
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
@@ -39,12 +38,16 @@ int strcmp(const char *s, const char *v)
 void printf(const char *fmt, ...)
 {
     char auxChar[2] = {0};
-    char buffer[256]={0};
+    char buffer[256] = {0};
     char *auxPointer;
     double num;
     va_list arg_param;
     va_start(arg_param, fmt);
-    int i = 0, start = 0, numLenght, val, negative = 0;
+    putchar(va_arg(arg_param, struct estru));
+    putchar(va_arg(arg_param,long long));
+
+
+    /*    int i = 0, start = 0, numLenght, val, negative = 0;
     char auxbuff[64];
     while (fmt[i])
     {
@@ -96,7 +99,7 @@ void printf(const char *fmt, ...)
         }
     }
     if (i != start)
-        syswrite(1, fmt + start, i - start);
+        syswrite(1, fmt + start, i - start);*/
     va_end(arg_param);
 }
 
@@ -107,10 +110,10 @@ int scanf(const char *fmt, ...)
     int i = 0, start = 0, numLenght, j = 0;
     char auxChar[2] = {0};
     char *auxPointer;
-    double num,aux=0;
+    double num, aux = 0;
     double n;
     char c;
-    char buff[256]={0};
+    char buff[256] = {0};
     int decimal;
     int negative, number, idx = 0, reset = 0;
     while (fmt[i])
@@ -221,7 +224,8 @@ int scanf(const char *fmt, ...)
                     idx++;
                     if (c == '-')
                     {
-                        if (idx == 1){
+                        if (idx == 1)
+                        {
                             negative = 1;
                             c = getchar();
                             continue;
@@ -231,7 +235,7 @@ int scanf(const char *fmt, ...)
                     }
                     if (c == '.')
                     {
-                        
+
                         if (decimal == 0)
                         {
                             decimal = 1;
@@ -243,13 +247,12 @@ int scanf(const char *fmt, ...)
                     {
                         n *= 10;
                         n += (c - '0');
-                        
                     }
                     else
                     {
-                        decimal*=10;
-                        aux=(c - '0');
-                        n+=aux/(double)decimal;
+                        decimal *= 10;
+                        aux = (c - '0');
+                        n += aux / (double)decimal;
                     }
                     c = getchar();
                 }
@@ -275,7 +278,7 @@ int scanf(const char *fmt, ...)
                 break;
             case 's':
                 j = 0;
-                auxPointer=va_arg(arg_param, char *);
+                auxPointer = va_arg(arg_param, char *);
                 while ((c != ' ' && c != '\n'))
                 {
                     auxPointer[j++] = c;
@@ -372,14 +375,15 @@ void printf(const char * fmt, ...){
 */
 
 int doubleToString(double num, char *buffer)
-{   
+{
     int neg = 0;
     char *p = buffer, *p1, *p2;
     int digits = 0;
-    if(num < 0){
-        neg=1;
-        num=-num;
-        *p++ ='-';
+    if (num < 0)
+    {
+        neg = 1;
+        num = -num;
+        *p++ = '-';
         digits++;
     }
     int integer_part = num;
@@ -394,7 +398,7 @@ int doubleToString(double num, char *buffer)
         digits++;
     } while (integer_part /= 10);
     *p = '.';
-    p1 = buffer+neg;
+    p1 = buffer + neg;
     p2 = p - 1;
     while (p1 < p2)
     {

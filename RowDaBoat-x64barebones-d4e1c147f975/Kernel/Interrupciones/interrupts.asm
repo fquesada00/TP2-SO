@@ -162,6 +162,7 @@ _irq05Handler:
 ;Ret								
 ;	rax -> syscall asociated value					
 _syscallHandler:
+	pushState
 	push rbp
 	mov rbp,rsp
 	cmp rax,0 ;syscall read
@@ -206,6 +207,7 @@ _syscallHandler:
 .end:
 	mov rsp,rbp
 	pop rbp
+	popState
 	ret
 ; -----------------------------------------------------------------------------
 

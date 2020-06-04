@@ -1,5 +1,5 @@
 #include "standardlib.h"
-
+extern int syswrite(int fd, const char *buff, int bytes);
 void shell()
 {
     char command[256]={0};
@@ -10,9 +10,11 @@ void shell()
     double d=0;
     char * p;
     while(1){
-    printf("\nIngrese numero:");
-    scanf("%f ",&d);
-    printf("\nNumero leido: %f\n",d);
+    printf("\nIngrese numero:",'a');
+    //scanf("%f ",&d);
+    
+    //printf("\nNumero leido: %f\n",d);
+    break;
     }
     return;
     //while (strcmp(command,"quit") != 0)

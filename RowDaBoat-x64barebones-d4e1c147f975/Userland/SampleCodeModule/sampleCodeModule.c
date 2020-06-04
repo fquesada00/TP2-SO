@@ -1,6 +1,7 @@
 /* sampleCodeModule.c */
 #include "../standardlib.h"
 extern void shell();
+extern void calc();
 typedef void (*function)();
 typedef struct
 {
@@ -10,7 +11,7 @@ typedef struct
 
 int main()
 {
-	
 	shell();
+	//calc();
 	return 0;
 }

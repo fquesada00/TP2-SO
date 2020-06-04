@@ -47,6 +47,10 @@ void keyboardHandler()
             {
                 keyboard_buffer[buff_size++] = 2;
             }
+            else if(scan == 0x13)
+            {
+                
+            }
         }
         else
         {
