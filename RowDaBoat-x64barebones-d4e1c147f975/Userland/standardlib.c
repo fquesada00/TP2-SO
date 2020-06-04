@@ -47,7 +47,7 @@ int strlen(char * s)
 
 void printf(const char *fmt, ...)
 {
-    char auxChar[5] = {0};
+    char auxChar[1] = {0};
     char buffer[256] = {0};
     char * auxPointer;
     double num;
@@ -80,8 +80,8 @@ void printf(const char *fmt, ...)
                 start = i;
                 break;
             case 'c':
-                auxChar[0] = va_arg(arg_param, int);
-                syswrite(1, auxChar, 4);
+                auxChar[0] = (char) va_arg(arg_param, int);
+                syswrite(1, auxChar, 1);
                 i += 2;
                 start = i;
                 break;
