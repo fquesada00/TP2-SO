@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "standardlib.h"
 typedef struct charStack
 {
@@ -46,9 +47,14 @@ void calc()
     int operator_index = 0, operand_index = 0;
     int start = 0;
     double result = 0;
+    char input[64];
     while (1)
     {
         printf("\nINPUT OPERATION:\n");
+        if(scanf("%s=",&input)==1){
+            
+
+        }
         while ((c = getchar()) != '=')
         {
             putchar(c);
