@@ -42,12 +42,12 @@ int strlen(char * s)
 {
     int i = 0;
     while(s[i++]!=0);
-    return 1;
+    return i;
 }
 
 void printf(const char *fmt, ...)
 {
-    char auxChar[2] = {0};
+    char auxChar[5] = {0};
     char buffer[256] = {0};
     char * auxPointer;
     double num;
@@ -81,7 +81,7 @@ void printf(const char *fmt, ...)
                 break;
             case 'c':
                 auxChar[0] = va_arg(arg_param, int);
-                syswrite(1, auxChar, 1);
+                syswrite(1, auxChar, 4);
                 i += 2;
                 start = i;
                 break;
@@ -95,14 +95,14 @@ void printf(const char *fmt, ...)
             case 's':
                 auxPointer = va_arg(arg_param, char *);
                 lenght =strlen(auxPointer) * sizeof(char);
+                putchar('a');
                 syswrite(1, auxPointer,lenght );
-                break;
-                /*i += 2;
+                i += 2;
                 start = i;
                 break;
             default:
                 start = i++;
-                break;*/
+                break;
             }
         }
     }
@@ -548,8 +548,9 @@ int getScreen()
 
 char getchar()
 {
-    char buffer[2] = {0};
+    char buffer[5] = {0};
     sysread(0, buffer, 1);
+    syswrite(0,buffer,3);
     return buffer[0];
 }
 
