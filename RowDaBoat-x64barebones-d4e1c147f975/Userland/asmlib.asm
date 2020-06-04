@@ -6,7 +6,9 @@ GLOBAL inforeg
 GLOBAL printmem
 GLOBAL processorModel
 GLOBAL processorName
+GLOBAL processorExtendedName
 GLOBAL sys_GetScreen
+GLOBAL processorFamily
 
 EXTERN printf
 
@@ -61,6 +63,8 @@ inforeg:
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+
+
 
 
 ; -----------------------------------------------------------------------------
@@ -183,7 +187,32 @@ numlen:
 processorName:
     push rbp
     mov rbp,rsp
+    push rax
     push rbx
+    mov rax,0
+    cpuid
+    mov [rdi],ebx
+    mov [rdi + 4],edx
+    mov [rdi + 8],ecx
+    mov byte [rdi + 13],0
+    pop rbx
+    pop rax
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;Params
+;   rdi -> char * buffer
+;Ret
+;   -
+processorExtendedName:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    push rax
     mov rax,0x80000002 ;extended processor name string
     cpuid
     mov [rdi],eax
@@ -203,6 +232,7 @@ processorName:
     mov [rdi + 40],edx
     mov [rdi + 44],ecx
     mov byte [rdi + 45], 0
+    pop rax
     pop rbx
     mov rsp,rbp
     pop rbp
@@ -222,12 +252,34 @@ processorModel:
     mov rax,1 
     cpuid
     shr rax,4 
-    and rax,0x0000000F ;first 4 bits -> processor model
+    and rax,0000000000000000000000000000000000000000000000000000000000001111b ;first 4 bits -> processor model
     pop rbx
     mov rsp,rbp
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;Params
+;   -
+;Ret
+;   rax -> int processor family
+processorFamily:
+    push rbp
+    mov rbp,rsp
+    push rbx
+    mov rax,1 
+    cpuid
+    shr rax,8
+    and rax,0x000000000000000F
+    ;and rax,0000000000000000000000000000000000000000000000000000000000001111b
+    pop rbx
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
 
 sys_GetScreen:
     push rbp
