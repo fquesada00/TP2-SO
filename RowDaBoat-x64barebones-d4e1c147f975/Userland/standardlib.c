@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "standardlib.h"
 #include <stdint.h>
-//static char buffer[256] = {0};
+#define MAX_PARAM 32
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char *buff, int bytes);
@@ -13,8 +13,10 @@ int strlen(char * s);
 extern int numlen(int);
 extern void printmem(long int);
 extern void inforeg(void);
-extern char *processorName(char *);
+extern char *processorName(char*);
+extern char *processorExtendedName(char *);
 extern int processorModel(void);
+extern int processorFamily(void);
 extern int sys_GetScreen();
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
@@ -119,17 +121,38 @@ int scanf(const char *fmt, ...)
     double num, aux = 0;
     double n;
     char c;
-    char buff[256] = {0};
-    int decimal;
-    int negative, number, idx = 0, reset = 0;
-    while (fmt[i])
+    char buff[256]={0};
+    int decimal,reset=0;
+    int negative, number, idx = 0;
+    int * int_param[MAX_PARAM] = {(void *) 0};
+    char * char_param[MAX_PARAM] = {(void *) 0};
+    char * string_param[MAX_PARAM] = {(void *) 0};
+    double * double_param[MAX_PARAM] = {(void *) 0};
+    int int_param_idx = 0, char_param_idx = 0, string_param_idx = 0, double_param_idx = 0;
+    while (fmt[i])//hola k ->
     {
         if (fmt[i] != '%')
         {
             c = getchar();
             if (c == '\b')
             {
-                if (i > 0)
+                if(i>=2 && fmt[i-2]=='%'){
+                    switch (fmt[i-1])
+                    {
+                    case 'c':
+                        char_param_idx--;
+                        break;
+                    case 'd':
+                        int_param_idx--;
+                        break;
+                    default:
+                        break;
+                    }
+                    reset=1;
+                    i-=2;
+                    putchar(c);
+                }
+                else if (i > 0)
                 {
                     i--;
                     putchar(c);
@@ -154,69 +177,90 @@ int scanf(const char *fmt, ...)
                 {
                     i--;
                     putchar(c);
-                    continue;
                 }
+                continue;
             }
             switch (fmt[i + 1])
             {
             case 'c':
                 putchar(c);
-                *((char *)va_arg(arg_param, char *)) = c;
+                if(!reset) char_param[char_param_idx] = (char *) va_arg(arg_param, char *);
+                *char_param[char_param_idx++] = c;
+                reset = 0;
                 i += 2;
-                start = i;
                 break;
             case 'd':
                 negative = 0;
                 number = 0;
                 idx = 0;
-                while ((c >= '0' && c <= '9') || c == '-')
+                while ((c >= '0' && c <= '9') || c == '-' || c=='\b')
                 {
+                    while(c=='\b'){
+                        if(idx>0){
+                            idx--;
+                            putchar(c);
+                        }
+                    }
+                    if(idx>0 && c == '\b'){
+                        putchar(c);
+                        idx--;
+                        if(negative && idx==1){
+                            negative = 0;
+                        }
+                        else{
+                            number/=10;
+                        }
+                        c = getchar();
+                        continue;
+                    }
+                    else if(c=='\b'){
+                        reset = 1;
+                        i--;
+                        break;
+                    }
                     putchar(c);
                     idx++;
-                    if (c == '-' && idx == 1)
+                    if (c == '-' && idx == 1){
                         negative = 1;
+                        continue;
+                    }
+                    else if(c == '-'){
+                        printf("\nERROR: tipeo cualquier cosa\n");
+                        return;
+                    }
                     else
                     {
                         number *= 10;
                         number += (c - '0');
                     }
                     c = getchar();
-                    /*while ((c = getcharacter())=='\b'){
-                        if(idx>0){
-                            putchar(c);
-                            idx--;
-                        }
-                        else{
-                            if(i>0){
-                                putchar(c);
-                                i--;
-                                reset = 1;
-                                break;
-                            }
-                        }
-                    }
-                    if(reset) break;*/
                 }
-                //if(reset) break;
-                //printformat("Tu numero es %d y el siguiente char: %c",number,c);
+                if(reset && idx==0) break;
                 if (negative)
                     number *= -1;
+                
+                if(!reset){
+                    
+                    int_param[int_param_idx] = (int *) va_arg(arg_param, int *); 
+                } 
+                reset = 0;
                 if (fmt[i + 2] == 0)
                 {
-                    *((int *)va_arg(arg_param, int *)) = number;
+                    *int_param[int_param_idx++] = number;
                     return;
                 }
                 if (fmt[i + 2] != c)
                 {
                     putchar(c);
                     printf("\nERROR: tipeo cualquier cosa\n");
-                    *((int *)va_arg(arg_param, int *)) = number;
+                    *int_param[int_param_idx++] = number;
                     return;
                 } //ERROR
-                *((int *)va_arg(arg_param, int *)) = number;
+                *int_param[int_param_idx++] = number;
                 putchar(c);
                 i += 3;
                 start = i;
+                printf("reset");
                 break;
             case 'f':
                 negative = 0;
@@ -461,10 +505,13 @@ int uintToBase(uint64_t value, char *buffer, uint32_t base)
 
 void processorInfo()
 {
-    char buffer[256];
+    char buffer[256] = {0};
     processorName(buffer);
     printf("Marca del procesador: %s\n", buffer);
-    printf("Modelo de procesador: %d\n", processorModel());
+    processorExtendedName(buffer);
+    printf("Marca del procesador extendida: %s\n", buffer);
+    printf("Familia del procesador: %d\n",processorFamily());
+    printf("Modelo de procesador: %d\n",processorModel());
 }
 
 void printMemoryFromAddress(long int address)
@@ -513,3 +560,19 @@ void putchar(char c)
     buff[1] = 0;
     syswrite(1, buff, 1);
 }
+
+
+
+
+
+/*
+int n1,n2
+char c
+
+if((scanf(%f)==1 && scanf( %c )==1 && scanf(%f)==1) || 
+(scanf(%c)==1 && scanf( %f )==1 && scanf(%c)==1 && scanf(%f)==1) || (scanf(%c)==1))
+(2+3)
+
+(E op E)
+E=n
+*/

@@ -9,6 +9,7 @@ void shell()
     int le = 10;
     double d=0;
     char * p;
+    processorInfo();
     while(1){
     printf("\nIngrese numero:");
     scanf("%f",&d);
