@@ -10,10 +10,10 @@ void shell()
     double d=0;
     char * p;
     while(1){
-    printf("\nIngrese numero:",'a');
-    //scanf("%f ",&d);
+    printf("\nIngrese numero:");
+    scanf("%f",&d);
     
-    //printf("\nNumero leido: %f\n",d);
+    printf("\nNumero leido: %f\n",d);
     break;
     }
     return;

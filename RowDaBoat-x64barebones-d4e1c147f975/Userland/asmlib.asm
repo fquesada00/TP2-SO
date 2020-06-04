@@ -1,6 +1,6 @@
 GLOBAL syswrite
 GLOBAL sysread
-GLOBAL strlen
+;GLOBAL strlen
 GLOBAL numlen
 GLOBAL inforeg
 GLOBAL printmem

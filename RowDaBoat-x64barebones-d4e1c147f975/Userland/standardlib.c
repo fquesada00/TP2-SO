@@ -8,7 +8,8 @@
 extern int syswrite(int fd, const char *buff, int bytes);
 // asumimos fd=0 STDIN
 extern int sysread(int fd, char *buff, int bytes);
-extern int strlen(char *);
+//extern int strlen(char *);
+int strlen(char * s);
 extern int numlen(int);
 extern void printmem(long int);
 extern void inforeg(void);
@@ -35,19 +36,22 @@ int strcmp(const char *s, const char *v)
     return 0;
 }
 
+int strlen(char * s)
+{
+    int i = 0;
+    while(s[i++]!=0);
+    return 1;
+}
+
 void printf(const char *fmt, ...)
 {
     char auxChar[2] = {0};
     char buffer[256] = {0};
-    char *auxPointer;
+    char * auxPointer;
     double num;
     va_list arg_param;
     va_start(arg_param, fmt);
-    putchar(va_arg(arg_param, struct estru));
-    putchar(va_arg(arg_param,long long));
-
-
-    /*    int i = 0, start = 0, numLenght, val, negative = 0;
+    int i = 0, start = 0, numLenght,lenght = 0, val, negative = 0;
     char auxbuff[64];
     while (fmt[i])
     {
@@ -88,18 +92,20 @@ void printf(const char *fmt, ...)
                 break;
             case 's':
                 auxPointer = va_arg(arg_param, char *);
-                syswrite(1, auxPointer, strlen(auxPointer) * sizeof(char));
-                i += 2;
+                lenght =strlen(auxPointer) * sizeof(char);
+                syswrite(1, auxPointer,lenght );
+                break;
+                /*i += 2;
                 start = i;
                 break;
             default:
                 start = i++;
-                break;
+                break;*/
             }
         }
     }
     if (i != start)
-        syswrite(1, fmt + start, i - start);*/
+        syswrite(1, fmt + start, i - start);
     va_end(arg_param);
 }
 

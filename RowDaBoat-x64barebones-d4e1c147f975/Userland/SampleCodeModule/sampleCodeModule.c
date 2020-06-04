@@ -11,7 +11,7 @@ typedef struct
 
 int main()
 {
-	shell();
-	//calc();
+	//shell();
+	calc();
 	return 0;
 }

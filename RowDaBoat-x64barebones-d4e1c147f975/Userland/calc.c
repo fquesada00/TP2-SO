@@ -40,6 +40,7 @@ void calc()
         printf("\nINPUT OPERATION:\n");
         while ((c = getchar()) != '=')
         {
+            putchar(c);
             if ((c >= '0' && c <= '9') || c == '.' || (c == '-' && !last_operand))
             {
                 start = 1;
