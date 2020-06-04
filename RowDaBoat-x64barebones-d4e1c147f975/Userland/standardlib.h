@@ -8,7 +8,7 @@ void processorInfo(void);
 void printMemoryFromAddress(long int);
 void printRegisters(void);
 int getScreen();
-char getchar();
+int getchar();
 void putchar(char c);
 int scanf(const char *,...);
 int doubleToString(double,char*);

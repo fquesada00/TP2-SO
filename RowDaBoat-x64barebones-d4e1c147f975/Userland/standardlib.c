@@ -92,7 +92,6 @@ void printf(const char *fmt, ...)
             case 's':
                 auxPointer = va_arg(arg_param, char *);
                 lenght =strlen(auxPointer) * sizeof(char);
-                putchar('a');
                 syswrite(1, auxPointer,lenght );
                 i += 2;
                 start = i;
@@ -543,12 +542,12 @@ int getScreen()
     return sys_GetScreen();
 }
 
-char getchar()
+int getchar()
 {
     char buffer[5] = {0};
     sysread(0, buffer, 1);
-    syswrite(0,buffer,3);
-    return buffer[0];
+    char c = buffer[0];
+    return (int) c;
 }
 
 void putchar(char c)
