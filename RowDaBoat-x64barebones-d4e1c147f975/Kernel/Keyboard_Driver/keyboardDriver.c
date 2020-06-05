@@ -1,5 +1,7 @@
 #include "keyboardDriver.h"
 extern char getKeyboardScanCode();
+extern void save_regs();
+
 static char keyboard_buffer[256];
 static int buff_size = 0;
 static int current = 0;
@@ -12,9 +14,10 @@ static const char latinasccode[0x56][3] =
 
 void keyboardHandler()
 {
-    signed long scan = getKeyboardScanCode();
+    signed char scan = getKeyboardScanCode();
     static int shift = 0;
     static int control = 0;
+    char buffer[256];
     //Los codigos de los scan code de apretar una tecla van de 0 a 0x56
     if (scan >= 0 && scan <= 0x56)
     {
@@ -49,7 +52,7 @@ void keyboardHandler()
             }
             else if(scan == 0x13)
             {
-                
+                save_regs();
             }
         }
         else
@@ -58,14 +61,13 @@ void keyboardHandler()
         }
     }
     //Release code shift
-    else if (scan == 0xAA)
+    else if (scan == 0xFFFFFFFFFFFFFFAA || scan == 0xFFFFFFFFFFFFFFB6)
     {
         shift = 0;
     }
     else
     {
         control = 0;
-        shift = 0;
     }
 
     //Buffer circular

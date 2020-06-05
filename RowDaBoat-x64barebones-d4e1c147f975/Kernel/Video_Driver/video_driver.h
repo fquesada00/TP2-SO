@@ -13,4 +13,6 @@ void scrollUp();
 void init_video();
 void changeScreen(int num);
 void putsN(char * buffer, int n);
+void putsColor(char *string, char r, char g, char b);
+void putCharColor(char c, char r, char g, char b);
 #endif

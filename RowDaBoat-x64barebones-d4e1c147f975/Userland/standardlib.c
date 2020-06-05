@@ -9,12 +9,13 @@ extern int syswrite(int fd, const char *buff, int bytes);
 extern int sysread(int fd, char *buff, int bytes);
 extern int numlen(int);
 extern void printmem(long int);
-extern void inforeg(void);
+extern void inforeg(uint64_t * regs);
 extern char *processorName(char*);
 extern char *processorExtendedName(char *);
 extern int processorModel(void);
 extern int processorFamily(void);
 extern int sys_GetScreen();
+extern int divExc();
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
@@ -518,12 +519,6 @@ void printMemoryFromAddress(long int address)
         printf("%d = %d\n", p, *p++);
     }
 }
-
-void printRegisters()
-{
-    inforeg();
-}
-
 /*
 char * intToStr(int n){
     int lenght = numlen(n);
@@ -558,6 +553,24 @@ void putchar(char c)
     syswrite(1, buff, 1);
 }
 
+void printReg()
+{
+    int64_t buffer[16];
+    inforeg(buffer);
+    char string[128]={0};
+    for (int i = 0; i < 15; i++)
+    {
+        uintToBase(buffer[i],string,16);
+        printf(string);
+        putchar('\n');
+    }
+    
+}
+
+void DivZero()
+{
+    divExc();
+}
 
 
 

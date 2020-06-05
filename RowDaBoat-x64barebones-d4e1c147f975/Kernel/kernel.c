@@ -66,7 +66,7 @@ int main(){
 	//puts((char*)sampleDataModuleAddress);
 	newLine();
 	puts("[Finished]");
-
+	return 0;
 	
 	
 }

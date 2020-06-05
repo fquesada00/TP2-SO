@@ -2,6 +2,7 @@
 extern int syswrite(int fd, const char *buff, int bytes);
 void shell()
 {
+    printf("\nArranco la shell\n");
     char command[256]={0};
     int i = 0;
     char c = 0;
@@ -56,6 +57,14 @@ void shell()
         else if(strcmp(command,"printmem") == 0)
         {
             printMemoryFromAddress(0x5C00);
+        }
+        else if(strcmp(command,"inforeg")==0)
+        {
+            printReg();
+        }
+        else if(strcmp(command,"divZero")==0)
+        {
+            DivZero();
         }
     }
     

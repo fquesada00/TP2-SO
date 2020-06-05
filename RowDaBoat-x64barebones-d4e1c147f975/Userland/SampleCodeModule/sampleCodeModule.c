@@ -3,31 +3,32 @@
 extern void shell();
 extern void calc();
 typedef void (*function)();
-typedef struct
+typedef struct ProgramType
 {
 	function programa;
 	int screen;
 } ProgramType;
-
+static int current_screen;
 int main()
 {
-	int d;
-	double f;
-	char s[64] = "Hola";
-	int c;
-	d = 15;
-	f = 125.369;
-	/*while (1)
+	printf("Start");
+	ProgramType shellP;
+	ProgramType calculatorP;
+	shellP.programa=(function)shell;
+	calculatorP.programa=(function)calc;
+	printf("Before getscrenn");
+	calculatorP.screen=getScreen();
+	shellP.screen=getScreen();
+	printf("before while");
+	printf("Program cal screen: %d\nProgram shellscreen: %d\n ",calculatorP.screen,shellP.screen);
+	while (1)	
 	{
-
-		c = getchar();
-		printf("\nEsto es un string sin vars\n");
-		printf("tiene un int %d\n", d);
-		printf("string %s\n", s);
-		printf("double %f\n", f);
-		printf("char %c\n", c);
-	}*/
-	//shell();
-	calc();
+		if(current_screen == calculatorP.screen)
+			calculatorP.programa();
+		else if(current_screen == shellP.screen)
+			shellP.programa();
+	}
+	
+	
 	return 0;
 }
