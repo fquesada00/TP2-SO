@@ -1,6 +1,6 @@
 GLOBAL syswrite
 GLOBAL sysread
-;GLOBAL strlen
+GLOBAL processorTemperature
 GLOBAL numlen
 GLOBAL inforeg
 GLOBAL printmem
@@ -9,6 +9,7 @@ GLOBAL processorName
 GLOBAL processorExtendedName
 GLOBAL sys_GetScreen
 GLOBAL processorFamily
+GLOBAL getRtc
 
 EXTERN printf
 
@@ -281,6 +282,7 @@ processorFamily:
 ; -----------------------------------------------------------------------------
 
 
+; -----------------------------------------------------------------------------
 sys_GetScreen:
     push rbp
     mov rbp,rsp
@@ -289,8 +291,46 @@ sys_GetScreen:
     mov rsp,rbp
     pop rbp
     ret
+; -----------------------------------------------------------------------------
 
 
-SECTION .bss
-    processorBufferName resw 20
-    processorBufferModel resw 20
+; -----------------------------------------------------------------------------
+processorCriticalTemperature:
+    push rbp
+    mov rbp,rsp
+    ;rdmsr -a IA32_THERM_STATUS
+
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;Params
+;   rdi -> int
+;Ret
+;   rax -> tiempo
+getRtc:
+    push rbp
+    mov rbp, rsp
+    push rbx
+    push rcx
+    push rdx
+    mov ax, di ;generico el pedido
+    out 70h, al
+    in al, 71h ;devuelve el numero en binario codeado
+    mov rcx,rax
+    and rcx,15 ;me quedo con la parte menos significativa
+    shr rax,4 ;me quedo con la parte mas significativa
+    mov rdx,rax
+    mov rax,10
+    mul rdx
+    add rax,rcx
+    pop rdx
+    pop rcx
+    pop rbx
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------

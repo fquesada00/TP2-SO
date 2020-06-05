@@ -17,6 +17,7 @@ int main()
 	int c;
 	d = 15;
 	f = 125.369;
+	printRtc();
 	/*while(1){
 		int val = scanf("%s",s);
 		printf("\nvalue: %d, string %s",val,s);
@@ -83,6 +84,6 @@ int main()
 		printf("char %c\n", c);
 	}*/
 	//shell();
-	calc();
+	//calc();
 	return 0;
 }

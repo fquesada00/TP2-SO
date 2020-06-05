@@ -15,9 +15,9 @@ extern char *processorExtendedName(char *);
 extern int processorModel(void);
 extern int processorFamily(void);
 extern int sys_GetScreen();
-/* return 1 if s is greater than v
-** 0 if s is equal to v
-** -1 if s is lower than v */
+extern void processorTemperature();
+extern int getRtc(int);
+
 
 void puts(char * c){
     int i = 0;
@@ -37,6 +37,10 @@ void vaArg(int n, ...){
         puts(va_arg(params, char *));
     }
 }
+
+/* return 1 if s is greater than v
+** 0 if s is equal to v
+** -1 if s is lower than v */
 int strcmp(const char *s, const char *v)
 {
     int i = 0;
@@ -813,6 +817,13 @@ void putchar(char c)
     syswrite(1, buff, 1);
 }
 
+void temperature(){
+
+}
+
+void printRtc(){
+    printf("%d:%d:%d\n",getRtc(4)-3, getRtc(2), getRtc(0));
+}
 /*
 int n1,n2
 char c

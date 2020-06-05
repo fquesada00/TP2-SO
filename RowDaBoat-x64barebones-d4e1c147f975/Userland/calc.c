@@ -1,5 +1,6 @@
-
+#include <float.h>
 #include "standardlib.h"
+
 
 typedef struct charStack
 {
@@ -26,7 +27,6 @@ int sizeChar(charStack *stack);
 int is_emptyChar(charStack *stack);
 void pushChar(charStack *s, char e);
 char popChar(charStack *s);
-double peekDouble(doubleStack *stack);
 int sizeDouble(doubleStack *stack);
 int is_emptyDouble(doubleStack *stack);
 void pushDouble(doubleStack *s, double e);
@@ -34,6 +34,7 @@ double popDouble(doubleStack *s);
 int getPrecedence(char prev, char current);
 int getIndex(char op);
 double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error);
+void man();
 
 void calc()
 {
@@ -143,7 +144,7 @@ void calc()
             }
             while (!error && !is_emptyChar(&s))
             {
-                if (peekChar(&s) != '(')
+                if (peekChar(&s) != '(' && peekChar(&s) != 'e')
                 {
                     posfix[operator_index++] = popChar(&s);
                 }
@@ -171,7 +172,7 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error)
     d.size = 0;
     int i = 0;
     int j = 0;
-    double left, right, result;
+    double left, right;
     *error = 0;
     while (i < op_dim )
     {
@@ -220,7 +221,9 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error)
             }
         }
     }
-    return popDouble(&d);
+    double result = popDouble(&d);
+    if(result == DBL_MAX_EXP) *error = 2;
+    return result;
 }
 int getPrecedence(char prev, char current)
 {
@@ -257,12 +260,6 @@ char peekChar(charStack *s)
         return 'e';
     return s->stack[s->size - 1];
 }
-double peekDouble(doubleStack *s)
-{
-    if (is_emptyDouble(s))
-        return;
-    return s->stack[s->size - 1];
-}
 int is_emptyChar(charStack *s)
 {
     return s->size == 0;
@@ -281,7 +278,7 @@ char popChar(charStack *s)
 double popDouble(doubleStack *s)
 {
     if (is_emptyDouble(s))
-        return;
+        return DBL_MAX_EXP;
     (s->size)--;
     return s->stack[s->size];
 }
@@ -295,11 +292,13 @@ void pushDouble(doubleStack *s, double e)
 }
 
 void man(){
-    printf("\n\n\tCalculadora que realiza suma, resta, producto y cociente.\n\n");
-    printf("\tToda cuenta debe estar encerrada entre parentesis, en base a \n\tla asociatividad que desee el usuario.\n");
-    printf("\tPara realizar una cuenta, escribirla de manera correcta, \n\tescribir un \"=\" al final y presionar la tecla enter.\n");
-    printf("\tPara borrar el ultimo caracter introducido, presionar la \n\ttecla backspace.\n");
-    printf("\tPara borrar toda la linea, presionar la tecla enter.\n");
+    printf("\n\n\tCALCULADORA QUE REALIZA SUMA, RESTA, PRODUCTO Y COCIENTE.\n\n");
+    printf("\tTODA CUENTA DEBE ESTAR ENCERRADA ENTRE PARENTESIS, EN BASE A \n\tLA ASOCIATIVIDAD QUE DESEE EL USUARIO.\n");
+    printf("\tPARA REALIZAR UNA CUENTA, ESCRIBIRLA DE MANERA CORRECTA, \n\tESCRIBIR UN \"=\" AL FINAL Y PRESIONAR LA TECLA ENTER.\n");
+    printf("\tPARA BORRAR EL ULTIMO CARACTER INTRODUCIDO, PRESIONAR LA \n\tTECLA BACKSPACE.\n");
+    printf("\tPARA BORRAR TODA LA LINEA, PRESIONAR LA TECLA ENTER.\n");
+    printf("\tPARA LOS SIMBOLOS *,/,( Y ), PRESIONARLOS MANTENIENDO \n\tPRESIONADA LA TECLA SHIFT.\n");
+    printf("\tPARA LOS SIMBOLOS + Y -, PRESIONAR LAS TECLAS DE LA \n\tPARTE IZQUIERDA DEL TECLADO, AL IGUAL QUE EN EL \n\tITEM ANTERIOR.\n");
     printf("\n\t\t EJEMPLOS DE USO\n\n");
     printf("\t((3+2)*4)=\n");
     printf("\t > 20\n");
