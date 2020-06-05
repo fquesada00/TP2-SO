@@ -43,25 +43,87 @@ int strlen(char *s)
     return i;
 }
 
+int printf(const char * fmt, ...){
+    va_list arg_param;
+    va_start(arg_param, fmt);
+    int idxFmt = 0, idxBuffer = 0;
+    char buffer[256] = {0};
+    char * sAtFmt;
+    int nAtFmt, nAtFmtLenght, sAtFmtLenght, idxsAtFmt, fAtFmtLenght;
+    double fAtFmt;
+    while(fmt[idxFmt]){
+        if(fmt[idxFmt] != '%'){
+            buffer[idxBuffer++] = fmt[idxFmt++];
+        }
+        else{
+            switch (fmt[idxFmt + 1])
+            {
+            case 'c':
+                buffer[idxBuffer++] = (char) va_arg(arg_param, int);
+                idxFmt += 2;
+                break;
+            case 'd':
+                nAtFmt = va_arg(arg_param, int);
+                if(nAtFmt < 0){
+                    nAtFmt *= -1;
+                    buffer[idxBuffer++] = '-';
+                }
+                nAtFmtLenght = uintToBase(nAtFmt, buffer + idxBuffer, 10);
+                idxFmt += 2;
+                idxBuffer += nAtFmtLenght;
+                break;
+            case 's':
+                sAtFmt = va_arg(arg_param, char *);
+                sAtFmtLenght = strlen(sAtFmt);
+                idxsAtFmt = 0;
+                while(sAtFmt[idxsAtFmt]){
+                    buffer[idxBuffer++] = sAtFmt[idxsAtFmt++];
+                }                
+                idxFmt += 2;
+                break;
+            case 'f':
+                fAtFmt = va_arg(arg_param, double);
+                fAtFmtLenght = doubleToString(fAtFmt, buffer + idxBuffer);
+                idxBuffer += fAtFmtLenght;
+                idxFmt += 2;
+                break;
+            default:
+                buffer[idxBuffer++] = fmt[idxFmt++];
+                break;
+            }
+        }
+    }
+    if(idxBuffer > 0){
+        syswrite(1, buffer, idxBuffer + 1);
+    }
+    va_end(arg_param);
+    return idxBuffer;
+}
+
+/*
 void printf(const char *fmt, ...)
 {
     char auxChar[1] = {0};
+    char floatBuffer[32] = {0};
     char buffer[256] = {0};
     char *auxPointer;
     double num;
     va_list arg_param;
     va_start(arg_param, fmt);
-    int i = 0, start = 0, numLenght, lenght = 0, val, negative = 0;
+    int idxFmt = 0, start = 0, numLenght, lenght = 0, val, negative = 0, idxBuffer = 0;
     char auxbuff[64];
-    while (fmt[i])
+    while (fmt[idxFmt])
     {
-        if (fmt[i] != '%')
-            i++;
+        idxBuffer = 0;
+        if (fmt[idxFmt] != '%')
+        {
+            buffer[idxBuffer++] = fmt[idxFmt++];
+        }
         else
         {
-            if (i != start)
-                syswrite(1, fmt + start, i - start);
-            switch (fmt[i + 1])
+            if (idxBuffer != 0)
+                syswrite(1, buffer, idxBuffer);
+            switch (fmt[idxFmt + 1])
             {
             case 'd':
                 negative = 0;
@@ -74,39 +136,40 @@ void printf(const char *fmt, ...)
                 }
                 numLenght = uintToBase(val, auxbuff + negative, 10);
                 syswrite(1, auxbuff, numLenght + negative);
-                i += 2;
-                start = i;
+                idxFmt += 2;
+                start = idxFmt;
                 break;
             case 'c':
-                auxChar[0] = (char)va_arg(arg_param, int);
+                auxChar[0] = (char) va_arg(arg_param, int);
                 syswrite(1, auxChar, 1);
-                i += 2;
-                start = i;
+                idxFmt += 2;
+                start = idxFmt;
                 break;
             case 'f':
                 num = va_arg(arg_param, double);
-                numLenght = doubleToString(num, buffer);
-                syswrite(1, buffer, numLenght * sizeof(char));
-                i += 2;
-                start = i;
+                numLenght = doubleToString(num, floatBuffer);
+                syswrite(1, floatBuffer, numLenght * sizeof(char));
+                idxFmt += 2;
+                start = idxFmt;
                 break;
             case 's':
                 auxPointer = va_arg(arg_param, char *);
                 lenght = strlen(auxPointer) * sizeof(char);
                 syswrite(1, auxPointer, lenght);
-                i += 2;
-                start = i;
+                idxFmt += 2;
+                start = idxFmt;
                 break;
             default:
-                start = i++;
+                start = idxFmt++;
                 break;
             }
         }
     }
-    if (i != start)
-        syswrite(1, fmt + start, i - start);
+    if (idxFmt != start)
+        syswrite(1, fmt + start, idxFmt - start);
     va_end(arg_param);
 }
+*/
 
 int scanf(const char *fmt, ...)
 {
@@ -121,8 +184,7 @@ int scanf(const char *fmt, ...)
     {
         if (c != '\b')
         {
-            buffer[idxBuffer] = (char)c;
-            idxBuffer++;
+            buffer[idxBuffer++] = (char) c;
             putchar(c);
         }
         else if (idxBuffer > 0)
@@ -135,8 +197,11 @@ int scanf(const char *fmt, ...)
     if (idxBuffer == 0)
         return argsRead;
     idxBuffer = 0;
+    //printf("\nSALI\n");
     while (fmt[idxFmt])
     {
+        //printf("\nidxBuffer:%d\n",idxBuffer);
+        printf("\nNO ME ROMPI 0 \n");
         if (fmt[idxFmt] != '%')
         {
             if (buffer[idxBuffer] != fmt[idxFmt])
@@ -147,6 +212,7 @@ int scanf(const char *fmt, ...)
             }
             idxFmt++;
             idxBuffer++;
+            printf("\nNO ME ROMPI\n");
         }
         else
         {
@@ -194,20 +260,29 @@ int scanf(const char *fmt, ...)
                 break;
             case 's':
                 auxPointer = va_arg(arg_param, char *);
+                idxAuxPointer = 0;
+                //printf("\nidxBuffer 0:%d\n",idxBuffer);
                 char cAtBuffer = buffer[idxBuffer++];
+                //printf("\nidxBuffer 1:%d\n",idxBuffer);
                 while (cAtBuffer != ' ')
                 {
+                    //printf("\ningreso: %c, idxFmt: %d, idxBuffer: %d\n",cAtBuffer,idxFmt,idxBuffer);
                     if(cAtBuffer == 0 && fmt[idxFmt + 2] == 0){
                         auxPointer[idxAuxPointer] = cAtBuffer;
                         return argsRead + 1;
                     } 
+                    if(cAtBuffer == fmt[idxFmt + 2]){ //(1+1)= %s= 
+                        //printf("\nentre\n");
+                        break;
+                    }
                     auxPointer[idxAuxPointer++] = cAtBuffer;
                     cAtBuffer = buffer[idxBuffer++];
                 }
                 auxPointer[idxAuxPointer] = '\0';
+                //printf("\nAUX POINTER: %s\n", auxPointer);
                 idxFmt += 2;
-                idxBuffer--;
                 argsRead++;
+                idxBuffer--;
                 break;
             case 'f':
                 negative = 0;
@@ -265,6 +340,7 @@ int scanf(const char *fmt, ...)
             }
         }
     }
+    //printf("\nBUFFER: %s\n",buffer);
     if(buffer[idxBuffer] != '\0'){
         printf("\nERROR: Caracteres de mas\n");
         return -1;

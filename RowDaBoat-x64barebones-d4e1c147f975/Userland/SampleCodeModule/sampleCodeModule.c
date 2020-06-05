@@ -13,11 +13,21 @@ int main()
 {
 	int d;
 	double f;
-	char s[64] = {0};
+	char s[256] = {0};
 	int c;
 	d = 15;
 	f = 125.369;
+	printf("\nes un numero: %d, letra: %c, string: %s, float: %f\n",123, 'k', "hola mundo", 123.456);
+	
 	while ((1))
+	{
+		printf("\nIngrese la cuenta:");
+		scanf("%s=",s);
+		printf("\nRESULTADO: %s\n",s);
+		putchar('\n');
+	}
+	
+	/*while ((1))
 	{	
 		printf("\nUser $ >");
 		int val = scanf("f: %f", &f);
@@ -45,7 +55,7 @@ int main()
 	printf("\n\n\n\n\n\n\n\n\n\n");
 	printf("\n\n\n\n\n\n\n\n\n\n");
 	printf("\n\n\n\n\n\n\n\n\n\n");
-	/*while (1)
+	while (1)
 	{
 
 		c = getchar();
