@@ -1,6 +1,7 @@
 #ifndef _STANDARD_LIB__H__
 #define _STANDARD_LIB__H__
 #include <stdint.h>
+void vaArg(int n, ...);
 int strcmp(const char*, const char*);
 int printf(const char*,...);
 int uintToBase(uint64_t,char*,uint32_t);

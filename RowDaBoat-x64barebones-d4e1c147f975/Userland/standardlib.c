@@ -18,10 +18,29 @@ extern int sys_GetScreen();
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
+
+void puts(char * c){
+    int i = 0;
+    while(c[i]){
+        putchar(c[i++]);
+    }
+    putchar('\n');
+}
+
+void vaArg(int n, ...){
+    va_list params;
+    va_start(params, n);
+    char buff[64];
+    char * aux;
+    int p;
+    for(int i = 0 ; i < n ; i++){
+        puts(va_arg(params, char *));
+    }
+}
 int strcmp(const char *s, const char *v)
 {
     int i = 0;
-    for (; s[i] != '\0' && v[i] != '\0'; i++)
+    for ( ; s[i] != '\0' && v[i] != '\0'; i++)
     {
         if (s[i] > v[i])
             return 1;
@@ -38,8 +57,9 @@ int strcmp(const char *s, const char *v)
 int strlen(char *s)
 {
     int i = 0;
-    while (s[i++] != 0)
-        ;
+    while (s[i] != 0){
+        i++;
+    }
     return i;
 }
 
@@ -94,7 +114,7 @@ int printf(const char * fmt, ...){
         }
     }
     if(idxBuffer > 0){
-        syswrite(1, buffer, idxBuffer + 1);
+        syswrite(1, buffer, idxBuffer);
     }
     va_end(arg_param);
     return idxBuffer;
@@ -180,6 +200,7 @@ int scanf(const char *fmt, ...)
     int negative, number, idxNumber, idxFloat, decimal;
     double floatNumber;
     char * auxPointer;
+    double * doublePointer;
     while ((c = getchar()) != '\n')
     {
         if (c != '\b')
@@ -193,26 +214,22 @@ int scanf(const char *fmt, ...)
             putchar(c);
         }
     }
-    buffer[idxBuffer] = (void *) 0;
+    buffer[idxBuffer] = 0;
     if (idxBuffer == 0)
         return argsRead;
     idxBuffer = 0;
-    //printf("\nSALI\n");
     while (fmt[idxFmt])
     {
-        //printf("\nidxBuffer:%d\n",idxBuffer);
-        printf("\nNO ME ROMPI 0 \n");
         if (fmt[idxFmt] != '%')
         {
             if (buffer[idxBuffer] != fmt[idxFmt])
             {
                 printf("\nERROR: tipeo cualquier cosa y te muestro:");
-                printf("\nidxFmtError: %d\n", idxFmt);
+                printf("\nidxFmtError: %d y %d\n", idxFmt, idxBuffer);
                 return -1;
             }
             idxFmt++;
             idxBuffer++;
-            printf("\nNO ME ROMPI\n");
         }
         else
         {
@@ -261,25 +278,20 @@ int scanf(const char *fmt, ...)
             case 's':
                 auxPointer = va_arg(arg_param, char *);
                 idxAuxPointer = 0;
-                //printf("\nidxBuffer 0:%d\n",idxBuffer);
                 char cAtBuffer = buffer[idxBuffer++];
-                //printf("\nidxBuffer 1:%d\n",idxBuffer);
-                while (cAtBuffer != ' ')
+                while (cAtBuffer != ' ') //(1+1)espacio
                 {
-                    //printf("\ningreso: %c, idxFmt: %d, idxBuffer: %d\n",cAtBuffer,idxFmt,idxBuffer);
                     if(cAtBuffer == 0 && fmt[idxFmt + 2] == 0){
                         auxPointer[idxAuxPointer] = cAtBuffer;
                         return argsRead + 1;
                     } 
-                    if(cAtBuffer == fmt[idxFmt + 2]){ //(1+1)= %s= 
-                        //printf("\nentre\n");
+                    if(cAtBuffer == fmt[idxFmt + 2]){ 
                         break;
                     }
                     auxPointer[idxAuxPointer++] = cAtBuffer;
                     cAtBuffer = buffer[idxBuffer++];
                 }
                 auxPointer[idxAuxPointer] = '\0';
-                //printf("\nAUX POINTER: %s\n", auxPointer);
                 idxFmt += 2;
                 argsRead++;
                 idxBuffer--;
@@ -321,7 +333,8 @@ int scanf(const char *fmt, ...)
                     fAtBuffer = buffer[idxBuffer++];
                 }
                 if(negative) floatNumber *= -1;
-                *((double *) va_arg(arg_param, double *)) = floatNumber;
+                doublePointer = va_arg(arg_param, double *);
+                *doublePointer = floatNumber;
                 argsRead++;
                 if(buffer[idxBuffer] == 0 && fmt[idxFmt + 2] == 0) return argsRead;
                 idxFmt += 2;
@@ -340,11 +353,10 @@ int scanf(const char *fmt, ...)
             }
         }
     }
-    //printf("\nBUFFER: %s\n",buffer);
-    if(buffer[idxBuffer] != '\0'){
-        printf("\nERROR: Caracteres de mas\n");
+    /*if(buffer[idxBuffer] != '\0'){
+        //printf("\nERROR: Caracteres de mas\n");
         return -1;
-    }
+    }*/
     return argsRead;
 }
 

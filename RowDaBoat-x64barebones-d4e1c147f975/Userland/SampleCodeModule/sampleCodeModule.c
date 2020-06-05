@@ -17,16 +17,33 @@ int main()
 	int c;
 	d = 15;
 	f = 125.369;
-	printf("\nes un numero: %d, letra: %c, string: %s, float: %f\n",123, 'k', "hola mundo", 123.456);
-	
+	/*while(1){
+		int val = scanf("%s",s);
+		printf("\nvalue: %d, string %s",val,s);
+	}*/
+	//vaArg(3, "hola", "mundo", "chau");
+	/*while(1){
+		scanf("%s %f=",s, &f);
+		printf("\nRESULTADO:%s %f\n",s,f);
+	}*/
+	/*printf("\nes un numero: %d, letra: %c, string: %s, float: %f\n", d, 'k', "hola mundo", f);
+	d = 30;
+	f *= 2;
+	printf("\nes un numero: %d, letra: %c, string: %s, float: %f\n", d, 'k', "hola mundo", f);*/
+	/*while (1)
+	{
+		scanf("%f", &d,&f);
+		printf("\n d vale: %d y f: %f", d,f);
+	}*/
+	/*
 	while ((1))
 	{
 		printf("\nIngrese la cuenta:");
-		scanf("%s=",s);
-		printf("\nRESULTADO: %s\n",s);
+		scanf("%s=", s);
+		printf("\nRESULTADO: %s\n", s);
 		putchar('\n');
-	}
-	
+	}*/
+
 	/*while ((1))
 	{	
 		printf("\nUser $ >");
