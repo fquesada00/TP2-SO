@@ -1,4 +1,4 @@
-#include <stdint.h>
+/*#include <stdint.h>
 #include "standardlib.h"
 typedef struct charStack
 {
@@ -11,7 +11,7 @@ typedef struct doubleStack
     double stack[64];
 } doubleStack;
 
-/*+ - * / ( )*/
++ - * / ( )
 static char precedenceTable[5][6] = {
     {1, 1, 0, 0, 0, 1}, //+
     {1, 1, 0, 0, 0, 1}, //-
@@ -37,7 +37,7 @@ void calc()
 {
     char c;
     double number = 0;
-    int decimal = 0, idxInput = 0;
+    int decimal = 0;
     int negative = 0;
     charStack s;
     s.size = 0;
@@ -48,85 +48,74 @@ void calc()
     int start = 0;
     double result = 0;
     char input[64];
-    char cAtInput;
     while (1)
     {
         printf("\nINPUT OPERATION:\n");
-        if (scanf("%s=", &input) == 1)
+        if(scanf("%s=",&input)==1){
+            
+        }
+        while ((c = getchar()) != '=')
         {
-            idxInput = 0;
-            while (input[idxInput])
+            putchar(c);
+            if ((c >= '0' && c <= '9') || c == '.' || (c == '-' && !last_operand))
             {
-                cAtInput = input[idxInput++];
-                if ((input >= '0' && input <= '9') || input == '.' || (input == '-' && !last_operand))
+                start = 1;
+                if (c == '.')
                 {
-                    start = 1;
-                    if (input == '.')
-                    {
-                        decimal = 1;
-                        continue;
-                    }
-                    else if (input == '-')
-                    {
-                        negative = 1;
-                    }
-                    if (!decimal)
-                    {
-                        number *= 10;
-                        number += (c - '0');
-                    }
-                    else
-                    {
-                        decimal *= 10;
-                        number += ((double)(c - '0')) / ((double)decimal);
-                    }
+                    decimal = 1;
+                    continue;
                 }
-                else if (input == '+' || input == '*' || input == '/' || input == '-' || input == '(' || input == ')')
+                else if (c == '-')
                 {
-                    if (negative)
-                    {
-                        negative = 0;
-                        number *= -1;
-                    }
-                    if (start)
-                    {
-                        posfix[operator_index++] = 'n';
-                        operands[operand_index++] = number;
-                        number = 0;
-                        decimal = 0;
-                        last_operand = 1;
-                        start = 0;
-                    }
-                    while (!is_emptyChar(&s) && getPrecedence(peekChar(&s), input))
-                    {
-                        posfix[operator_index++] = popChar(&s);
-                    }
-                    if (input != ')')
-                    {
-                        pushChar(&s, input);
-                    }
-                    else if (!is_emptyChar(&s))
-                    {
-                        popChar(&s);
-                    }
-                    else
-                    {
-                        printf("\nERROR: Introdujo mal los operadores\n");
-                        break;
-                    }
-                       
+                    negative = 1;
+                }
+                if (!decimal)
+                {
+                    number *= 10;
+                    number += (c - '0');
                 }
                 else
                 {
-                    printf("\nERROR: Introdujo un caracter desconocido\n");
-                    break;
+                    decimal *= 10;
+                    number += ((double)(c - '0')) / ((double)decimal);
                 }
             }
+            else if (c == '+' || c == '*' || c == '/' || c == '-' || c == '(' || c == ')')
+            {
+                if (negative)
+                {
+                    negative = 0;
+                    number *= -1;
+                }
+                if (start)
+                {
+                    posfix[operator_index++] = 'n';
+                    operands[operand_index++] = number;
+                    number = 0;
+                    decimal = 0;
+                    last_operand = 1;
+                    start = 0;
+                }
+                while (!is_emptyChar(&s) && getPrecedence(peekChar(&s), c))
+                {
+                    posfix[operator_index++] = popChar(&s);
+                }
+                if (c != ')')
+                {
+                    pushChar(&s, c);
+                }
+                else if (!is_emptyChar(&s))
+                {
+                    popChar(&s);
+                }
+                else
+                    ; //ERROR
+            }
+            else
+            {
+                printf("ERROR");
+            }
         }
-        else{
-            printf("\nERROR: Ingreso cualquier cosa\n");
-        }
-
         while (!is_emptyChar(&s))
         {
             if (peekChar(&s) != '(')
@@ -134,11 +123,7 @@ void calc()
                 posfix[operator_index++] = popChar(&s);
             }
             else
-            {
-                printf("\nERROR: Introdujo mal los parentesis\n");
-                continue;
-            }
-                
+                ; //ERROR
         }
         result = evaluate(posfix, operands, operator_index, operand_index);
         printf("\n%f\n", result);
@@ -154,38 +139,35 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx)
     double left, right, result;
     result;
     putchar('\n');
-    printf("op dim vale %d", op_dim);
+    printf("op dim vale %d",op_dim);
     printf(op);
     while (i < op_dim)
     {
-        if (op[i++] == 'n')
-        {
+        if (op[i++] == 'n'){
             pushDouble(&d, numbers[j++]);
             printf("pushee");
         }
         else
         {
-            if (!is_emptyDouble(&d))
-                right = popDouble(&d);
-            else
-                ; //ERROR
-            if (!is_emptyDouble(&d))
-                left = popDouble(&d);
-            else
-                ; //ERROR
+            if(!is_emptyDouble(&d))
+                right=popDouble(&d);
+            else; //ERROR
+            if(!is_emptyDouble(&d))
+                left=popDouble(&d);
+            else;//ERROR
             switch (op[i++])
             {
             case '+':
-                pushDouble(&d, left + right);
+                pushDouble(&d,left + right);
                 break;
             case '-':
-                pushDouble(&d, left - right);
+                pushDouble(&d,left - right);
                 break;
             case '*':
-                pushDouble(&d, left * right);
+                pushDouble(&d,left * right);
                 break;
             case '/':
-                pushDouble(&d, left / right);
+                pushDouble(&d,left / right);
                 break;
             default:
                 break;
@@ -265,3 +247,4 @@ void pushDouble(doubleStack *s, double e)
 {
     s->stack[(s->size)++] = e;
 }
+*/
