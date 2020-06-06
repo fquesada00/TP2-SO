@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "standardlib.h"
-#define MAX_PARAM 32
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char *buff, int bytes);
@@ -212,7 +211,7 @@ int scanf(const char *fmt, ...)
                 auxPointer = va_arg(arg_param, char *);
                 idxAuxPointer = 0;
                 char cAtBuffer = buffer[idxBuffer++];
-                while (cAtBuffer != ' ') //(1+1)espacio
+                while (cAtBuffer != ' ') 
                 {
                     if(cAtBuffer == 0 && fmt[idxFmt + 2] == 0){
                         auxPointer[idxAuxPointer] = cAtBuffer;

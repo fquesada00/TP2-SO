@@ -312,7 +312,7 @@ sys_GetScreen:
 processorCriticalTemperature:
     push rbp
     mov rbp,rsp
-    ;rdmsr -a IA32_THERM_STATUS
+    rdmsr -a IA32_THERM_STATUS
 
     mov rsp,rbp
     pop rbp

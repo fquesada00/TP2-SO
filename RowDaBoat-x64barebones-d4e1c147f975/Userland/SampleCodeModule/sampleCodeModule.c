@@ -18,7 +18,7 @@ int main()
 	d = 15;
 	f = 125.369;
 	/*while(1){
-		int val = scanf("%s",s);
+		int val = scanf("hola mundo",s);
 		printf("\nvalue: %d, string %s",val,s);
 	}*/
 	//vaArg(3, "hola", "mundo", "chau");
