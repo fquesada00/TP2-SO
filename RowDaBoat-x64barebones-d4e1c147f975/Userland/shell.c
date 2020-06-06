@@ -70,6 +70,12 @@ void shell()
         {
             invOpCode();
         }
+        else if(strcmp(command,"time")==0)
+        {
+            printRtc();
+        }else{
+            printf("'%s' is not a valid command\n",command);
+        }
     }
     
 }

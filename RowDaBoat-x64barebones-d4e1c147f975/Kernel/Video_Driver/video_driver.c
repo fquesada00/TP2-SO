@@ -11,7 +11,7 @@
 #define LINES (HEIGHT / CHARSIZE)
 #define COLS ((WIDTH) / CHARSIZE)
 #define START_POS WIDTH *PIXELSIZE *CHARSIZE *(LINES - 1)
-#define START_SCREEN 1
+#define START_SCREEN 0
 struct vbe_mode_info_structure
 {
     uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
@@ -210,7 +210,7 @@ void clearLine(int line)
 {
     for (int i = 0; i < CHARSIZE; i++)
     {
-        for (int j = SCREEN_WIDTH * current_screen; j < SCREEN_WIDTH * (current_screen + 1); j++)
+        for (int j = SCREEN_WIDTH * current_screen + current_screen; j < SCREEN_WIDTH * (current_screen + 1); j++)
         {
             write_pixel(j, i + (line * CHARSIZE), 0, 0, 0);
         }
