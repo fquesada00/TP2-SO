@@ -18,6 +18,6 @@ void DivZero();
 int programLoader(void(*program)(void));
 void printRtc();
 void invOpCode();
-int coreTemp();
+void printCoreTemp();
 void manShell();
 #endif

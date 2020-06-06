@@ -17,7 +17,7 @@ void shell()
             else if(strcmp(command, "time") == 0) printRtc();
             else if(strcmp(command, "help") == 0) manShell();
             else if(strcmp(command, "quit") == 0) quit = 1;
-            else if(strcmp(command,"temp") == 0){printf("Core temperature: %d",coreTemp());}
+            else if(strcmp(command,"temp") == 0) printCoreTemp();
             else printf("\n'%s' is not a valid command\n",command);
         }
         else if(argsRead == 2){

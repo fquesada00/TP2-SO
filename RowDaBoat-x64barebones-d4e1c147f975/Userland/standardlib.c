@@ -430,9 +430,9 @@ void invOpCode()
 {
     invalidOpCode();
 }
-int coreTemp()
+void printCoreTemp()
 {
-    return processorTemperature();
+    printf("\nCore temperature: %d C\n",processorTemperature());
 }
 
 
