@@ -17,4 +17,5 @@ void printReg();
 void DivZero();
 int programLoader(void(*program)(void));
 void printRtc();
+void invOpCode();
 #endif

@@ -4,7 +4,7 @@
 extern void printreg(int,uint64_t);
 extern void save_regs(uint64_t);
 extern uint64_t * getRegs();
-
+extern void restartProgram(uint64_t);
 void invalid_op_code_handler(uint64_t rsp){
     save_regs(rsp);
     uint64_t * buffer = getRegs();
@@ -13,4 +13,5 @@ void invalid_op_code_handler(uint64_t rsp){
     {
         printreg(i,buffer[i-1]);
     }
+    restartProgram(rsp);
 }

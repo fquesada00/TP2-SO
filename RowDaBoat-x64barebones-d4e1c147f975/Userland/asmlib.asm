@@ -10,8 +10,9 @@ GLOBAL processorExtendedName
 GLOBAL sys_GetScreen
 GLOBAL processorFamily
 GLOBAL divExc
-GLOBAL loadProgram
+GLOBAL loadPrgrm
 GLOBAL sysrtc
+GLOBAL invalidOpCode
 
 EXTERN printf
 EXTERN putchar
@@ -295,7 +296,7 @@ processorFamily:
     ret
 ; -----------------------------------------------------------------------------
 
-loadProgram:
+loadPrgrm:
     push rbp
     mov rbp,rsp
     mov rax,5
@@ -335,3 +336,10 @@ processorCriticalTemperature:
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+invalidOpCode:
+    push rbp
+    mov rbp,rsp
+    UD2
+    mov rsp,rbp
+    pop rbp
+    ret

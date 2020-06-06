@@ -16,16 +16,20 @@ int loadProgram(uint64_t start)
 }
 void continueProgram(int num, uint64_t rsp)
 {
+    changeScreen(Tasker.programs[num].screen);
     struct State * currentState = (void*)rsp;
     //Si aun no se cargo ningun programa, cargo el primero
     if(!runningPrograms[num])
     {
+        if(currentID !=-1)
+            saveState(*currentState,&(Tasker.states[currentID]));
         runningPrograms[num]=1;
         currentID = num;
         Tasker.Stacks[num][STACK_SIZE-1]=currentState->rip;//pongo la dir de retorno de mi programa en su stack
-        Tasker.states[num].rsp=Tasker.Stacks[num]-8;
+        Tasker.states[num].rsp=Tasker.Stacks[num]-(char)8;
         Tasker.states[num].rip=Tasker.programs[num].start;
-        loadState(currentState,Tasker.states[num]);
+        currentState->rip=Tasker.programs[currentID].start;
+        currentState->rsp=Tasker.Stacks[currentID]-8;
     }else
         {
             saveState(*currentState,&(Tasker.states[currentID]));
@@ -78,4 +82,10 @@ void saveState(struct State currentState,Registers * state)
     state->flags=currentState.flags;
     state->rip=currentState.rip;
     state->rsp=currentState.rsp;
+}
+void restartProgram(uint64_t rsp)
+{
+    struct State * currentState = (void*)rsp;
+    currentState->rip=Tasker.programs[currentID].start;
+    currentState->rsp=Tasker.Stacks[currentID]-8;
 }

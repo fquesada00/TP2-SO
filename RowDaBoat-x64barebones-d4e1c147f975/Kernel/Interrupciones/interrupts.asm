@@ -215,8 +215,6 @@ _syscallHandler:
 	call syscall_rtc
 	jmp .end
 .end:
-	mov rsp,rbp
-	pop rbp
 	iretq
 ; -----------------------------------------------------------------------------
 

@@ -66,6 +66,10 @@ void shell()
         {
             DivZero();
         }
+        else if(strcmp(command,"invOpCode") == 0)
+        {
+            invOpCode();
+        }
     }
     
 }

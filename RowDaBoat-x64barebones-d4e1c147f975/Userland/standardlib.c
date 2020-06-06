@@ -16,10 +16,10 @@ extern int processorModel(void);
 extern int processorFamily(void);
 extern int sys_GetScreen();
 extern int divExc();
-extern int loadProgram(void(*programa)(void));
+extern int loadPrgrm(void(*programa)(void));
 extern void processorTemperature();
 extern unsigned char sysrtc(int);
-
+extern void invalidOpCode();
 
 void puts(char * c){
     int i = 0;
@@ -824,9 +824,13 @@ void DivZero()
 
 int programLoader(void(*program)(void))
 {
-    loadProgram(program);
+    loadPrgrm(program);
 }
 
+void invOpCode()
+{
+    invalidOpCode();
+}
 
 
 

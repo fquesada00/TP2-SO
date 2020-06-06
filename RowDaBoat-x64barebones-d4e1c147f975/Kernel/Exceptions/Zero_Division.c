@@ -3,7 +3,7 @@
 #include <stdint.h>
 extern void save_regs(uint64_t);
 extern uint64_t * getRegs();
-
+extern void restartProgram(uint64_t);
 void zero_division_handler(uint64_t rsp){
     
     save_regs(rsp);
@@ -13,6 +13,7 @@ void zero_division_handler(uint64_t rsp){
     {
         printreg(i,buffer[i-1]);
     }
+    restartProgram(rsp);
 }
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
 {
