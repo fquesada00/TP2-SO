@@ -9,7 +9,10 @@ GLOBAL processorName
 GLOBAL processorExtendedName
 GLOBAL sys_GetScreen
 GLOBAL processorFamily
+GLOBAL divExc
+GLOBAL loadPrgrm
 GLOBAL sysrtc
+GLOBAL invalidOpCode
 
 EXTERN printf
 EXTERN putchar
@@ -57,10 +60,8 @@ SECTION .text
 inforeg:
     push rbp
     mov rbp,rsp
-    pushState
     mov rax,3 ;id syscall registers
     int 80h
-    popState
     mov rsp,rbp
     pop rbp
     ret
@@ -295,6 +296,14 @@ processorFamily:
     ret
 ; -----------------------------------------------------------------------------
 
+loadPrgrm:
+    push rbp
+    mov rbp,rsp
+    mov rax,5
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
 
 ; -----------------------------------------------------------------------------
 sys_GetScreen:
@@ -308,13 +317,29 @@ sys_GetScreen:
 ; -----------------------------------------------------------------------------
 
 
+divExc:
+    push rbp
+    mov rbp,rsp
+    mov rdi,0
+    mov rax,0x123
+    div rdi
+    mov rsp,rbp
+    pop rbp
+    ret
 ; -----------------------------------------------------------------------------
 processorCriticalTemperature:
     push rbp
     mov rbp,rsp
-    rdmsr -a IA32_THERM_STATUS
+    ;rdmsr -a IA32_THERM_STATUS
 
     mov rsp,rbp
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
+invalidOpCode:
+    push rbp
+    mov rbp,rsp
+    UD2
+    mov rsp,rbp
+    pop rbp
+    ret

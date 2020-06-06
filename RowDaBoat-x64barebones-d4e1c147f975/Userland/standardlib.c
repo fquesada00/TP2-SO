@@ -8,15 +8,17 @@ extern int syswrite(int fd, const char *buff, int bytes);
 extern int sysread(int fd, char *buff, int bytes);
 extern int numlen(int);
 extern void printmem(long int);
-extern void inforeg(void);
-extern char *processorName(char *);
+extern void inforeg(uint64_t * regs);
+extern char *processorName(char*);
 extern char *processorExtendedName(char *);
 extern int processorModel(void);
 extern int processorFamily(void);
 extern int sys_GetScreen();
+extern int divExc();
+extern int loadPrgrm(void(*programa)(void));
 extern void processorTemperature();
 extern unsigned char sysrtc(int);
-
+extern void invalidOpCode();
 
 void puts(char * c){
     int i = 0;
@@ -26,16 +28,6 @@ void puts(char * c){
     putchar('\n');
 }
 
-void vaArg(int n, ...){
-    va_list params;
-    va_start(params, n);
-    char buff[64];
-    char * aux;
-    int p;
-    for(int i = 0 ; i < n ; i++){
-        puts(va_arg(params, char *));
-    }
-}
 
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
@@ -72,7 +64,7 @@ int printf(const char * fmt, ...){
     int idxFmt = 0, idxBuffer = 0;
     char buffer[256] = {0};
     char * sAtFmt;
-    int nAtFmt, nAtFmtLenght, sAtFmtLenght, idxsAtFmt, fAtFmtLenght;
+    int nAtFmt, nAtFmtLenght, idxsAtFmt, fAtFmtLenght;
     double fAtFmt;
     while(fmt[idxFmt]){
         if(fmt[idxFmt] != '%'){
@@ -97,7 +89,6 @@ int printf(const char * fmt, ...){
                 break;
             case 's':
                 sAtFmt = va_arg(arg_param, char *);
-                sAtFmtLenght = strlen(sAtFmt);
                 idxsAtFmt = 0;
                 while(sAtFmt[idxsAtFmt]){
                     buffer[idxBuffer++] = sAtFmt[idxsAtFmt++];
@@ -152,12 +143,12 @@ int scanf(const char *fmt, ...)
     idxBuffer = 0;
     while (fmt[idxFmt])
     {
+        if(buffer[idxBuffer] == 0) return argsRead;
         if (fmt[idxFmt] != '%')
         {
             if (buffer[idxBuffer] != fmt[idxFmt])
             {
-                printf("\nERROR: tipeo cualquier cosa y te muestro:");
-                printf("\nidxFmtError: %d y %d\n", idxFmt, idxBuffer);
+                printf("\nERROR: No cumple con el formato\n");
                 return -1;
             }
             idxFmt++;
@@ -193,7 +184,7 @@ int scanf(const char *fmt, ...)
                     }
                     else if (nAtBuffer == '-')
                     {
-                        printf("\nERROR: Metiste un -\n");
+                        printf("\nERROR: Hay al menos un '-' de mas\n");
                         return -1;
                     }
                     number *= 10;
@@ -213,11 +204,11 @@ int scanf(const char *fmt, ...)
                 char cAtBuffer = buffer[idxBuffer++];
                 while (cAtBuffer != ' ') 
                 {
-                    if(cAtBuffer == 0 && fmt[idxFmt + 2] == 0){
+                    if(cAtBuffer == 0){
                         auxPointer[idxAuxPointer] = cAtBuffer;
                         return argsRead + 1;
-                    } 
-                    if(cAtBuffer == fmt[idxFmt + 2]){ 
+                    }
+                    else if(cAtBuffer == fmt[idxFmt + 2]){ 
                         break;
                     }
                     auxPointer[idxAuxPointer++] = cAtBuffer;
@@ -251,7 +242,7 @@ int scanf(const char *fmt, ...)
                         continue;
                     }
                     else if(fAtBuffer == '-' && idxFloat > 0){
-                        printf("\nERROR: Metiste un -\n");
+                        printf("\nERROR: Hay al menos un '-' de mas\n");
                         return -1;
                     }
                     if(!decimal){
@@ -370,6 +361,7 @@ int uintToBase(uint64_t value, char *buffer, uint32_t base)
 void processorInfo()
 {
     char buffer[256] = {0};
+    putchar('\n');
     processorName(buffer);
     printf("Marca del procesador: %s\n", buffer);
     processorExtendedName(buffer);
@@ -383,13 +375,9 @@ void printMemoryFromAddress(long int address)
     char *p = (char *)address;
     for (int i = 0; i < 32; i++)
     {
-        printf("%d = %d\n", p, *p++);
+        printf("%d = %d\n", p, *p);
+        p++;
     }
-}
-
-void printRegisters()
-{
-    inforeg();
 }
 
 int getScreen()
@@ -413,10 +401,47 @@ void putchar(char c)
     syswrite(1, buff, 1);
 }
 
+void printReg()
+{
+    uint64_t buffer[16];
+    inforeg(buffer);
+    char string[128]={0};
+    for (int i = 0; i < 15; i++)
+    {
+        uintToBase(buffer[i],string,16);
+        printf(string);
+        putchar('\n');
+    }
+    
+}
+
+void DivZero()
+{
+    divExc();
+}
+
+int programLoader(void(*program)(void))
+{
+    loadPrgrm(program);
+    return 1;
+}
+
+void invOpCode()
+{
+    invalidOpCode();
+}
+
+
+
+
 void temperature(){
 
 }
 
 void printRtc(){
-    printf("%d:%d:%d\n", (sysrtc(4)+21)%24, sysrtc(2), sysrtc(0));
+    printf("\n%d:%d:%d\n", (sysrtc(4)+21)%24, sysrtc(2), sysrtc(0));
+}
+
+void manShell(){
+
 }

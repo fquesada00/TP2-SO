@@ -19,7 +19,7 @@ void loadModules(void * payloadStart, void ** targetModuleAddress)
 static void loadModule(uint8_t ** module, void * targetModuleAddress)
 {
 	uint32_t moduleSize = readUint32(module);
-
+	/*
 	puts("  Will copy module at 0x");
 	ncPrintHex((uint64_t)*module);
 	puts(" to 0x");
@@ -27,12 +27,12 @@ static void loadModule(uint8_t ** module, void * targetModuleAddress)
 	puts(" (");
 	ncPrintDec(moduleSize);
 	puts(" bytes)");
-
+*/
 	memcpy(targetModuleAddress, *module, moduleSize);
 	*module += moduleSize;
 
-	puts(" [Done]");
-	newLine();
+	/*puts(" [Done]");
+	newLine();*/
 }
 
 static uint32_t readUint32(uint8_t ** address)

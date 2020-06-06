@@ -1,70 +1,105 @@
 #include "Zero_Division.h"
-
-extern void registers(void);
-
-//NO VA ACA Y ESTA MAL
-void printf(char* s,...){
-    return;
+#include "../Video_Driver/video_driver.h"
+#include <stdint.h>
+extern void save_regs(uint64_t);
+extern uint64_t * getRegs();
+extern void restartProgram(uint64_t);
+void zero_division_handler(uint64_t rsp){
+    
+    save_regs(rsp);
+    uint64_t * buffer = getRegs();
+    putsColor("ZERO DIVISION EXCEPTION\n",255,0,0);
+    for(int i = 15;i>0;i--)
+    {
+        printreg(i,buffer[i-1]);
+    }
+    restartProgram(rsp);
 }
+static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
+{
+	char *p = buffer;
+	char *p1, *p2;
+	uint32_t digits = 0;
 
-void zero_division_handler(){
-    registers();
+	//Calculate characters for each digit
+	do
+	{
+		uint32_t remainder = value % base;
+		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
+		digits++;
+	}
+	while (value /= base);
+
+	// Terminate string in buffer.
+	*p = 0;
+
+	//Reverse string in buffer.
+	p1 = buffer;
+	p2 = p - 1;
+	while (p1 < p2)
+	{
+		char tmp = *p1;
+		*p1 = *p2;
+		*p2 = tmp;
+		p1++;
+		p2--;
+	}
+
+	return digits;
 }
-
-void printreg(int reg, int val){
+void printreg(int reg, uint64_t val){
+    char buffer[64];
+    uintToBase(val,buffer,16);
     switch (reg){
-    case 16:
-        printf("rip=");
-        break;
     case 15:
-        printf("rax=");
+        putsColor("rax= ",255,0,0);
         break;
     case 14:
-        printf("rbx=");
+        putsColor("rbx= ",255,0,0);
         break;
     case 13:
-        printf("rcx=");
+        putsColor("rcx= ",255,0,0);
         break;
     case 12:
-        printf("rdx=");
+        putsColor("rdx= ",255,0,0);
         break;
     case 11:
-        printf("rbp=");
+        putsColor("rbp= ",255,0,0);
         break;
     case 10:
-        printf("rdi=");
+        putsColor("rdi= ",255,0,0);
         break;
     case 9:
-        printf("rsi=");
+        putsColor("rsi= ",255,0,0);
         break;
     case 8:
-        printf("r8=");
+        putsColor("r8= ",255,0,0);
         break;
     case 7:
-        printf("r9=");
+        putsColor("r9= ",255,0,0);
         break;
     case 6:
-        printf("r10=");
+        putsColor("r10= ",255,0,0);
         break;
     case 5:
-        printf("r11=");
+        putsColor("r11= ",255,0,0);
         break;
     case 4:
-        printf("r12=");
+        putsColor("r12= ",255,0,0);
         break;
     case 3:
-        printf("r13=");
+        putsColor("r13= ",255,0,0);
         break;
     case 2:
-        printf("r14=");
+        putsColor("r14= ",255,0,0);
         break;
     case 1:
-        printf("r15=");
+        putsColor("r15= ",255,0,0);
         break;
     default:
         break;
     }
-
-    printf("%d\n",val);
+    puts(buffer);
+    putChar('\n');
 
 }

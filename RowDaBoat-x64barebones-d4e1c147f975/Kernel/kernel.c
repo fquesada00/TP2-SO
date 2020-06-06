@@ -51,22 +51,8 @@ void * initializeKernelBinary()
 int main(){
 	load_idt();
 	init_video();
-	puts("Sample code module at 0x");
-	ncPrintHex((uint64_t)sampleCodeModuleAddress);
-	newLine();
-	puts("  Calling the sample code module returned: ");
-	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	newLine();
-	newLine();
-
-	puts("  Sample data module at 0x");
-	//ncPrintHex((uint64_t)sampleDataModuleAddress);
-	newLine();
-	puts("  Sample data module contents: ");
-	//puts((char*)sampleDataModuleAddress);
-	newLine();
-	puts("[Finished]");
-
+	((EntryPoint)sampleCodeModuleAddress)();
+	return 0;
 	
 	
 }

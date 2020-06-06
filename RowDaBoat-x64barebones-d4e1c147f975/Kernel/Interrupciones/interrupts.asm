@@ -15,6 +15,8 @@ GLOBAL _irq05Handler
 GLOBAL _syscallHandler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
+GLOBAL save_regs
+GLOBAL getRegs
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
@@ -26,6 +28,8 @@ EXTERN putChar
 EXTERN puts
 EXTERN syscall_read
 EXTERN syscall_write
+EXTERN syscall_registers
+EXTERN loadProgram
 SECTION .text
 
 %macro pushState 0
@@ -66,8 +70,8 @@ SECTION .text
 
 %macro irqHandlerMaster 1
 	pushState
-
 	mov rdi, %1 ; pasaje de parametro
+	mov rsi,rsp
 	call irqDispatcher
 
 	; signal pic EOI (End of Interrupt)
@@ -80,10 +84,9 @@ SECTION .text
 
 %macro exceptionHandler 1
 	pushState
-
 	mov rdi, %1 ; pasaje de parametro
+	mov rsi,rsp
 	call exceptionDispatcher
-
 	popState
 	iretq
 %endmacro
@@ -162,8 +165,6 @@ _irq05Handler:
 ;Ret								
 ;	rax -> syscall asociated value					
 _syscallHandler:
-	push rbp
-	mov rbp,rsp
 	cmp rax,0 ;syscall read
 	je .read
 	cmp rax,1 ;syscall write
@@ -174,6 +175,8 @@ _syscallHandler:
 	je .register
 	cmp rax,4 ;syscall rtc
 	je .rtc
+	cmp rax,5 ;syscall execute
+	je .exe
 	jmp .end
 .read:
 	push rdi
@@ -205,12 +208,13 @@ _syscallHandler:
 .register:
 	call syscall_registers
 	jmp .end
+.exe:
+	call loadProgram
+	jmp .end
 .rtc:
 	call syscall_rtc
 	jmp .end
 .end:
-	mov rsp,rbp
-	pop rbp
 	iretq
 ; -----------------------------------------------------------------------------
 
@@ -323,8 +327,8 @@ syscall_screen:
 	push rbp
 	mov rbp,rsp
 	call screenNumber
-	pop rbp
 	mov rsp,rbp
+	pop rbp
 	ret
 ; -----------------------------------------------------------------------------
 
@@ -363,26 +367,26 @@ syscall_rtc:
 ;	-
 ;Ret
 ;	-
-syscall_registers:
-	push rbp
-	mov rbp,rsp
-	push rax
-	push rbx
-	lea rbx,[rbp + 8*19] ;rbx -> rip
-	mov rax,16 ;acumulador
-.loop:
-	cmp rax,0
-	je .end ;no regs left
-	regDispatcher rax, [rbx]
-	sub rbx,8
-	dec rax
-	jmp .loop
-.end:
-	pop rbx
-	pop rax
-	mov rsp,rbp
-	pop rbp
-	ret
+;syscall_registers:
+;	push rbp
+;	mov rbp,rsp
+;	push rax
+;	push rbx
+;	lea rbx,[rbp + 8*19] ;rbx -> rip
+;	mov rax,16 ;acumulador
+;.loop:
+;	cmp rax,0
+;	je .end ;no regs left
+;	regDispatcher rax, [rbx]
+;	sub rbx,8
+;	dec rax
+;	jmp .loop
+;.end:
+;	pop rbx
+;	pop rax
+;	mov rsp,rbp
+;	pop rbp
+;	ret
 ; -----------------------------------------------------------------------------
 
 ;Zero Division Exception
@@ -397,3 +401,32 @@ haltcpu:
 	cli
 	hlt
 	ret
+
+save_regs:
+	push rbp
+	mov rbp,rsp
+	mov rsi,0
+.loop:
+	mov rax,[rdi]
+	mov [register+rsi],rax
+	add rsi, 8
+	add rdi,8
+	cmp rsi,120
+	je .end
+	jmp .loop
+.end:
+	mov rax,0
+	mov rsp,rbp
+	pop rbp
+	ret
+
+
+getRegs:
+	push rbp
+	mov rbp,rsp
+	mov rax, register
+	mov rsp,rbp
+	pop rbp
+	ret
+section .bss
+register: resq  16
