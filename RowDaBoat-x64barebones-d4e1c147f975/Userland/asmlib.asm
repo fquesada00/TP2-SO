@@ -10,6 +10,7 @@ GLOBAL processorExtendedName
 GLOBAL sys_GetScreen
 GLOBAL processorFamily
 GLOBAL divExc
+GLOBAL loadProgram
 
 EXTERN printf
 
@@ -279,6 +280,14 @@ processorFamily:
     ret
 ; -----------------------------------------------------------------------------
 
+loadProgram:
+    push rbp
+    mov rbp,rsp
+    mov rax,5
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
 
 sys_GetScreen:
     push rbp

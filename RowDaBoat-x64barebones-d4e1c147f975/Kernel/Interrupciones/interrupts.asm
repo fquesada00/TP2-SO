@@ -29,6 +29,7 @@ EXTERN puts
 EXTERN syscall_read
 EXTERN syscall_write
 EXTERN syscall_registers
+EXTERN loadProgram
 SECTION .text
 
 %macro pushState 0
@@ -69,34 +70,24 @@ SECTION .text
 
 %macro irqHandlerMaster 1
 	pushState
-	push rbp
-	mov rbp,rsp
 	mov rdi, %1 ; pasaje de parametro
+	mov rsi,rsp
 	call irqDispatcher
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
 
-	mov rsp,rbp
-	pop rbp
 	popState
 	iretq
 %endmacro
 
 %macro exceptionHandler 1
 	pushState
-	push rbp
-	mov rbp,rsp
 	mov rdi, %1 ; pasaje de parametro
+	mov rsi,rsp
 	call exceptionDispatcher
-	mov rsp,rbp
-	pop rbp
 	popState
-	pop rdi
-	mov rdi,[rbp]
-	mov rsi,[rdi+8]
-	push rsi
 	iretq
 %endmacro
 
@@ -174,8 +165,6 @@ _irq05Handler:
 ;Ret								
 ;	rax -> syscall asociated value					
 _syscallHandler:
-	push rbp
-	mov rbp,rsp
 	cmp rax,0 ;syscall read
 	je .read
 	cmp rax,1 ;syscall write
@@ -184,6 +173,8 @@ _syscallHandler:
 	je .screen
 	cmp rax,3 ;syscall registers
 	je .register
+	cmp rax,5 ;syscall execute
+	je .exe
 	jmp .end
 .read:
 	push rdi
@@ -215,10 +206,11 @@ _syscallHandler:
 .register:
 	call syscall_registers
 	jmp .end
+.exe:
+	call loadProgram
+	jmp .end
 .end:
-	mov rsp,rbp
-	pop rbp
-	ret
+	iretq
 ; -----------------------------------------------------------------------------
 
 
@@ -378,14 +370,9 @@ haltcpu:
 	ret
 
 save_regs:
-	push rbp;rbp de keyboardriver
+	push rbp
 	mov rbp,rsp
-	mov rax,[rbp];aca tengo el rbp de int 21
-	mov rdi,[rax];aca tengo el rbp de irq dispatcher
-	mov rax,[rdi];aca tengo el rbp de handler
-	mov rdi,[rax]
 	mov rsi,0
-	add rdi,8
 .loop:
 	mov rax,[rdi]
 	mov [register+rsi],rax

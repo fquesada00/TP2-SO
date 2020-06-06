@@ -1,11 +1,12 @@
 #include "Zero_Division.h"
 #include "../Video_Driver/video_driver.h"
-extern void save_regs();
+#include <stdint.h>
+extern void save_regs(uint64_t);
 extern uint64_t * getRegs();
 
-void zero_division_handler(){
+void zero_division_handler(uint64_t rsp){
     
-    save_regs();
+    save_regs(rsp);
     uint64_t * buffer = getRegs();
     putsColor("ZERO DIVISION EXCEPTION\n",255,0,0);
     for(int i = 15;i>0;i--)

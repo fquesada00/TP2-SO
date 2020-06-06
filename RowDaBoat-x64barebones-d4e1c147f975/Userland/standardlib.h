@@ -14,4 +14,5 @@ int doubleToString(double,char*);
 int strlen(char * s);
 void printReg();
 void DivZero();
+int programLoader(void(*program)(void));
 #endif

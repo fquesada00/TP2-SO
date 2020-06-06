@@ -10,8 +10,9 @@ typedef struct ProgramType
 } ProgramType;
 static int current_screen;
 int main()
-{
+{/*
 	printf("Start");
+	shell();
 	ProgramType shellP;
 	ProgramType calculatorP;
 	shellP.programa=(function)shell;
@@ -29,6 +30,14 @@ int main()
 			shellP.programa();
 	}
 	
+	*/
+	programLoader((function)calc);
+	programLoader((function)shell);
+	printf("Waiting to run...");
+	while (1)
+	{
+		getchar();
+	}
 	
 	return 0;
 }

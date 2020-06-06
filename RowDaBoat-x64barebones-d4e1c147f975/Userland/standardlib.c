@@ -16,6 +16,7 @@ extern int processorModel(void);
 extern int processorFamily(void);
 extern int sys_GetScreen();
 extern int divExc();
+extern int loadProgram(void(*programa)(void));
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
@@ -814,6 +815,12 @@ void DivZero()
 {
     divExc();
 }
+
+int programLoader(void(*program)(void))
+{
+    loadProgram(program);
+}
+
 
 
 
