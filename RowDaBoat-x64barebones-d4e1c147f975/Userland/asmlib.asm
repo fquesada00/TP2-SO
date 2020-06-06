@@ -9,9 +9,10 @@ GLOBAL processorName
 GLOBAL processorExtendedName
 GLOBAL sys_GetScreen
 GLOBAL processorFamily
-GLOBAL getRtc
+GLOBAL sysrtc
 
 EXTERN printf
+EXTERN putchar
 
 SECTION .text
 
@@ -115,6 +116,19 @@ sysread:
     push rbp
     mov rbp,rsp
     mov rax,0 ;id syscall read
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;int sysrtc(int n)
+sysrtc:
+    push rbp
+    mov rbp,rsp
+    mov rax,4 ;id syscall rtc
     int 80h
     mov rsp,rbp
     pop rbp
@@ -300,36 +314,6 @@ processorCriticalTemperature:
     mov rbp,rsp
     ;rdmsr -a IA32_THERM_STATUS
 
-    mov rsp,rbp
-    pop rbp
-    ret
-; -----------------------------------------------------------------------------
-
-
-; -----------------------------------------------------------------------------
-;Params
-;   rdi -> int
-;Ret
-;   rax -> tiempo
-getRtc:
-    push rbp
-    mov rbp, rsp
-    push rbx
-    push rcx
-    push rdx
-    mov ax, di ;generico el pedido
-    out 70h, al
-    in al, 71h ;devuelve el numero en binario codeado
-    mov rcx,rax
-    and rcx,15 ;me quedo con la parte menos significativa
-    shr rax,4 ;me quedo con la parte mas significativa
-    mov rdx,rax
-    mov rax,10
-    mul rdx
-    add rax,rcx
-    pop rdx
-    pop rcx
-    pop rbx
     mov rsp,rbp
     pop rbp
     ret

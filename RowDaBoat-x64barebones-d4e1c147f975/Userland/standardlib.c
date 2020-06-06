@@ -16,7 +16,7 @@ extern int processorModel(void);
 extern int processorFamily(void);
 extern int sys_GetScreen();
 extern void processorTemperature();
-extern int getRtc(int);
+extern unsigned char sysrtc(int);
 
 
 void puts(char * c){
@@ -822,7 +822,7 @@ void temperature(){
 }
 
 void printRtc(){
-    printf("%d:%d:%d\n",getRtc(4)-3, getRtc(2), getRtc(0));
+    printf("%d:%d:%d\n", (sysrtc(4)+21)%24, sysrtc(2), sysrtc(0));
 }
 /*
 int n1,n2

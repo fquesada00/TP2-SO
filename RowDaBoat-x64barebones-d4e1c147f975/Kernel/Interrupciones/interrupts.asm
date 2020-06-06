@@ -162,7 +162,6 @@ _irq05Handler:
 ;Ret								
 ;	rax -> syscall asociated value					
 _syscallHandler:
-	pushState
 	push rbp
 	mov rbp,rsp
 	cmp rax,0 ;syscall read
@@ -173,6 +172,8 @@ _syscallHandler:
 	je .screen
 	cmp rax,3 ;syscall registers
 	je .register
+	cmp rax,4 ;syscall rtc
+	je .rtc
 	jmp .end
 .read:
 	push rdi
@@ -204,11 +205,13 @@ _syscallHandler:
 .register:
 	call syscall_registers
 	jmp .end
+.rtc:
+	call syscall_rtc
+	jmp .end
 .end:
 	mov rsp,rbp
 	pop rbp
-	popState
-	ret
+	iretq
 ; -----------------------------------------------------------------------------
 
 
@@ -323,6 +326,34 @@ syscall_screen:
 	pop rbp
 	mov rsp,rbp
 	ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;SYSCALL RTC -> #4
+;Params
+;	rdi -> int n
+;Ret
+;	rax -> time
+syscall_rtc:
+	push rbp
+    mov rbp,rsp
+    push rbx
+    mov rax,0
+    mov rbx,0
+    mov ax,di
+    out 70h,al
+    in al,71h
+    mov bl,al
+    and bl,15
+    shr al,4
+    mov cl,10
+    mul cl
+    add al,bl
+    pop rbx
+    mov rsp,rbp
+    pop rbp
+    ret
 ; -----------------------------------------------------------------------------
 
 
