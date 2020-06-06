@@ -1,5 +1,7 @@
-#include <stdint.h>
+#include <float.h>
 #include "standardlib.h"
+
+
 typedef struct charStack
 {
     int size;
@@ -25,52 +27,61 @@ int sizeChar(charStack *stack);
 int is_emptyChar(charStack *stack);
 void pushChar(charStack *s, char e);
 char popChar(charStack *s);
-double peekDouble(doubleStack *stack);
 int sizeDouble(doubleStack *stack);
 int is_emptyDouble(doubleStack *stack);
 void pushDouble(doubleStack *s, double e);
 double popDouble(doubleStack *s);
 int getPrecedence(char prev, char current);
 int getIndex(char op);
-double evaluate(char *op, double *numbers, int op_dim, int num_idx);
+double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error);
+void man();
+
 void calc()
 {
     char c;
     double number = 0;
-    int decimal = 0, idxInput = 0;
+    int decimal = 0;
     int negative = 0;
     charStack s;
     s.size = 0;
     char posfix[64];
     double operands[64];
-    int last_operand = 0;
+    int was_num = 0;
     int operator_index = 0, operand_index = 0;
     int start = 0;
     double result = 0;
     char input[64];
-    char cAtInput;
+    int idxInput = 0, error;
     while (1)
     {
-        printf("\nINPUT OPERATION:\n");
-        if (scanf("%s=", &input) == 1)
+        idxInput = 0;
+        operand_index = 0;
+        operator_index = 0;
+        error = 0;
+        printf("\nINPUT OPERATION > ");
+        if (scanf("%s", input) == 1)
         {
-            idxInput = 0;
-            while (input[idxInput])
+            if(strcmp("help",input) == 0){
+                man();
+                continue;
+            }
+            while (input[idxInput] && input[idxInput] != '=')
             {
-                cAtInput = input[idxInput++];
-                if ((input >= '0' && input <= '9') || input == '.' || (input == '-' && !last_operand))
+
+                c = input[idxInput++];
+                if ((c >= '0' && c <= '9') || c == '.' || (c == '-' && !was_num))
                 {
+                    was_num = 1;
                     start = 1;
-                    if (input == '.')
+                    if (c == '.')
                     {
                         decimal = 1;
-                        continue;
                     }
-                    else if (input == '-')
+                    else if (c == '-')
                     {
                         negative = 1;
                     }
-                    if (!decimal)
+                    else if (!decimal)
                     {
                         number *= 10;
                         number += (c - '0');
@@ -81,7 +92,7 @@ void calc()
                         number += ((double)(c - '0')) / ((double)decimal);
                     }
                 }
-                else if (input == '+' || input == '*' || input == '/' || input == '-' || input == '(' || input == ')')
+                else if (c == '+' || c == '*' || c == '/' || c == '-' || c == '(' || c == ')')
                 {
                     if (negative)
                     {
@@ -94,85 +105,98 @@ void calc()
                         operands[operand_index++] = number;
                         number = 0;
                         decimal = 0;
-                        last_operand = 1;
                         start = 0;
                     }
-                    while (!is_emptyChar(&s) && getPrecedence(peekChar(&s), input))
+                    was_num = 0;
+                    while (!is_emptyChar(&s) && getPrecedence(peekChar(&s), c))
                     {
                         posfix[operator_index++] = popChar(&s);
                     }
-                    if (input != ')')
+                    if (c != ')')
                     {
-                        pushChar(&s, input);
+                        pushChar(&s, c);
                     }
                     else if (!is_emptyChar(&s))
                     {
+                        was_num = 1;
                         popChar(&s);
                     }
                     else
                     {
-                        printf("\nERROR: Introdujo mal los operadores\n");
+                        error = 2;
                         break;
                     }
-                       
                 }
                 else
                 {
-                    printf("\nERROR: Introdujo un caracter desconocido\n");
+                    error = 3;
                     break;
                 }
             }
-        }
-        else{
-            printf("\nERROR: Ingreso cualquier cosa\n");
-        }
-
-        while (!is_emptyChar(&s))
-        {
-            if (peekChar(&s) != '(')
+            if (input[idxInput] == 0)
             {
-                posfix[operator_index++] = popChar(&s);
-            }
-            else
-            {
-                printf("\nERROR: Introdujo mal los parentesis\n");
+                while ((idxInput + 1) > 0)
+                {
+                    idxInput--;
+                    putchar('\b');
+                }
                 continue;
             }
-                
+            while (!error && !is_emptyChar(&s))
+            {
+                if (peekChar(&s) != '(' && peekChar(&s) != 'e')
+                {
+                    posfix[operator_index++] = popChar(&s);
+                }
+                else
+                {
+                    error = 2;
+                    break;
+                }
+            }
+            if(!error) result = evaluate(posfix, operands, operator_index, operand_index, &error);
+            if (error == 0)
+                printf("\n\n > RESULT = %f\n", result);
+            else if (error == 2)
+                printf("\n\n > SYNTAX ERROR: Missing operand\n");
+            else if (error == 1)
+                printf("\n\n > MATH ERROR: Zero division\n");
+            else if (error == 3)
+                printf("\n\n > SYNTAX ERROR: Character not recognized\n");
         }
-        result = evaluate(posfix, operands, operator_index, operand_index);
-        printf("\n%f\n", result);
-        operand_index = 0;
-        operator_index = 0;
     }
 }
-double evaluate(char *op, double *numbers, int op_dim, int num_idx)
+double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error)
 {
     doubleStack d;
+    d.size = 0;
     int i = 0;
     int j = 0;
-    double left, right, result;
-    result;
-    putchar('\n');
-    printf("op dim vale %d", op_dim);
-    printf(op);
-    while (i < op_dim)
+    double left, right;
+    *error = 0;
+    while (i < op_dim )
     {
-        if (op[i++] == 'n')
+        if (op[i] == 'n')
         {
             pushDouble(&d, numbers[j++]);
-            printf("pushee");
+            i++;
         }
         else
         {
             if (!is_emptyDouble(&d))
                 right = popDouble(&d);
             else
-                ; //ERROR
+            {
+                *error = 2;
+                break;
+            }
             if (!is_emptyDouble(&d))
                 left = popDouble(&d);
-            else
-                ; //ERROR
+            else{
+                *error = 2;
+                break;
+            }
+
             switch (op[i++])
             {
             case '+':
@@ -185,6 +209,11 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx)
                 pushDouble(&d, left * right);
                 break;
             case '/':
+                if (right == 0)
+                {
+                    *error = 1;
+                    break;
+                }
                 pushDouble(&d, left / right);
                 break;
             default:
@@ -192,7 +221,9 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx)
             }
         }
     }
-    return popDouble(&d);
+    double result = popDouble(&d);
+    if(result == DBL_MAX_EXP) *error = 2;
+    return result;
 }
 int getPrecedence(char prev, char current)
 {
@@ -229,12 +260,6 @@ char peekChar(charStack *s)
         return 'e';
     return s->stack[s->size - 1];
 }
-double peekDouble(doubleStack *s)
-{
-    if (is_emptyDouble(s))
-        return;
-    return s->stack[s->size - 1];
-}
 int is_emptyChar(charStack *s)
 {
     return s->size == 0;
@@ -253,7 +278,7 @@ char popChar(charStack *s)
 double popDouble(doubleStack *s)
 {
     if (is_emptyDouble(s))
-        return;
+        return DBL_MAX_EXP;
     (s->size)--;
     return s->stack[s->size];
 }
@@ -264,4 +289,19 @@ void pushChar(charStack *s, char e)
 void pushDouble(doubleStack *s, double e)
 {
     s->stack[(s->size)++] = e;
+}
+
+void man(){
+    printf("\n\n\tCALCULADORA QUE REALIZA SUMA, RESTA, PRODUCTO Y COCIENTE.\n\n");
+    printf("\tTODA CUENTA DEBE ESTAR ENCERRADA ENTRE PARENTESIS, EN BASE A \n\tLA ASOCIATIVIDAD QUE DESEE EL USUARIO.\n");
+    printf("\tPARA REALIZAR UNA CUENTA, ESCRIBIRLA DE MANERA CORRECTA, \n\tESCRIBIR UN \"=\" AL FINAL Y PRESIONAR LA TECLA ENTER.\n");
+    printf("\tPARA BORRAR EL ULTIMO CARACTER INTRODUCIDO, PRESIONAR LA \n\tTECLA BACKSPACE.\n");
+    printf("\tPARA BORRAR TODA LA LINEA, PRESIONAR LA TECLA ENTER.\n");
+    printf("\tPARA LOS SIMBOLOS *,/,( Y ), PRESIONARLOS MANTENIENDO \n\tPRESIONADA LA TECLA SHIFT.\n");
+    printf("\tPARA LOS SIMBOLOS + Y -, PRESIONAR LAS TECLAS DE LA \n\tPARTE IZQUIERDA DEL TECLADO, AL IGUAL QUE EN EL \n\tITEM ANTERIOR.\n");
+    printf("\n\t\t EJEMPLOS DE USO\n\n");
+    printf("\t((3+2)*4)=\n");
+    printf("\t > 20\n");
+    printf("\t(6*(4+2))=\n");
+    printf("\t > 36\n");
 }

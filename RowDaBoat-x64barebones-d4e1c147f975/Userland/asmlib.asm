@@ -1,6 +1,6 @@
 GLOBAL syswrite
 GLOBAL sysread
-;GLOBAL strlen
+GLOBAL processorTemperature
 GLOBAL numlen
 GLOBAL inforeg
 GLOBAL printmem
@@ -11,8 +11,10 @@ GLOBAL sys_GetScreen
 GLOBAL processorFamily
 GLOBAL divExc
 GLOBAL loadProgram
+GLOBAL sysrtc
 
 EXTERN printf
+EXTERN putchar
 
 SECTION .text
 
@@ -114,6 +116,19 @@ sysread:
     push rbp
     mov rbp,rsp
     mov rax,0 ;id syscall read
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+
+
+; -----------------------------------------------------------------------------
+;int sysrtc(int n)
+sysrtc:
+    push rbp
+    mov rbp,rsp
+    mov rax,4 ;id syscall rtc
     int 80h
     mov rsp,rbp
     pop rbp
@@ -289,6 +304,7 @@ loadProgram:
     pop rbp
     ret
 
+; -----------------------------------------------------------------------------
 sys_GetScreen:
     push rbp
     mov rbp,rsp
@@ -297,6 +313,8 @@ sys_GetScreen:
     mov rsp,rbp
     pop rbp
     ret
+; -----------------------------------------------------------------------------
+
 
 divExc:
     push rbp
@@ -307,7 +325,13 @@ divExc:
     mov rsp,rbp
     pop rbp
     ret
+; -----------------------------------------------------------------------------
+processorCriticalTemperature:
+    push rbp
+    mov rbp,rsp
+    ;rdmsr -a IA32_THERM_STATUS
 
-SECTION .bss
-    processorBufferName resw 20
-    processorBufferModel resw 20
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
