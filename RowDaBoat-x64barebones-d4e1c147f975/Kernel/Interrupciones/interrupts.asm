@@ -177,6 +177,8 @@ _syscallHandler:
 	je .rtc
 	cmp rax,5 ;syscall execute
 	je .exe
+	cmp rax,6
+	je .tmp
 	jmp .end
 .read:
 	push rdi
@@ -213,6 +215,9 @@ _syscallHandler:
 	jmp .end
 .rtc:
 	call syscall_rtc
+	jmp .end
+.tmp:
+	call syscall_tmp
 	jmp .end
 .end:
 	iretq
@@ -425,6 +430,29 @@ getRegs:
 	push rbp
 	mov rbp,rsp
 	mov rax, register
+	mov rsp,rbp
+	pop rbp
+	ret
+
+syscall_tmp:
+	push rbp
+	mov rbp,rsp
+	mov rcx,0
+	mov ecx,0x19C;DELTA
+	rdmsr 
+	mov rax,0x88330008
+	mov rdi, rax
+	shr rdi,16
+	and rdi,0x7F
+	mov rcx,0
+	mov ecx,0x1A2;TJMAX
+	rdmsr 
+	mov rax,0x5640000
+	mov rsi,rax
+	shr rsi,16
+	and rsi,0xFF
+	sub rsi,rdi
+	mov rax,rdi
 	mov rsp,rbp
 	pop rbp
 	ret

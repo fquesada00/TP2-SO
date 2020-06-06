@@ -73,7 +73,12 @@ void shell()
         else if(strcmp(command,"time")==0)
         {
             printRtc();
-        }else{
+        }
+        else if(strcmp(command,"temp") == 0)
+        {
+            printf("Core Temperatur: %d °C\n",coreTemp());
+        }
+        else{
             printf("'%s' is not a valid command\n",command);
         }
     }

@@ -327,11 +327,11 @@ divExc:
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
-processorCriticalTemperature:
+processorTemperature:
     push rbp
     mov rbp,rsp
-    ;rdmsr -a IA32_THERM_STATUS
-
+    mov rax,6
+    int 80h
     mov rsp,rbp
     pop rbp
     ret

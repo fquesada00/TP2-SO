@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include "Video_Driver/video_driver.h"
 #include "TaskManager.h"
+extern void _cli();
+extern void _sti();
 static struct TaskManager Tasker;
 static int cantPrograms;
 static int ids;
@@ -8,14 +10,17 @@ static int currentID=-1;
 static char runningPrograms[MAX_PROGRAMS];
 int loadProgram(uint64_t start)
 {
+    _cli();
     ProgramType program;
     program.start=start;
     program.ID=ids++;
     program.screen=screenNumber();
     Tasker.programs[cantPrograms++]=program;
+    _sti();
 }
 void continueProgram(int num, uint64_t rsp)
 {
+    _cli();
     changeScreen(Tasker.programs[num].screen);
     struct State * currentState = (void*)rsp;
     //Si aun no se cargo ningun programa, cargo el primero
@@ -36,6 +41,7 @@ void continueProgram(int num, uint64_t rsp)
             currentID=num;
             loadState(currentState,Tasker.states[num]);
         }
+        _sti();
 }
 
 void loadState(struct State * currentState,Registers state)
