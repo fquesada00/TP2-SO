@@ -92,6 +92,6 @@ void saveState(struct State currentState,Registers * state)
 void restartProgram(uint64_t rsp)
 {
     struct State * currentState = (void*)rsp;
-    currentState->rip=Tasker.programs[currentID].start;
-    currentState->rsp=Tasker.Stacks[currentID]-8;
+    currentState->rip=Tasker.programs[currentID].start; //rip del programa actual
+    currentState->rsp=Tasker.Stacks[currentID]-8; //rsp del programa actual
 }

@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "standardlib.h"
-#define MAX_PARAM 32
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char *buff, int bytes);
@@ -65,7 +64,7 @@ int printf(const char * fmt, ...){
     int idxFmt = 0, idxBuffer = 0;
     char buffer[256] = {0};
     char * sAtFmt;
-    int nAtFmt, nAtFmtLenght, sAtFmtLenght, idxsAtFmt, fAtFmtLenght;
+    int nAtFmt, nAtFmtLenght, idxsAtFmt, fAtFmtLenght;
     double fAtFmt;
     while(fmt[idxFmt]){
         if(fmt[idxFmt] != '%'){
@@ -90,7 +89,6 @@ int printf(const char * fmt, ...){
                 break;
             case 's':
                 sAtFmt = va_arg(arg_param, char *);
-                sAtFmtLenght = strlen(sAtFmt);
                 idxsAtFmt = 0;
                 while(sAtFmt[idxsAtFmt]){
                     buffer[idxBuffer++] = sAtFmt[idxsAtFmt++];
@@ -115,77 +113,6 @@ int printf(const char * fmt, ...){
     va_end(arg_param);
     return idxBuffer;
 }
-
-/*
-void printf(const char *fmt, ...)
-{
-    char auxChar[1] = {0};
-    char floatBuffer[32] = {0};
-    char buffer[256] = {0};
-    char *auxPointer;
-    double num;
-    va_list arg_param;
-    va_start(arg_param, fmt);
-    int idxFmt = 0, start = 0, numLenght, lenght = 0, val, negative = 0, idxBuffer = 0;
-    char auxbuff[64];
-    while (fmt[idxFmt])
-    {
-        idxBuffer = 0;
-        if (fmt[idxFmt] != '%')
-        {
-            buffer[idxBuffer++] = fmt[idxFmt++];
-        }
-        else
-        {
-            if (idxBuffer != 0)
-                syswrite(1, buffer, idxBuffer);
-            switch (fmt[idxFmt + 1])
-            {
-            case 'd':
-                negative = 0;
-                val = va_arg(arg_param, int);
-                if (val < 0)
-                {
-                    negative = 1;
-                    val = -val;
-                    auxbuff[0] = '-';
-                }
-                numLenght = uintToBase(val, auxbuff + negative, 10);
-                syswrite(1, auxbuff, numLenght + negative);
-                idxFmt += 2;
-                start = idxFmt;
-                break;
-            case 'c':
-                auxChar[0] = (char) va_arg(arg_param, int);
-                syswrite(1, auxChar, 1);
-                idxFmt += 2;
-                start = idxFmt;
-                break;
-            case 'f':
-                num = va_arg(arg_param, double);
-                numLenght = doubleToString(num, floatBuffer);
-                syswrite(1, floatBuffer, numLenght * sizeof(char));
-                idxFmt += 2;
-                start = idxFmt;
-                break;
-            case 's':
-                auxPointer = va_arg(arg_param, char *);
-                lenght = strlen(auxPointer) * sizeof(char);
-                syswrite(1, auxPointer, lenght);
-                idxFmt += 2;
-                start = idxFmt;
-                break;
-            default:
-                start = idxFmt++;
-                break;
-            }
-        }
-    }
-    if (idxFmt != start)
-        syswrite(1, fmt + start, idxFmt - start);
-    va_end(arg_param);
-}
-*/
 
 int scanf(const char *fmt, ...)
 {
@@ -216,12 +143,12 @@ int scanf(const char *fmt, ...)
     idxBuffer = 0;
     while (fmt[idxFmt])
     {
+        if(buffer[idxBuffer] == 0) return argsRead;
         if (fmt[idxFmt] != '%')
         {
             if (buffer[idxBuffer] != fmt[idxFmt])
             {
-                printf("\nERROR: tipeo cualquier cosa y te muestro:");
-                printf("\nidxFmtError: %d y %d\n", idxFmt, idxBuffer);
+                printf("\nERROR: No cumple con el formato\n");
                 return -1;
             }
             idxFmt++;
@@ -257,7 +184,7 @@ int scanf(const char *fmt, ...)
                     }
                     else if (nAtBuffer == '-')
                     {
-                        printf("\nERROR: Metiste un -\n");
+                        printf("\nERROR: Hay al menos un '-' de mas\n");
                         return -1;
                     }
                     number *= 10;
@@ -275,13 +202,13 @@ int scanf(const char *fmt, ...)
                 auxPointer = va_arg(arg_param, char *);
                 idxAuxPointer = 0;
                 char cAtBuffer = buffer[idxBuffer++];
-                while (cAtBuffer != ' ') //(1+1)espacio
+                while (cAtBuffer != ' ') 
                 {
-                    if(cAtBuffer == 0 && fmt[idxFmt + 2] == 0){
+                    if(cAtBuffer == 0){
                         auxPointer[idxAuxPointer] = cAtBuffer;
                         return argsRead + 1;
-                    } 
-                    if(cAtBuffer == fmt[idxFmt + 2]){ 
+                    }
+                    else if(cAtBuffer == fmt[idxFmt + 2]){ 
                         break;
                     }
                     auxPointer[idxAuxPointer++] = cAtBuffer;
@@ -315,7 +242,7 @@ int scanf(const char *fmt, ...)
                         continue;
                     }
                     else if(fAtBuffer == '-' && idxFloat > 0){
-                        printf("\nERROR: Metiste un -\n");
+                        printf("\nERROR: Hay al menos un '-' de mas\n");
                         return -1;
                     }
                     if(!decimal){
@@ -349,327 +276,8 @@ int scanf(const char *fmt, ...)
             }
         }
     }
-    /*if(buffer[idxBuffer] != '\0'){
-        //printf("\nERROR: Caracteres de mas\n");
-        return -1;
-    }*/
     return argsRead;
 }
-
-/*
-int scanf(const char *fmt, ...)
-{
-    va_list arg_param;
-    va_start(arg_param, fmt);
-    int i = 0, start = 0, numLenght, j = 0;
-    char auxChar[2] = {0};
-    char *auxPointer;
-    double num, aux = 0;
-    double n;
-    char c;
-    char buff[256]={0};
-    int decimal,reset=0;
-    int negative, number, idx = 0;
-    int * int_param[MAX_PARAM] = {(void *) 0};
-    char * char_param[MAX_PARAM] = {(void *) 0};
-    char * string_param[MAX_PARAM] = {(void *) 0};
-    double * double_param[MAX_PARAM] = {(void *) 0};
-    int int_param_idx = 0, char_param_idx = 0, string_param_idx = 0, double_param_idx = 0;
-    while (fmt[i])//hola k ->
-    {
-        if (fmt[i] != '%')
-        {
-            c = getchar();
-            if (c == '\b')
-            {
-                if(i>=2 && fmt[i-2]=='%'){
-                    switch (fmt[i-1])
-                    {
-                    case 'c':
-                        char_param_idx--;
-                        break;
-                    case 'd':
-                        int_param_idx--;
-                        break;
-                    default:
-                        break;
-                    }
-                    reset=1;
-                    i-=2;
-                    putchar(c);
-                }
-                else if (i > 0)
-                {
-                    i--;
-                    putchar(c);
-                }
-                continue;
-            }
-            else if (c != fmt[i])
-            {
-                putchar(c);
-                printf("\nERROR: tipeo cualquier cosa\n");
-                return;
-            }
-            putchar(c);
-            i++;
-        }
-        else
-        {
-            c = getchar();
-            if (c == '\b')
-            {
-                if (i > 0)
-                {
-                    i--;
-                    putchar(c);
-                }
-                continue;
-            }
-            switch (fmt[i + 1])
-            {
-            case 'c':
-                putchar(c);
-                if(!reset) char_param[char_param_idx] = (char *) va_arg(arg_param, char *);
-                *char_param[char_param_idx++] = c;
-                reset = 0;
-                i += 2;
-                break;
-            case 'd':
-                negative = 0;
-                number = 0;
-                idx = 0;
-                while ((c >= '0' && c <= '9') || c == '-' || c=='\b')
-                {
-                    while(c=='\b'){
-                        if(idx>0){
-                            idx--;
-                            putchar(c);
-                        }
-                    }
-                    if(idx>0 && c == '\b'){
-                        putchar(c);
-                        idx--;
-                        if(negative && idx==1){
-                            negative = 0;
-                        }
-                        else{
-                            number/=10;
-                        }
-                        c = getchar();
-                        continue;
-                    }
-                    else if(c=='\b'){
-                        reset = 1;
-                        i--;
-                        break;
-                    }
-                    putchar(c);
-                    idx++;
-                    if (c == '-' && idx == 1){
-                        negative = 1;
-                        continue;
-                    }
-                    else if(c == '-'){
-                        printf("\nERROR: tipeo cualquier cosa\n");
-                        return;
-                    }
-                    else
-                    {
-                        number *= 10;
-                        number += (c - '0');
-                    }
-                    c = getchar();
-                }
-                if(reset && idx==0) break;
-                if (negative)
-                    number *= -1;
-                
-                if(!reset){
-                    
-                    int_param[int_param_idx] = (int *) va_arg(arg_param, int *); 
-                } 
-                reset = 0;
-                if (fmt[i + 2] == 0)
-                {
-                    *int_param[int_param_idx++] = number;
-                    return;
-                }
-                if (fmt[i + 2] != c)
-                {
-                    putchar(c);
-                    printf("\nERROR: tipeo cualquier cosa\n");
-                    *int_param[int_param_idx++] = number;
-                    return;
-                } //ERROR
-                *int_param[int_param_idx++] = number;
-                putchar(c);
-                i += 3;
-                start = i;
-                printf("reset");
-                break;
-            case 'f':
-                negative = 0;
-                idx = 0;
-                n = 0;
-                aux = 0;
-                decimal = 0;
-                while ((c >= '0' && c <= '9') || (c == '-') || (c == '.'))
-                {
-                    putchar(c);
-                    idx++;
-                    if (c == '-')
-                    {
-                        if (idx == 1)
-                        {
-                            negative = 1;
-                            c = getchar();
-                            continue;
-                        }
-                        else
-                            break;
-                    }
-                    if (c == '.')
-                    {
-
-                        if (decimal == 0)
-                        {
-                            decimal = 1;
-                        }
-                        else
-                            break;
-                    }
-                    else if (!decimal)
-                    {
-                        n *= 10;
-                        n += (c - '0');
-                    }
-                    else
-                    {
-                        decimal *= 10;
-                        aux = (c - '0');
-                        n += aux / (double)decimal;
-                    }
-                    c = getchar();
-                }
-                if (negative)
-                    n *= -1;
-                if (fmt[i + 2] == 0)
-                {
-                    *((double *)va_arg(arg_param, double *)) = n;
-                    return;
-                }
-                if (fmt[i + 2] != c)
-                {
-                    putchar(c);
-                    printf("\nERROR: tipeo cualquier cosa\n");
-                    *((double *)va_arg(arg_param, double *)) = n;
-                    return;
-                }
-
-                *((double *)va_arg(arg_param, double *)) = n;
-                putchar(c);
-                i += 3;
-                start = i;
-                break;
-            case 's':
-                j = 0;
-                auxPointer = va_arg(arg_param, char *);
-                while ((c != ' ' && c != '\n'))
-                {
-                    auxPointer[j++] = c;
-                    putchar(c);
-                    c = getchar();
-                }
-                auxPointer[j] = '\0';
-                if (fmt[i + 2] == 0)
-                {
-                    return;
-                }
-                putchar(c);
-                i += 3;
-                start = i;
-                break;
-            default:
-                start = i++;
-                break;
-            }
-        }
-    }
-    /*if(i!=start) sysread(0, buffer + start, i - start);
-    return 0;
-}
-*/
-
-/*
-int readNumber(){
-    char c;
-    int negative = 0, firstChar = 1, number = 0;
-    while(((c = getchar())>='0' && c<='9') || (c=='-' && firstChar)){
-        if(c=='-') negative = 1;
-        else{
-            number *= 10;
-            number += (c - '0');
-        }
-    }
-    if(negative) number *= -1;
-    return number;
-}
-*/
-
-// variable params
-/*
-void printf(const char * fmt, ...){
-    va_list arg_list;
-    va_start(arg_list, fmt);
-    int i = 0, start, flagPercentage = 0;
-    int pEntera = 0, pDecimal = 0;
-    int number,lenght;
-    char auxChar[2]={0};
-    char * auxPointer;
-    double num;
-    while(fmt[i]){ //%%
-        if(!flagPercentage) start = i;
-        while(fmt[i] && (fmt[i]!='%' || flagPercentage)){
-            i++;
-            flagPercentage = 0;
-        }
-        if(i!=start) syswrite(1, fmt + start, (i-start) * sizeof(char));
-        if(fmt[i] == '%'){
-            switch (fmt[i+1])
-            {
-            case 'd':
-                number = va_arg(arg_list, int);
-                lenght = uintToBase(number, buffer, 10);
-                syswrite(1, buffer, lenght * sizeof(char));
-                i+=2;
-                break;
-            case 'c':
-                auxChar[0] = va_arg(arg_list, int);
-                syswrite(1, auxChar, 2 * sizeof(int));
-                i+=2;
-                break;
-            //TODO
-            case 'f':
-                num = va_arg(arg_list,double);
-                lenght = doubleToString(num,buffer);
-                syswrite(1,buffer,lenght * sizeof(char));
-                i+=2;
-                break;
-            case 's':
-                auxPointer = va_arg(arg_list, char *);
-                syswrite(1, auxPointer,  strlen(auxPointer) * sizeof(char));
-                i+=2;
-                break;
-            default:
-                flagPercentage = 1;
-                break;
-            }
-        }
-    }
-    va_end(arg_list);
-}
-*/
 
 int doubleToString(double num, char *buffer)
 {
@@ -753,6 +361,7 @@ int uintToBase(uint64_t value, char *buffer, uint32_t base)
 void processorInfo()
 {
     char buffer[256] = {0};
+    putchar('\n');
     processorName(buffer);
     printf("Marca del procesador: %s\n", buffer);
     processorExtendedName(buffer);
@@ -766,21 +375,10 @@ void printMemoryFromAddress(long int address)
     char *p = (char *)address;
     for (int i = 0; i < 32; i++)
     {
-        printf("%d = %d\n", p, *p++);
+        printf("%d = %d\n", p, *p);
+        p++;
     }
 }
-/*
-char * intToStr(int n){
-    int lenght = numlen(n);
-    char * p = bufferInt;
-    while (lenght)
-    {
-        int remainder = n % 10;
-        p[--lenght] = remainder + '0';
-        n/=10;
-    }
-    return p;
-}*/
 
 int getScreen()
 {
@@ -805,7 +403,7 @@ void putchar(char c)
 
 void printReg()
 {
-    int64_t buffer[16];
+    uint64_t buffer[16];
     inforeg(buffer);
     char string[128]={0};
     for (int i = 0; i < 15; i++)
@@ -825,6 +423,7 @@ void DivZero()
 int programLoader(void(*program)(void))
 {
     loadPrgrm(program);
+    return 1;
 }
 
 void invOpCode()
@@ -838,16 +437,9 @@ int coreTemp()
 
 
 void printRtc(){
-    printf("%d:%d:%d\n", (sysrtc(4)+21)%24, sysrtc(2), sysrtc(0));
+    printf("\n%d:%d:%d\n", (sysrtc(4)+21)%24, sysrtc(2), sysrtc(0));
 }
-/*
-int n1,n2
-char c
 
-if((scanf(%f)==1 && scanf( %c )==1 && scanf(%f)==1) || 
-(scanf(%c)==1 && scanf( %f )==1 && scanf(%c)==1 && scanf(%f)==1) || (scanf(%c)==1))
-(2+3)
+void manShell(){
 
-(E op E)
-E=n
-*/
+}

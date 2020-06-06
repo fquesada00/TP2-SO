@@ -2,85 +2,27 @@
 extern int syswrite(int fd, const char *buff, int bytes);
 void shell()
 {
-    printf("\nArranco la shell\n");
+    printf("\nInitializing shell\n");
     char command[256]={0};
-    int i = 0;
-    char c = 0;
-    int n,l,k;
-    int le = 10;
-    double d=0;
-    char * p;
-    /*processorInfo();
-    while(1){
-    printf("\nIngrese numero:");
-    scanf("%f",&d);
-    
-    printf("\nNumero leido: %f\n",d);
-    break;
-    }
-    return;*/
-    while (strcmp(command,"quit") != 0)
-    {
-        command[0]=0;
+    int argsRead, memoryAddress, quit = 0;
+    do{
         printf("\nUser:> ");
-        i=0;
-        
-        /*while(1){
-            printf("\nUser:> ");
-            //scanf("%d",&n);
-            //scanf("%f",&d);
-            printf("\nNumber read: %f",d);
-            //printf("%d\n",n);
-            //scanf("%d+%d*%d",&n,&l,&k);
-            //printf("Cuenta: %d+%d*%d",n,l,k);
-            while(le){
-                printf("\n \n \n");
-                le--;
-            }
-            le = 10;
-       }
-        */
-        while ((c=getchar()) != '\n')
-        {
-            if(c != '\b'){
-                command[i++] = c;
-                putchar(c);
-            }else if(i > 0){
-                i--;
-                putchar(c);
-            }
-        }
+        argsRead = scanf("%s %d",command, &memoryAddress);
         putchar('\n');
-        command[i]=0;
-        if(strcmp(command,"processor") == 0)
-            processorInfo();
-        else if(strcmp(command,"printmem") == 0)
-        {
-            printMemoryFromAddress(0x5C00);
+        if(argsRead == 1){
+            if(strcmp(command,"processor") == 0) processorInfo();
+            else if(strcmp(command, "inforeg") == 0) printReg();
+            else if(strcmp(command, "testDivZero") == 0) DivZero();
+            else if(strcmp(command, "testInvOpCode") == 0) invOpCode();
+            else if(strcmp(command, "time") == 0) printRtc();
+            else if(strcmp(command, "help") == 0) manShell();
+            else if(strcmp(command, "quit") == 0) quit = 1;
+            else if(strcmp(command,"temp") == 0){printf("Core temperature: %d",coreTemp());}
+            else printf("\n'%s' is not a valid command\n",command);
         }
-        else if(strcmp(command,"inforeg")==0)
-        {
-            printReg();
+        else if(argsRead == 2){
+            if(strcmp(command,"printmem") == 0) printMemoryFromAddress(memoryAddress);
+            else printf("\n'%s' is not a valid command\n",command);
         }
-        else if(strcmp(command,"divZero")==0)
-        {
-            DivZero();
-        }
-        else if(strcmp(command,"invOpCode") == 0)
-        {
-            invOpCode();
-        }
-        else if(strcmp(command,"time")==0)
-        {
-            printRtc();
-        }
-        else if(strcmp(command,"temp") == 0)
-        {
-            printf("Core Temperatur: %d °C\n",coreTemp());
-        }
-        else{
-            printf("'%s' is not a valid command\n",command);
-        }
-    }
-    
+    }while(!quit);
 }

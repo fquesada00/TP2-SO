@@ -52,6 +52,7 @@ void calc()
     double result = 0;
     char input[64];
     int idxInput = 0, error;
+    printf("\nInitializing calculator\n");
     while (1)
     {
         idxInput = 0;

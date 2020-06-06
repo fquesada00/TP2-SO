@@ -19,4 +19,5 @@ int programLoader(void(*program)(void));
 void printRtc();
 void invOpCode();
 int coreTemp();
+void manShell();
 #endif
