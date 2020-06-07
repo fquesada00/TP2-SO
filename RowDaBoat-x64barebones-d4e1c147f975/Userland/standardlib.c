@@ -403,11 +403,76 @@ void putchar(char c)
 
 void printReg()
 {
-    uint64_t buffer[16];
+    uint64_t buffer[20];
     inforeg(buffer);
     char string[128]={0};
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < 20; i++)
     {
+        switch (i)
+        {
+        case 19:
+            printf("ss = ");
+            break;
+        case 18:
+            printf("rsp = ");
+            break;
+        case 17:
+            printf("rflags = ");
+            break;
+        case 16:
+            printf("cs = ");
+            break;
+        case 15:
+            printf("rip = ");
+            break;
+        case 14:
+            printf("rax = ");
+            break;
+        case 13:
+            printf("rbx = ");
+            break;
+        case 12:
+            printf("rcx = ");
+            break;
+        case 11:
+            printf("rdx = ");
+            break;
+        case 10:
+            printf("rbp = ");
+            break;
+        case 9:
+            printf("rdi = ");
+            break;
+        case 8:
+            printf("rsi = ");
+            break;
+        case 7:
+            printf("r8 = ");
+            break;
+        case 6:
+            printf("r9 = ");
+            break;
+        case 5:
+            printf("r10 = ");
+            break;
+        case 4:
+            printf("r11 = ");
+            break;
+        case 3:
+            printf("r12 = ");
+            break;
+        case 2:
+            printf("r13 = ");
+            break;
+        case 1:
+            printf("r14 = ");
+            break;
+        case 0:
+            printf("r15 = ");
+            break;
+        default:
+            break;
+        }
         uintToBase(buffer[i],string,16);
         printf(string);
         putchar('\n');

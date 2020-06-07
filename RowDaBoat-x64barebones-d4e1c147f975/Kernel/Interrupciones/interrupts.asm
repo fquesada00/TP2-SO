@@ -15,8 +15,6 @@ GLOBAL _irq05Handler
 GLOBAL _syscallHandler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
-GLOBAL save_regs
-GLOBAL getRegs
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
@@ -405,33 +403,6 @@ _exception6Handler:
 haltcpu:
 	cli
 	hlt
-	ret
-
-save_regs:
-	push rbp
-	mov rbp,rsp
-	mov rsi,0
-.loop:
-	mov rax,[rdi]
-	mov [register+rsi],rax
-	add rsi, 8
-	add rdi,8
-	cmp rsi,120
-	je .end
-	jmp .loop
-.end:
-	mov rax,0
-	mov rsp,rbp
-	pop rbp
-	ret
-
-
-getRegs:
-	push rbp
-	mov rbp,rsp
-	mov rax, register
-	mov rsp,rbp
-	pop rbp
 	ret
 
 syscall_tmp:

@@ -3,8 +3,7 @@
 #include "../TaskManager.h"
 #include "../Video_Driver/video_driver.h"
 extern char getKeyboardScanCode();
-extern void save_regs();
-
+#include "../Interrupciones/States.h"
 static char keyboard_buffer[256];
 static int buff_size = 0;
 static int current = 0;
@@ -20,6 +19,9 @@ void keyboardHandler(uint64_t rsp)
     signed char scan = getKeyboardScanCode();
     static int shift = 0;
     static int control = 0;
+    char buff[64];
+    uintToBase(scan,buff,16);
+    //puts(buff);
     //Los codigos de los scan code de apretar una tecla van de 0 a 0x56
     if (scan >= 0 && scan <= 0x56)
     {
@@ -69,7 +71,7 @@ void keyboardHandler(uint64_t rsp)
     {
         shift = 0;
     }
-    else
+    else if(scan == 0xFFFFFFFFFFFFFF9D)
     {
         control = 0;
     }

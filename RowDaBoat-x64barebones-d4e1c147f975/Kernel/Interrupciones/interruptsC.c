@@ -1,8 +1,9 @@
 #include "../Keyboard_Driver/keyboardDriver.h"
 #include "../Video_Driver/video_driver.h"
 #include <stdint.h>
+#include <lib.h>
+#include "States.h"
 extern void _hlt();
-extern uint64_t * getRegs();
 int syscall_read(int fd, char * buffer,int n)
 {
     int i;
@@ -22,16 +23,9 @@ int syscall_write(int fd, const char * buffer,int n)
 {
    putsN(buffer,n);
 }
-
 int syscall_registers(uint64_t * regs)
 {
-    uint64_t * buffer = getRegs();
-    for (int i = 0; i < 15; i++)
-    {
-        regs[i]=buffer[i];
-    }
-
-    
+    State * savedState = getRegs();
+    memcpy(regs,savedState,sizeof(State));
+    return 1;    
 }
-
-
