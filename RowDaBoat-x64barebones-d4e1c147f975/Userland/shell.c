@@ -3,6 +3,7 @@ extern int syswrite(int fd, const char *buff, int bytes);
 void shell()
 {
     printf("\nInitializing shell\n");
+    printf("\nType 'help' to see the shell commands list\n");
     char command[256]={0};
     int argsRead, memoryAddress, quit = 0;
     do{
