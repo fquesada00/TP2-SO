@@ -363,9 +363,9 @@ void processorInfo()
     printf("Modelo de procesador: %d\n", processorModel());
 }
 
-void printMemoryFromAddress(long int address)
+void printMemoryFromAddress(uint64_t address)
 {
-    unsigned char *p = (char *)address;
+    unsigned char *p = (unsigned char *)address;
     for (int i = 0; i < 32; i++)
     {
         printf("%d = %d\n", p, *p);

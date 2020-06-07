@@ -9,7 +9,6 @@ static int cantPrograms;
 static int ids;
 static int currentID = -1;
 static char runningPrograms[MAX_PROGRAMS];
-static State Userland;
 static uint64_t Stacks [MAX_PROGRAMS][STACK_SIZE];
 static State states [MAX_PROGRAMS];
 int loadProgram(uint64_t start)
@@ -42,7 +41,7 @@ void continueProgram(int num, uint64_t rsp)
         }
         runningPrograms[num] = 1;
         currentID = num;
-        states[num].rsp = Stacks[num] + (STACK_SIZE-1);
+        states[num].rsp =(uint64_t) Stacks[num] + (STACK_SIZE-1);
         states[num].rip = Tasker.programs[num].start;
         currentState->rip = states[num].rip;
         currentState->rsp = states[num].rsp;
@@ -69,5 +68,5 @@ void restartProgram(uint64_t rsp)
 {
     struct State *currentState = (void *)rsp;
     currentState->rip = Tasker.programs[currentID].start; //rip del programa actual
-    currentState->rsp = Stacks[currentID] +STACK_SIZE-1;     //rsp del programa actual
+    currentState->rsp =(uint64_t) Stacks[currentID] +STACK_SIZE-1;     //rsp del programa actual
 }
