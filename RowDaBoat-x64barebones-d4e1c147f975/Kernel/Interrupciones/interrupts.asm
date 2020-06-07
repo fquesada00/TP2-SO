@@ -15,17 +15,9 @@ GLOBAL _irq05Handler
 GLOBAL _syscallHandler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
-GLOBAL save_regs
-GLOBAL getRegs
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
-EXTERN screenNumber
-EXTERN get_buffer
-EXTERN putsN ;TODO
-EXTERN printreg
-EXTERN putChar
-EXTERN puts
 EXTERN syscall_read
 EXTERN syscall_write
 EXTERN syscall_registers
@@ -91,16 +83,13 @@ SECTION .text
 	iretq
 %endmacro
 
-;no se si se puede poner extern en una macro
-%macro regDispatcher 2
-    push rdi
-    push rsi
-	mov rdi, %1 ;pasaje de parametro 1 -> # reg
-	mov rsi, %2 ;pasaje de parametro 2 -> value of # reg
-    call printreg
-    pop rsi
-    pop rdi
-%endmacro
+;Zero Division Exception
+_exception0Handler:
+	exceptionHandler 0
+
+;Invalid Op Code Exception
+_exception6Handler:
+	exceptionHandler 6
 
 _hlt:
 	sti
@@ -169,15 +158,13 @@ _syscallHandler:
 	je .read
 	cmp rax,1 ;syscall write
 	je .write
-	cmp rax,2 ;syscall screen
-	je .screen
-	cmp rax,3 ;syscall registers
+	cmp rax,2 ;syscall registers
 	je .register
-	cmp rax,4 ;syscall rtc
+	cmp rax,3 ;syscall rtc
 	je .rtc
-	cmp rax,5 ;syscall execute
+	cmp rax,4 ;syscall execute
 	je .exe
-	cmp rax,6
+	cmp rax,5 ;syscall tmp
 	je .tmp
 	jmp .end
 .read:
@@ -194,15 +181,6 @@ _syscallHandler:
 	push rsi
 	push rdx
 	call syscall_write
-	pop rdx
-	pop rsi
-	pop rdx
-	jmp .end
-.screen:
-	push rdi
-	push rsi
-	push rdx
-	call syscall_screen
 	pop rdx
 	pop rsi
 	pop rdx
@@ -323,23 +301,9 @@ _syscallHandler:
 
 
 ; -----------------------------------------------------------------------------
-;SYSCALL SCREEN_NUMBER -> #2
-;Params
-;	-
-;Ret
-;	rax -> screen number
-syscall_screen:
-	push rbp
-	mov rbp,rsp
-	call screenNumber
-	mov rsp,rbp
-	pop rbp
-	ret
-; -----------------------------------------------------------------------------
-
 
 ; -----------------------------------------------------------------------------
-;SYSCALL RTC -> #4
+;SYSCALL RTC -> #3
 ;Params
 ;	rdi -> int n
 ;Ret
@@ -365,88 +329,29 @@ syscall_rtc:
     ret
 ; -----------------------------------------------------------------------------
 
-
-; -----------------------------------------------------------------------------
-;SYSCALL PRINT_REGS -> #3
-;Params
-;	-
-;Ret
-;	-
-;syscall_registers:
-;	push rbp
-;	mov rbp,rsp
-;	push rax
-;	push rbx
-;	lea rbx,[rbp + 8*19] ;rbx -> rip
-;	mov rax,16 ;acumulador
-;.loop:
-;	cmp rax,0
-;	je .end ;no regs left
-;	regDispatcher rax, [rbx]
-;	sub rbx,8
-;	dec rax
-;	jmp .loop
-;.end:
-;	pop rbx
-;	pop rax
-;	mov rsp,rbp
-;	pop rbp
-;	ret
-; -----------------------------------------------------------------------------
-
-;Zero Division Exception
-_exception0Handler:
-	exceptionHandler 0
-
-;Invalid Op Code Exception
-_exception6Handler:
-	exceptionHandler 6
-
 haltcpu:
 	cli
 	hlt
 	ret
 
-save_regs:
-	push rbp
-	mov rbp,rsp
-	mov rsi,0
-.loop:
-	mov rax,[rdi]
-	mov [register+rsi],rax
-	add rsi, 8
-	add rdi,8
-	cmp rsi,120
-	je .end
-	jmp .loop
-.end:
-	mov rax,0
-	mov rsp,rbp
-	pop rbp
-	ret
 
-
-getRegs:
-	push rbp
-	mov rbp,rsp
-	mov rax, register
-	mov rsp,rbp
-	pop rbp
-	ret
-
+; -----------------------------------------------------------------------------
+;SYSCALL TMP -> #5
+;Ret
+;	rax -> processor temperature
 syscall_tmp:
 	push rbp
 	mov rbp,rsp
 	mov rcx,0
 	mov ecx,0x19C;DELTA
-	rdmsr 
+	;rdmsr 
 	mov rax,0x88330008
 	mov rdi, rax
 	shr rdi,16
 	and rdi,0x7F
 	mov rcx,0
 	mov ecx,0x1A2;TJMAX
-	rdmsr 
+	;rdmsr 
 	mov rax,0x5640000
 	mov rsi,rax
 	shr rsi,16
@@ -456,5 +361,3 @@ syscall_tmp:
 	mov rsp,rbp
 	pop rbp
 	ret
-section .bss
-register: resq  16

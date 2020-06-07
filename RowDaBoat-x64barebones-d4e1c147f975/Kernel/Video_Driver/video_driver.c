@@ -75,13 +75,13 @@ void init_video()
 }
 
 /*Obtiene un puntero al pixel deseado a partir de la posicion inicial*/
-uint32_t getAbsolutePixelDataPosition(int x, int y)
+uint64_t getAbsolutePixelDataPosition(int x, int y)
 {
     return (start + (x + y * WIDTH) * PIXELSIZE);
 }
 
 /*Obtiene un puntero al pixel deseado a parti de la posicion actual de donde se esta escribiendo*/
-uint32_t getRelativePixelDataPosition(int x, int y)
+uint64_t getRelativePixelDataPosition(int x, int y)
 {
     return (currentscreen_info->framebuffer + current[current_screen] + (SCREEN_WIDTH + 1) * current_screen * PIXELSIZE + (x + y * WIDTH) * PIXELSIZE);
 }
@@ -118,7 +118,7 @@ void putCharColor(char c, char r, char g, char b)
     else
     {
         //Accedo al mapa de bits de la fuente y tomo el mapa del caracter deseado
-        char *bitmap = font8x8_basic[c];
+        char *bitmap = font8x8_basic[(int)c];
         int set;
 
         for (int i = 0; i < CHARSIZE; i++)
@@ -137,14 +137,13 @@ void putCharColor(char c, char r, char g, char b)
             }
         }
         //Si estoy al final de la linea pongo mi current en la siguiente linea de caracteres
-        if ((/*(currentscreen_info->framebuffer) - start)*/ current[current_screen] % (SCREEN_WIDTH * PIXELSIZE) == (SCREEN_WIDTH - CHARSIZE) * PIXELSIZE))
+        if ((current[current_screen] % (SCREEN_WIDTH * PIXELSIZE) == (SCREEN_WIDTH - CHARSIZE) * PIXELSIZE))
         {
             scrollUp();
-            ///*currentscreen_info->framebuffer*/current[current_screen] += (CHARSIZE * WIDTH * PIXELSIZE) - SCREEN_WIDTH * PIXELSIZE;
             current[current_screen] = START_POS - CHARSIZE * PIXELSIZE;
         }
         //Aumento el current en 1 caracter
-        /*currentscreen_info->framebuffer*/ current[current_screen] += PIXELSIZE * CHARSIZE;
+        current[current_screen] += PIXELSIZE * CHARSIZE;
         chars_written[current_screen]++;
     }
 }
@@ -153,15 +152,14 @@ void putCharColor(char c, char r, char g, char b)
 void deleteChar()
 {
     //Si estoy al comienzo de todo no hago nada
-    if (/*currentscreen_info->framebuffer == start current[current_screen] == START_POS*/ chars_written[current_screen] <= 0)
+    if (chars_written[current_screen] <= 0)
         return;
     //Si estoy al comienzo de una linea que no es la primera me muevo una linea de caracteres para arriba
-    if (/*(currentscreen_info->framebuffer - start) % (WIDTH * 3) == 0*/ current[current_screen] % SCREEN_WIDTH * PIXELSIZE == 0)
+    if (current[current_screen] % SCREEN_WIDTH * PIXELSIZE == 0)
     {
-        /*currentscreen_info->framebuffer*/ current[current_screen] -= WIDTH * PIXELSIZE * CHARSIZE - SCREEN_WIDTH * 3;
+        current[current_screen] -= WIDTH * PIXELSIZE * CHARSIZE - SCREEN_WIDTH * 3;
     }
     //Me voy un caracter para atras
-    //currentscreen_info->framebuffer -= 24;
     current[current_screen] -= PIXELSIZE * CHARSIZE;
     chars_written[current_screen]--;
     for (int i = 0; i < CHARSIZE; i++)
@@ -202,7 +200,7 @@ void clear()
             write_pixel(j, i, 0, 0, 0);
         }
 
-    /*currentscreen_info->framebuffer = start;*/ current[current_screen] = START_POS;
+    current[current_screen] = START_POS;
 }
 //TOCHECK
 /*Elimina una linea*/
@@ -224,17 +222,17 @@ void scrollUp()
     clearLine(i - 1);
 }
 /*Imprime en pantalla un string con color*/
-void putsColor(char *string, char r, char g, char b)
+void putsColor(const char *string, char r, char g, char b)
 {
     while (*string != 0)
     {
-        putCharColor(*string,r,g,b);
+        putCharColor(*string, r, g, b);
         string++;
     }
 }
 
 /*Imprime un string a pantalla*/
-void puts(char *string)
+void puts(const char *string)
 {
     while (*string != 0)
     {
@@ -242,20 +240,16 @@ void puts(char *string)
         string++;
     }
 }
-//CAMBIE DE NUEVO EL 9 por el 8
 /*Imprime un salto de Linea*/
 void newLine()
 {
-    /*
-    uint32_t auxi = /*(currentscreen_info->framebuffer - start) % (WIDTH * 3);*/
-    ;
-    /*currentscreen_info->framebuffercurrent[current_screen] += (WIDTH * 3 * 8) - auxi;*/
+
     scrollUp();
     current[current_screen] = START_POS;
     chars_written[current_screen] = 0;
 }
 
-int putsN(char *buffer, int n)
+int putsN(const char *buffer, int n)
 {
     int i;
     for (i = 0; i < n && buffer[i]; i++)
@@ -277,4 +271,3 @@ void changeScreen(int num)
         return;
     current_screen = num;
 }
-

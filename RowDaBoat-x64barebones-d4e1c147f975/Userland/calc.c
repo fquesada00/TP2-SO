@@ -175,7 +175,7 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error)
     int j = 0;
     double left, right;
     *error = 0;
-    while (i < op_dim )
+    while (!(*error) && i < op_dim )
     {
         if (op[i] == 'n')
         {
@@ -194,6 +194,7 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error)
             if (!is_emptyDouble(&d))
                 left = popDouble(&d);
             else{
+            
                 *error = 2;
                 break;
             }
@@ -223,7 +224,7 @@ double evaluate(char *op, double *numbers, int op_dim, int num_idx, int *error)
         }
     }
     double result = popDouble(&d);
-    if(result == DBL_MAX_EXP) *error = 2;
+    if(!(*error) && result == DBL_MAX_EXP) *error = 2;
     return result;
 }
 int getPrecedence(char prev, char current)

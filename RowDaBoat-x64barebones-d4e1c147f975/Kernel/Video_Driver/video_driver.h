@@ -3,7 +3,7 @@
 #include <stdint.h>
 void write_pixel(int x, int y,char r,char g, char b);
 void putChar(char c);
-void puts(char * string);
+void puts(const char * string);
 void newLine();
 void clearLine(int line);
 void clear();
@@ -12,8 +12,8 @@ void upLine(int line);
 void scrollUp();
 void init_video();
 void changeScreen(int num);
-int putsN(char * buffer, int n);
-void putsColor(char *string, char r, char g, char b);
+int putsN(const char * buffer, int n);
+void putsColor(const char *string, char r, char g, char b);
 void putCharColor(char c, char r, char g, char b);
 int screenNumber();
 #endif

@@ -1,97 +1,25 @@
 GLOBAL syswrite
 GLOBAL sysread
 GLOBAL processorTemperature
-GLOBAL numlen
 GLOBAL inforeg
-GLOBAL printmem
 GLOBAL processorModel
 GLOBAL processorName
 GLOBAL processorExtendedName
-GLOBAL sys_GetScreen
 GLOBAL processorFamily
 GLOBAL divExc
 GLOBAL loadPrgrm
 GLOBAL sysrtc
 GLOBAL invalidOpCode
 
-EXTERN printf
-EXTERN putchar
-
 SECTION .text
-
-%macro pushState 0
-	push rax
-	push rbx
-	push rcx
-	push rdx
-	push rbp
-	push rdi
-	push rsi
-	push r8
-	push r9
-	push r10
-	push r11
-	push r12
-	push r13
-	push r14
-	push r15
-%endmacro
-
-%macro popState 0
-	pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop r11
-	pop r10
-	pop r9
-	pop r8
-	pop rsi
-	pop rdi
-	pop rbp
-	pop rdx
-	pop rcx
-	pop rbx
-	pop rax
-%endmacro
 
 ;REHACER
 ; -----------------------------------------------------------------------------
 inforeg:
     push rbp
     mov rbp,rsp
-    mov rax,3 ;id syscall registers
+    mov rax,2 ;id syscall registers
     int 80h
-    mov rsp,rbp
-    pop rbp
-    ret
-; -----------------------------------------------------------------------------
-
-
-
-
-; -----------------------------------------------------------------------------
-;Params
-;   rdi -> dir
-;Ret
-;   -
-printmem:
-    push rbp
-    mov rbp,rsp
-    push rbx
-    mov rbx,0 ;acumulador
-.loop:
-    cmp rbx,32
-    je .end
-    push rdi
-    mov rdi,[rdi]
-    call printf
-    pop rdi
-    inc rdi ;next byte
-    inc rbx
-    jmp .loop
-.end:
-    pop rbx
     mov rsp,rbp
     pop rbp
     ret
@@ -129,71 +57,12 @@ sysread:
 sysrtc:
     push rbp
     mov rbp,rsp
-    mov rax,4 ;id syscall rtc
+    mov rax,3 ;id syscall rtc
     int 80h
     mov rsp,rbp
     pop rbp
     ret
 ; -----------------------------------------------------------------------------
-
-
-; -----------------------------------------------------------------------------
-;Params
-;   rdi -> char * string
-;Ret
-;   rax -> string lenght
-;strlen:
-;    push rbp
-;    mov rbp,rsp
-;    push rdi
-;    mov rax,0
-;.loop:
-;    cmp byte [rdi],0
-;    je .end ;if null, then finish
-;    inc rax
-;    inc rdi
-;    jmp .loop
-;.end:
-;    pop rdi
-;    mov rsp,rbp
-;    pop rbp
-;    ret
-; -----------------------------------------------------------------------------
-
-
-; -----------------------------------------------------------------------------
-;Params
-;   rdi -> int n
-;Ret
-;   rax -> n lenght
-numlen:
-    push rbp
-    mov rbp,rsp
-    push rbx
-    push rcx
-    push rdx
-    mov rbx,0 ;accum
-    cmp rdi,0 ;if null, finish
-    je .end
-    mov rax,rdi ;charge number
-.loop:
-    mov rcx,10 ;divisor
-    mov rdx,0 ;resto
-    div rcx ;rax divided by rcx
-    inc rbx 
-    cmp rax,0
-    je .end ;if 0, then number is gone
-    jmp .loop
-.end:
-    mov rax,rbx
-    pop rdx
-    pop rcx
-    pop rbx
-    mov rsp,rbp
-    pop rbp
-    ret
-; -----------------------------------------------------------------------------
-
 
 ; -----------------------------------------------------------------------------
 ;Params
@@ -268,7 +137,7 @@ processorModel:
     mov rax,1 
     cpuid
     shr rax,4 
-    and rax,0000000000000000000000000000000000000000000000000000000000001111b ;first 4 bits -> processor model
+    and rax,0x0F ;first 4 bits -> processor model
     pop rbx
     mov rsp,rbp
     pop rbp
@@ -288,8 +157,7 @@ processorFamily:
     mov rax,1 
     cpuid
     shr rax,8
-    and rax,0x000000000000000F
-    ;and rax,0000000000000000000000000000000000000000000000000000000000001111b
+    and rax,0x0F
     pop rbx
     mov rsp,rbp
     pop rbp
@@ -299,23 +167,11 @@ processorFamily:
 loadPrgrm:
     push rbp
     mov rbp,rsp
-    mov rax,5
+    mov rax,4
     int 80h
     mov rsp,rbp
     pop rbp
     ret
-
-; -----------------------------------------------------------------------------
-sys_GetScreen:
-    push rbp
-    mov rbp,rsp
-    mov rax,2
-    int 80h
-    mov rsp,rbp
-    pop rbp
-    ret
-; -----------------------------------------------------------------------------
-
 
 divExc:
     push rbp
@@ -330,7 +186,7 @@ divExc:
 processorTemperature:
     push rbp
     mov rbp,rsp
-    mov rax,6
+    mov rax,5
     int 80h
     mov rsp,rbp
     pop rbp
