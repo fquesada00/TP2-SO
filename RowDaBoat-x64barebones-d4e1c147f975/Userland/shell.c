@@ -18,11 +18,11 @@ void shell()
             else if(strcmp(command, "help") == 0) manShell();
             else if(strcmp(command,"coreTemp") == 0) printCoreTemp();
             else if(strcmp(command,"printmem")==0) printf("\nprintmem requires an input address\nUsage: 'printmem [ADDRESS]'\n");
-            else printf("\n'%s' is not a valid command\nType 'help' to see a list of available commands\n",command);
+            else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);
         }
         else if(argsRead == 2){
             if(strcmp(command,"printmem") == 0) printMemoryFromAddress(memoryAddress);
-            else printf("\n'%s' is not a valid command\nType 'help' to see a list of available commands\n",command);
+            else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);
         }
     }while(1);
 }
