@@ -255,13 +255,14 @@ void newLine()
     chars_written[current_screen] = 0;
 }
 
-void putsN(char *buffer, int n)
+int putsN(char *buffer, int n)
 {
-    for (int i = 0; i < n && buffer[i]; i++)
+    int i;
+    for (i = 0; i < n && buffer[i]; i++)
     {
         putChar(buffer[i]);
     }
-    return;
+    return i;
 }
 
 int screenNumber()

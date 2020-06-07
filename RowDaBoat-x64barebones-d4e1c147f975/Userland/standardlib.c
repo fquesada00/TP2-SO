@@ -148,7 +148,6 @@ int scanf(const char *fmt, ...)
         {
             if (buffer[idxBuffer] != fmt[idxFmt])
             {
-                printf("\nERROR: No cumple con el formato\n");
                 return -1;
             }
             idxFmt++;
@@ -184,7 +183,6 @@ int scanf(const char *fmt, ...)
                     }
                     else if (nAtBuffer == '-')
                     {
-                        printf("\nERROR: Hay al menos un '-' de mas\n");
                         return -1;
                     }
                     number *= 10;
@@ -242,7 +240,6 @@ int scanf(const char *fmt, ...)
                         continue;
                     }
                     else if(fAtBuffer == '-' && idxFloat > 0){
-                        printf("\nERROR: Hay al menos un '-' de mas\n");
                         return -1;
                     }
                     if(!decimal){
@@ -270,7 +267,6 @@ int scanf(const char *fmt, ...)
                 }
                 break;
             default:
-                printf("\nERROR: Formato desconocido\n");
                 return -1;
                 break;
             }

@@ -21,7 +21,7 @@ int syscall_read(int fd, char * buffer,int n)
 }
 int syscall_write(int fd, const char * buffer,int n)
 {
-   putsN(buffer,n);
+   return putsN(buffer,n);
 }
 int syscall_registers(uint64_t * regs)
 {
