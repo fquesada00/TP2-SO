@@ -1,5 +1,4 @@
-#include "../Exceptions/Zero_Division.h"
-#include "../Exceptions/Invalid_Op_Code.h"
+#include "Exceptions.h"
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OP_CODE 6

@@ -2,11 +2,7 @@
 #include <string.h>
 #include <lib.h>
 #include <moduleLoader.h>
-#include <naiveConsole.h>
-#include "Video_Driver/video_driver.h"
-#include "Keyboard_Driver/keyboardDriver.h"
 #include "Interrupciones/idtLoader.h"
-#include "Interrupciones/time.h"
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;

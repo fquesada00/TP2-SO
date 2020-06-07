@@ -6,14 +6,11 @@
 extern int syswrite(int fd, const char *buff, int bytes);
 // asumimos fd=0 STDIN
 extern int sysread(int fd, char *buff, int bytes);
-extern int numlen(int);
-extern void printmem(long int);
 extern void inforeg(uint64_t * regs);
 extern char *processorName(char*);
 extern char *processorExtendedName(char *);
 extern int processorModel(void);
 extern int processorFamily(void);
-extern int sys_GetScreen();
 extern int divExc();
 extern int loadPrgrm(void(*programa)(void));
 extern int processorTemperature();
@@ -368,17 +365,12 @@ void processorInfo()
 
 void printMemoryFromAddress(long int address)
 {
-    char *p = (char *)address;
+    unsigned char *p = (char *)address;
     for (int i = 0; i < 32; i++)
     {
         printf("%d = %d\n", p, *p);
         p++;
     }
-}
-
-int getScreen()
-{
-    return sys_GetScreen();
 }
 
 int getchar()

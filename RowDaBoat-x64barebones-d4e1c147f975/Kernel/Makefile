@@ -39,6 +39,6 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o *.o *.bin Interrupciones/*.o Keyboard_Driver/*.o Video_Driver/*.o
+	rm -rf asm/*.o *.o *.bin Interrupciones/*.o Keyboard_Driver/*.o Video_Driver/*.o Exceptions/*.o
 
 .PHONY: all clean
