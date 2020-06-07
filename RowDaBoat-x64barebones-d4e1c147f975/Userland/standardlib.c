@@ -16,7 +16,7 @@ extern int processorFamily(void);
 extern int sys_GetScreen();
 extern int divExc();
 extern int loadPrgrm(void(*programa)(void));
-extern void processorTemperature();
+extern int processorTemperature();
 extern unsigned char sysrtc(int);
 extern void invalidOpCode();
 
@@ -426,13 +426,11 @@ void invOpCode()
 {
     invalidOpCode();
 }
-
-
-
-
-void temperature(){
-
+void printCoreTemp()
+{
+    printf("\nCore temperature: %d C\n",processorTemperature());
 }
+
 
 void printRtc(){
     printf("\n%d:%d:%d\n", (sysrtc(4)+21)%24, sysrtc(2), sysrtc(0));
