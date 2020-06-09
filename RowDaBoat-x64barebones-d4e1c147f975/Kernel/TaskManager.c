@@ -17,7 +17,7 @@ int loadProgram(uint64_t start)
     if(cantPrograms>= MAX_PROGRAMS)
     {
         _sti();
-        return 0;
+        return 1;
     }
     ProgramType program;
     program.start = start;

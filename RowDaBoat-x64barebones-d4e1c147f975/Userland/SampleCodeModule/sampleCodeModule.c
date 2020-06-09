@@ -10,8 +10,13 @@ typedef struct ProgramType
 } ProgramType;
 int main()
 {
-	programLoader((function)calc); //left screen
-	programLoader((function)shell); //right screen
+
+	
+	if(programLoader((function)calc) || programLoader((function)shell)) //left screen calc, right screen shell
+	{
+		printf("Error Loading Program!!\n");
+		return 1;
+	}
 	printf("Press CTRL + 1 to run calculator on left screen\n");
 	printf("Press CTRL + 2 to run shell on right screen\n");
 	printf("Waiting for instruction...\n");

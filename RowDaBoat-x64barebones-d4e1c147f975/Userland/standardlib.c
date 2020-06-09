@@ -481,8 +481,7 @@ void DivZero()
 
 int programLoader(void(*program)(void))
 {
-    loadPrgrm(program);
-    return 1;
+    return loadPrgrm(program);
 }
 
 void invOpCode()
