@@ -508,9 +508,9 @@ void manShell(){
     printf("\tprocessor: MUESTRA POR SALIDA ESTANDARD LA MARCA, MARCA\n\tEXTENDIDA, FAMILIA Y MODELO DEL PROCESADOR\n\n");
     printf("\ttemp: MUESTRA POR SALIDA ESTANDARD LA TEMPERATURA DEL\n\tPROCESADOR MEDIDA EN GRADOS CENTIGRADOS\n\n");
     printf("\ttestDivZero: EJECUTA LA EXCEPCION 0 DE TIPO DIVISION POR CERO\n\n");
-    printf("\t\tDespliega los registros al momento de ejecucion del comando\n\n");
+    printf("\t\tMuestra el funcionamiento de la rutina de atencion \n\tde dicha excepcion\n\n");
     printf("\ttestInvOpCode: EJECUTA LA EXCEPCION 6 DE TIPO INVALID OP CODE\n\n");
-    printf("\t\tDespliega los registros al momento de ejecucion del comando\n\n");
+    printf("\t\tMuestra el funcionamiento de la rutina \n\tde atencion de dicha excepcion\n\n");
     printf("\thelp: MUESTRA POR SALIDA ESTANDAR ESTE PANEL\n\n");
     printf("\n\n\n");
     printf("\tPARA EJECUTAR CUALQUIER COMANDO, SE DEBE PRESIONAR LA TECLA\n\tENTER AL FINAL\n");
