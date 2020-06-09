@@ -53,6 +53,7 @@ void calc()
     char input[64];
     int idxInput = 0, error;
     printf("\nInitializing calculator\n");
+    printf("\nType 'help' to see the calculator manual\n");
     while (1)
     {
         idxInput = 0;
