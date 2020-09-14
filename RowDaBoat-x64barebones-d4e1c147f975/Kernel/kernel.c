@@ -2,8 +2,8 @@
 #include <string.h>
 #include <lib.h>
 #include <moduleLoader.h>
-#include "Interrupciones/idtLoader.h"
-#include "Video_Driver/video_driver.h"
+#include "idtLoader.h"
+#include "video_driver.h"
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;

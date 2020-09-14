@@ -11,7 +11,8 @@ $(ASM):
 	nasm -f elf64 $(SOURCES_LIB_ASM)
 
 $(MODULE): $(SOURCES)
-	$(GCC) $(GCCFLAGS) -T sampleCodeModule.ld _loader.c $(SOURCES) $(SOURCES_LIB) $(OBJECTS_LIB_ASM) -o ../$(MODULE)
+	$(GCC) $(GCCFLAGS) -T sampleCodeModule.ld _loader.c $(SOURCES) $(SOURCES_LIB) $(OBJECTS_LIB_ASM) -I ../include -o ../$(MODULE)
+
 
 clean:
 	rm -rf *.o

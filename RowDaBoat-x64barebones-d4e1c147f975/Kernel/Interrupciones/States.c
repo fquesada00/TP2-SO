@@ -1,5 +1,5 @@
 #include "States.h"
-#include "../Video_Driver/video_driver.h"
+#include "video_driver.h"
 #include <lib.h>
 static State savedState={0};
 uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base)

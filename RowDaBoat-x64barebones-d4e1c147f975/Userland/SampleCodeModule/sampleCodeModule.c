@@ -1,5 +1,5 @@
 /* sampleCodeModule.c */
-#include "../standardlib.h"
+#include "standardlib.h"
 extern void shell();
 extern void calc();
 typedef void (*function)();

@@ -22,6 +22,7 @@ EXTERN syscall_read
 EXTERN syscall_write
 EXTERN syscall_registers
 EXTERN loadProgram
+EXTERN syscall_read_mem
 SECTION .text
 
 %macro pushState 0
@@ -166,6 +167,8 @@ _syscallHandler:
 	je .exe
 	cmp rax,5 ;syscall tmp
 	je .tmp
+	cmp rax,6
+	je .read_mem ;syscall read memory
 	jmp .end
 .read:
 	push rdi
@@ -197,110 +200,14 @@ _syscallHandler:
 .tmp:
 	call syscall_tmp
 	jmp .end
+.read_mem:
+	call syscall_read_mem
+	jmp .end
 .end:
 	iretq
 ; -----------------------------------------------------------------------------
 
 
-; -----------------------------------------------------------------------------
-;SYSCALL READ -> #0
-;Params
-;	rdi -> 0 standard input
-;	rsi -> buffer to copy n bytes from standard input
-;	rdx -> n bytes to read from standard input
-;Ret
-;	rax -> total bytes read
-;syscall_read:
-;	push rbp
-;	mov rbp,rsp
-;	push rbx
-;	mov rbx,0 ;acumulador
-;	cmp rdx,0
-;	jle .end;if 0 bytes, finish
-;.loop:
-;	call is_buffer_empty
-;	cmp rax,1
-;	je .wait
-;.continue:
-;	push rsi
-;	push rdx
-;	call get_buffer ;rax with one byte from buffer
-;	pop rdx
-;	pop rsi
-;	cmp rax,0
-;	je .end;if char is null, finish
-;	cmp rbx,rdx ;then check bytes left are diff to 0
-;	je .end
-;	mov byte [rsi], al ;CHEQUEAR ;copy byte into buffer
-;	inc rsi
-;	inc rbx
-;	jmp .loop
-;
-;.wait:
-;	call haltcpu
-;	jmp .continue
-;
-;.end:
-;	mov rax,rbx ;charge bytes read
-;	pop rbx
-;	mov rsp,rbp
-;	pop rbp
-;	ret
-; -----------------------------------------------------------------------------
-
-
-; -----------------------------------------------------------------------------
-;SYSCALL WRITE -> #1 
-;Params
-;	rdi -> 1 standard output
-;	rsi -> buffer to read n bytes
-;	rdx -> n bytes to read from buffer
-;Ret
-;	rax -> total bytes written
-;syscall_write:
-;	push rbp
-;	mov rbp,rsp
-;	push rbx
-;	push rdi
-;	mov rbx,0 ;acumulador
-;	cmp rdx,0 
-;	jle .end;if 0 bytes, finish
-;	mov rdi,rsi
-;.loop:
-;	cmp byte[rsi],0
-;	je .end;if null, finish
-;	cmp rbx,rdx ;then check bytes left are diff to 0
-;	je .end
-;	push rsi
-;	push rdx
-;	mov rdi,0
-;	mov di,[rsi]
-;	call putChar ;print to STDOUT
-;	pop rdx
-;	pop rsi
-;	inc rsi
-;	inc rbx
-;	jmp .loop
-;.end:
-;	mov rax,rbx
-;	pop rdi
-;	pop rbx
-;	mov rsp,rbp
-;	pop rbp
-;	ret
-;syscall_write:
-;	push rbp
-;	mov rbp,rsp
-;	mov rdi,rsi
-;	mov rsi,rdx
-;	call putsN
-;	mov rsp,rbp
-;	pop rbp
-;	ret
-; -----------------------------------------------------------------------------
-
-
-; -----------------------------------------------------------------------------
 
 ; -----------------------------------------------------------------------------
 ;SYSCALL RTC -> #3

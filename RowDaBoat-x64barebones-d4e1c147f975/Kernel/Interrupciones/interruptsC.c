@@ -1,5 +1,5 @@
-#include "../Keyboard_Driver/keyboardDriver.h"
-#include "../Video_Driver/video_driver.h"
+#include "keyboardDriver.h"
+#include "video_driver.h"
 #include <stdint.h>
 #include <lib.h>
 #include "States.h"
@@ -27,5 +27,12 @@ int syscall_registers(uint64_t * regs)
 {
     State * savedState = getRegs();
     memcpy(regs,savedState,sizeof(State));
-    return 1;    
+    return 0;    
 }
+
+int syscall_read_mem(uint64_t address, char * buff)
+{
+    memcpy((void *) buff,(void *) address,32);
+    return 0;
+}
+

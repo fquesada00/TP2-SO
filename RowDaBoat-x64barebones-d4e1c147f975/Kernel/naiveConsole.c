@@ -1,5 +1,5 @@
 #include <naiveConsole.h>
-#include "Video_Driver/video_driver.h"
+#include "video_driver.h"
 static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 static char buffer[64] = { '0' };

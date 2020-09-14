@@ -2,7 +2,7 @@
 #define _TASK_MANAGER_H_
 #define MAX_PROGRAMS 10
 #include <stdint.h>
-#include "./Interrupciones/States.h"
+#include "States.h"
 #define STACK_SIZE 512
 typedef struct ProgramType{
     uint64_t start;

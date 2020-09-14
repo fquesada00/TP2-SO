@@ -16,6 +16,7 @@ extern int loadPrgrm(void(*programa)(void));
 extern int processorTemperature();
 extern unsigned char sysrtc(int);
 extern void invalidOpCode();
+extern int read_mem(uint64_t address, char * buff);
 
 void puts(char * c){
     int i = 0;
@@ -367,14 +368,16 @@ void processorInfo()
 
 void printMemoryFromAddress(uint64_t address)
 {
+    char buff[255]={0};
     if(address < 0){
         printf("\nERROR: %d is not a valid address\n", address);
         return;
     }
     unsigned char *p = (unsigned char *)address;
+    read_mem(address,buff);
     for (int i = 0; i < 32; i++)
     {
-        printf("%d = %d\n", p, *p);
+        printf("%d = %d\n", p, buff[i]);
         p++;
     }
 }

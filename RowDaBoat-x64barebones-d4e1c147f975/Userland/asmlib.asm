@@ -10,6 +10,7 @@ GLOBAL divExc
 GLOBAL loadPrgrm
 GLOBAL sysrtc
 GLOBAL invalidOpCode
+GLOBAL read_mem
 
 SECTION .text
 
@@ -196,6 +197,15 @@ invalidOpCode:
     push rbp
     mov rbp,rsp
     UD2
+    mov rsp,rbp
+    pop rbp
+    ret
+; -----------------------------------------------------------------------------
+read_mem:
+    push rbp
+    mov rbp,rsp
+    mov rax,6
+    int 80h
     mov rsp,rbp
     pop rbp
     ret

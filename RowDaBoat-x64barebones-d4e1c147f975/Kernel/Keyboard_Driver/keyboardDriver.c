@@ -1,8 +1,8 @@
 #include "keyboardDriver.h"
 #include <stdint.h>
-#include "../TaskManager.h"
+#include "TaskManager.h"
 extern char getKeyboardScanCode();
-#include "../Interrupciones/States.h"
+#include "States.h"
 static char keyboard_buffer[256];
 static int buff_size = 0;
 static int current = 0;
