@@ -27,10 +27,15 @@ Para borrar toda la linea, presionar la tecla enter.
 Para los simbolos *,/,( y ), presionarlos manteniendo presionada la tecla shift.
 Para los simbolos + y -, presionar las teclas de la parte izquierda del teclado, al igual que en el item anterior.
 Ejemplos de uso:
+
 ((3+2)*4)=
-> 20
+
+\>20
+
 (6*(4+2))=
-> 36
+
+\>36
+
 **SHELL**
 SHELL COMMANDS LIST:
 inforeg: Muestra por salida estandard el valor de los registros.
