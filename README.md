@@ -1,7 +1,8 @@
----------ARQUI-TPE-1Q2020------------
+---------SO-TP2-2Q2020------------
 Alumnos:
 	* Serpe, Octavio
 	* Quesada, Francisco
+	* Donikian, Gastón
 
 **PARA COMPILAR Y EJECUTAR EN LINUX**
 1) Entrar a la carpeta "RowDaBoat-x64barebones-d4e1c147f975" y abrir una terminal.
@@ -11,30 +12,6 @@ Alumnos:
 5) Ejecutar el archivo 'run.sh'
 ACLARACION:
 Se recomienda compilar los archivos utilizando, en docker, la imagen provista por la cátedra.
-
-**USO DEL SISTEMA**
-Una vez iniciado el sistema se desplegara un mensaje preguntando que programa desea ejecutar.
-Presione 'Ctrl + 1' si desea ejecutar la calculadora.
-Presione 'Ctrl + 2' si desea ejecutar la consola de comandos.
-La calculadora siempre aparecerá en la ventana izquierda y la shell en la ventana derecha.
-
-**Calculadora**
-Calculadora que realiza suma, resta, producto y cociente.
-Toda cuenta debe estar encerrada entre parentesis, en base a la asociatividad que desee el usuario.
-Para realizar una cuenta, escribirla de manera correcta, escribir un "=" al final y presionar la tecla enter.
-Para borrar el ultimo caracter introducido, presionar la tecla backspace.
-Para borrar toda la linea, presionar la tecla enter.
-Para los simbolos *,/,( y ), presionarlos manteniendo presionada la tecla shift.
-Para los simbolos + y -, presionar las teclas de la parte izquierda del teclado, al igual que en el item anterior.
-Ejemplos de uso:
-
-((3+2)*4)=
-
-\>20
-
-(6*(4+2))=
-
-\>36
 
 **SHELL**
 SHELL COMMANDS LIST:
