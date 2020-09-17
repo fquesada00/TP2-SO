@@ -3,22 +3,27 @@
 
 #define CTE (size_t)1000000 * 4      //store 4mb MODIFICAR ESTO
 #define MINIMUN_BLOCK_SIZE (size_t)8 //8 bytes
+
+#define WORD_ALIGN 8 //Buscamos en el manual del Pure y usa 8 bytes https://tracker.pureos.net/w/pureos/hardware_requirements/
+#define WORD_ALIGN_MASK 7
 typedef struct A_BLOCK
 {
     struct A_BLOCK * pNextBlock;
     size_t BlockSize;
 } a_block;
 
-//chequear mascara y alineamiento
-static const size_t heapHeaderSize = sizeof(a_block) & (size_t)-2;
+
+//alternativa -> sizeof(block) + (8 - sizeof(block)%8) falta el caso que este alineado
+static const size_t heapHeaderSize = sizeof(a_block) + (size_t) (WORD_ALIGN - 1)  & ~(WORD_ALIGN_MASK) ; //3 bytes,13 bytes , 16 bytes
 static size_t remainingBytes = CTE;
-static a_block heapStart, *heapEnd = NULL;
+static a_block heapStart, *heapEnd = NULL; 
 
 /*
     LINKS DE INTERES
     https://courses.cs.washington.edu/courses/cse351/10sp/lectures/15-memallocation.pdf
     https://www.youtube.com/watch?v=74s0m4YoHgM
     https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/master/portable/MemMang/heap_4.c
+    https://prod.liveshare.vsengsaas.visualstudio.com/join?724EFAA2DF18E6037AE292669CDD74D5ED67
     using implicit free list w/ first fit algorithm 
 */
 
@@ -34,6 +39,7 @@ int main(void){
     pInitHeap(baseAddress, baseAddress + (1024*1024*10 - 1));
 
 }
+
 void *pMalloc(size_t requestedSize)
 {
     void *pReturnBlock = NULL;
@@ -90,6 +96,7 @@ void *pMalloc(size_t requestedSize)
 
         //supongo que salio todo ok
         remainingBytes -= pActualBlock->BlockSize;
+        pActualBlock->BlockSize = pActualBlock->BlockSize | 1;
         pActualBlock->pNextBlock = NULL;
     }
     
@@ -110,7 +117,7 @@ void pInitHeap(void *baseAddress, void *endAddress)
     heapEnd->BlockSize = (size_t)0;
 
     /* initialize first block
-        his size is the diff where end begins and firstBlock + is size starts
+        his size is the diff where end begins and firstBlock 
     */
     a_block *pFirstBlock = (a_block *)baseAddress;
     pFirstBlock->pNextBlock = heapEnd;
