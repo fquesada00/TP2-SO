@@ -85,13 +85,15 @@ void *pMalloc(size_t requestedSize)
             If yes, then its done.
             If not, then add WORD_ALIGN and bitwise "and" operator with
             WORD_ALIGN_MASK to set last bits multiple of WORD_ALIGN
+
             Alternativa ineficiente en operaciones nivel procesador:
                 requestedSize += (WORD_ALIGN - requestedSize%WORD_ALIGN)%WORD_ALIGN
             */
         if ((requestedSize & WORD_ALIGN_MASK) != 0)
         {
-            requestedSize += WORD_ALIGN;
+
             requestedSize &= WORD_ALIGN_MASK; //NO SERIA NOT WORD_ALIGN_MASK
+
         }
 
         /*
@@ -139,6 +141,7 @@ void *pMalloc(size_t requestedSize)
             a_block * pLinkBlock = pActualBlock + requestedSize;
             pLinkBlock->BlockSize = pActualBlock->BlockSize - requestedSize;
             pLinkBlock->free = 1; //Esto no es necesario porque este seria el libre, va, si 1 es ocupado, ademas como esta implementado no es necesario
+
 
             /*
                 Update new size as its less than before
