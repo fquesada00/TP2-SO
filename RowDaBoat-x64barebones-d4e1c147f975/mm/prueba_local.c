@@ -17,6 +17,7 @@ typedef struct A_BLOCK
     Usando el tamaño del "header" usamos operaciones nivel bit
     reemplazando el operador "mod" y alineamos para que el tamaño sea
     multiplo de 8, que es lo que lee el tamaño de una palabra del Pure
+
     Alternativa ineficiente en operaciones nivel procesador:
         heapHeaderSize = sizeof(a_block) + ((WORD_ALIGN - sizeof(a_block)%WORD_ALIGN))%WORD_ALIGN
 */
@@ -43,12 +44,40 @@ void pInitHeap(void *, void *);
 void pFree(void *);
 void pInsertBlockIntoList(a_block *);
 
+void h(void)
+{
+    printf("llegue\n");
+}
+
+void printDirections(char *p, int dim)
+{
+    for (int i = 0; i < dim; i++)
+    {
+        printf("Dir at pos %d: %p - ", i,p + i);
+    }
+    printf("\n");
+}
 int main(void)
 {
     //reserve 10mb
-    char *baseAddress = malloc(1024 * 1024 * 10);
+    a_block a,b;
+    a.free=0;
+    b.free=1;
+    //printf("%d\n",heapHeaderSize);
+    //printf("%d %d\n",(sizeof(a) + (size_t)(WORD_ALIGN - 1)) & ~(WORD_ALIGN_MASK),(sizeof(b) + (size_t)(WORD_ALIGN - 1)) & ~(WORD_ALIGN_MASK));
+
+
+    char *baseAddress = malloc(1024 * 1024 * 10); //(void*)0x7efec7045010
 
     pInitHeap(baseAddress, baseAddress + (1024 * 1024 * 10 - 1));
+
+    char *temp = pMalloc(sizeof(int) * 4);
+    printDirections(temp, 4);
+    printf("temp-header: %p & %p\n",(temp-heapHeaderSize), temp);
+    pFree(temp);
+    
+    temp = pMalloc(sizeof(int) * 4);
+    printDirections(temp, 5);
 }
 
 void *pMalloc(size_t requestedSize)
@@ -60,7 +89,6 @@ void *pMalloc(size_t requestedSize)
     */
     if (heapEnd == NULL)
     {
-        //MODIFICAR ESTO CON CTES ESTARIA COPADO
         //pInitHeap(0x800000, 0xC000000);
     }
     //creo q esto no va a aca xq sino siempre devuelve null en la primer iter, chequear
@@ -84,18 +112,17 @@ void *pMalloc(size_t requestedSize)
             To align, check if requestedSize is not multiple of WORD_ALIGN_MASK.
             If yes, then its done.
             If not, then add WORD_ALIGN and bitwise "and" operator with
-            WORD_ALIGN_MASK to set last bits multiple of WORD_ALIGN
+            "not" WORD_ALIGN_MASK to set last bits multiple of WORD_ALIGN
 
             Alternativa ineficiente en operaciones nivel procesador:
                 requestedSize += (WORD_ALIGN - requestedSize%WORD_ALIGN)%WORD_ALIGN
             */
         if ((requestedSize & WORD_ALIGN_MASK) != 0)
         {
-
-            requestedSize &= WORD_ALIGN_MASK; //NO SERIA NOT WORD_ALIGN_MASK
-
+            requestedSize += WORD_ALIGN;
+            requestedSize &= ~WORD_ALIGN_MASK;
         }
-
+        printf("requested %d\n",requestedSize);
         /*
             Initialize search blocks
         */
@@ -125,7 +152,7 @@ void *pMalloc(size_t requestedSize)
         /*
             Skip block pointer as its going to be occupied 
         */
-        //Bueno, aca tenemos una diferencia de implementacion, aca lo que hace es ignora los bloques que no estan libres, 
+        //Bueno, aca tenemos una diferencia de implementacion, aca lo que hace es ignora los bloques que no estan libres,
         //osea tiene una lista de libres y los ocupados los deja por ahi, cuando se liberan los vuelve a incorporar
         //Como es mas eficiente la que implementan ellos, la dejo, sino tendriamos que checkear el free en elwhile de arriba y cambiarlo
         pPrevBlock->pNextBlock = pActualBlock->pNextBlock;
@@ -138,10 +165,9 @@ void *pMalloc(size_t requestedSize)
         */
         if ((pActualBlock->BlockSize - requestedSize) > (remainingBytes - heapHeaderSize))
         {
-            a_block * pLinkBlock = pActualBlock + requestedSize;
+            a_block *pLinkBlock = pActualBlock + requestedSize;
             pLinkBlock->BlockSize = pActualBlock->BlockSize - requestedSize;
             pLinkBlock->free = 1; //Esto no es necesario porque este seria el libre, va, si 1 es ocupado, ademas como esta implementado no es necesario
-
 
             /*
                 Update new size as its less than before
@@ -159,7 +185,7 @@ void *pMalloc(size_t requestedSize)
         pActualBlock->pNextBlock = NULL;
         pActualBlock->free = 0;
     }
-
+    printf("return %p\n",pReturnBlock);
     return pReturnBlock;
 }
 
@@ -172,6 +198,7 @@ void pInitHeap(void *baseAddress, void *endAddress)
     /*
         Set start struct allocated in stack
     */
+    printf("Base: %p & End: %p\n", baseAddress, endAddress);
     heapStart.pNextBlock = (a_block *)baseAddress;
     heapStart.BlockSize = (size_t)0;
     heapStart.free = 0;
@@ -185,6 +212,7 @@ void pInitHeap(void *baseAddress, void *endAddress)
     pFirstBlock->pNextBlock = heapEnd;
     pFirstBlock->BlockSize = (size_t)heapEnd - (size_t)pFirstBlock;
     pFirstBlock->free = 1;
+    //printf("first %p, %d\n",pFirstBlock,(sizeof(*pFirstBlock) + (size_t)(WORD_ALIGN - 1)) & ~(WORD_ALIGN_MASK));
 
     remainingBytes = pFirstBlock->BlockSize;
 }
@@ -192,28 +220,32 @@ void pInitHeap(void *baseAddress, void *endAddress)
 /*
     Receive a pointer to be freed
 */
-void pFree(void * pointer)
+void pFree(void *pointer)
 {
 
-    size_t * pNextABlock = (size_t *) pointer;
-    a_block * pLinkBlock;
+    size_t *pNextABlock = (size_t *)pointer;
+    a_block *pLinkBlock;
+    printf("%p\n",pNextABlock);
 
     if (pNextABlock == NULL)
     {
 
     } //nothing to do here
-
+    
     /*
         Before the pointer there is a_block struct
     */
     pNextABlock -= heapHeaderSize;
-    pLinkBlock = (a_block *) pNextABlock;
-
-    if (pLinkBlock->free == 0 || pLinkBlock->pNextBlock != NULL)
+    printf("%d\n",heapHeaderSize);
+    printf("nextBlock: %p\n",pNextABlock);
+    pLinkBlock = (a_block *)pNextABlock;
+    printf("%p\n", pLinkBlock);
+    //ACA ESTA FALLANDO
+    if (pLinkBlock->free == 0 || pLinkBlock->pNextBlock == NULL)
     {
 
     } //we did something wrong so
-
+    h();
     remainingBytes += pLinkBlock->BlockSize;
 
     pInsertBlockIntoList(pLinkBlock);
@@ -221,58 +253,64 @@ void pFree(void * pointer)
 
 void pInsertBlockIntoList(a_block *pInsertBlock)
 {
-
-    //iterate through the list
     a_block *pPrevBlock = &heapStart;
 
-    //never reaches end as we are asking for next block and inequality
+    /*
+        Starting from first block, we iterate along the list
+        until we find a block with a higher address than pInsertBlock
+    */
     while (pPrevBlock->pNextBlock < pInsertBlock)
     {
         pPrevBlock = pPrevBlock->pNextBlock;
     }
 
-    //check if nextBlock of prevBlock is next to insertBlock, if so merge them
+    if (pPrevBlock->free == 0 || pPrevBlock->pNextBlock == NULL)
+    {
+
+    } //we did something wrong
+
+    /*
+        Check if the previous block to the one being inserted make
+        a big block that is next to each other, if yes, then merge
+    */
     if ((pPrevBlock + pPrevBlock->BlockSize) == pInsertBlock)
     {
         pPrevBlock->BlockSize += pInsertBlock->BlockSize;
         pInsertBlock = pPrevBlock;
     }
-    else
-    {
-        //no entendi el error que habria q tirar aca
-    }
 
-    //analogous but with next block from insertBlock, if so merge them
-    //we do not care if a previous merge was done as we increase the size
+    /*
+        Same method as above but with next block.
+        If a previous merge was done, it doesnt modify
+        anything as we are dealing with pointers
+    */
     if ((pInsertBlock + pInsertBlock->BlockSize) == pPrevBlock->pNextBlock)
     {
-        //if we reached the end then do not increase size
+        /*
+            If end was reached, then dont increase size.
+            Else, skip intermediate block
+        */
         if (pPrevBlock->pNextBlock == heapEnd)
         {
             pInsertBlock->pNextBlock = heapEnd;
         }
         else
         {
-            //set pointers skiping intermediate block
-            //as said before if a previous merge was done does not change anything
-            //as we are dealing with memory addresses
             pInsertBlock->BlockSize += pPrevBlock->pNextBlock->BlockSize;
             pInsertBlock->pNextBlock = pPrevBlock->pNextBlock->pNextBlock;
         }
     }
     else
     {
-        //set pointer accordingly
         pInsertBlock->pNextBlock = pPrevBlock->pNextBlock;
     }
 
-    //if they didnt merge then set nextBlock from prevBlock accordingly
+    /*
+        If first merge was not done, set next block pointer
+        of previous block to the one being inserted
+    */
     if (pInsertBlock != pPrevBlock)
     {
         pPrevBlock->pNextBlock = pInsertBlock;
-    }
-    else
-    {
-        //we did something wrong
     }
 }
