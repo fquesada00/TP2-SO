@@ -17,7 +17,6 @@ typedef struct A_BLOCK
 {
     struct A_BLOCK *pNextBlock;
     size_t BlockSize;
-    char free;
 } a_block;
 
 /*
@@ -174,7 +173,6 @@ void *pMalloc(size_t requestedSize)
         {
             a_block *pLinkBlock = (a_block *)((u_int8_t *)pActualBlock + requestedSize);
             pLinkBlock->BlockSize = pActualBlock->BlockSize - requestedSize;
-            pLinkBlock->free = 1;
 
             /*
                 Update new size as its less than before
@@ -189,7 +187,6 @@ void *pMalloc(size_t requestedSize)
             Take out the block from the list
         */
         pActualBlock->pNextBlock = NULL;
-        pActualBlock->free = 0;
     }
 
     return pReturnBlock;
@@ -205,17 +202,14 @@ void pInitHeap(void *baseAddress, void *endAddress)
     */
     heapStart.pNextBlock = (a_block *)baseAddress;
     heapStart.BlockSize = (size_t)0;
-    heapStart.free = 0;
 
     heapEnd = endAddress - heapHeaderSize;
     heapEnd->pNextBlock = NULL;
     heapEnd->BlockSize = (size_t)0;
-    heapEnd->free = 0;
 
     a_block *pFirstBlock = (a_block *)baseAddress;
     pFirstBlock->pNextBlock = heapEnd;
     pFirstBlock->BlockSize = (size_t)heapEnd - (size_t)pFirstBlock;
-    pFirstBlock->free = 1;
 
     remainingBytes = pFirstBlock->BlockSize;
 }
