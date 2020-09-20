@@ -1,11 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define CTE (size_t)1024 * 1024 * 4  //store 4mb MODIFICAR ESTO
-#define MINIMUN_BLOCK_SIZE (size_t)8 //8 bytes
+/*
+    Store 4mb.
+    MODIFICAR ESTO
+*/
+#define CTE (size_t)1024 * 1024 * 4  
 
-#define WORD_ALIGN 8 //Buscamos en el manual del Pure y usa 8 bytes https://tracker.pureos.net/w/pureos/hardware_requirements/
+/*
+    On Pure's manual: https://tracker.pureos.net/w/pureos/hardware_requirements/
+*/
+#define WORD_ALIGN 8 
 #define WORD_ALIGN_MASK 7
+
 typedef struct A_BLOCK
 {
     struct A_BLOCK *pNextBlock;
@@ -14,9 +21,9 @@ typedef struct A_BLOCK
 } a_block;
 
 /*
-    Usando el tamaño del "header" usamos operaciones nivel bit
-    reemplazando el operador "mod" y alineamos para que el tamaño sea
-    multiplo de 8, que es lo que lee el tamaño de una palabra del Pure
+    Knowing the size of the header by bitwise operations 
+    and word alignment to set it to a multiply of 8, we
+    can move through the heap efficiently
 
     Alternativa ineficiente en operaciones nivel procesador:
         heapHeaderSize = sizeof(a_block) + ((WORD_ALIGN - sizeof(a_block)%WORD_ALIGN))%WORD_ALIGN
@@ -26,8 +33,8 @@ static const size_t heapHeaderSize = (sizeof(a_block) + (size_t)(WORD_ALIGN - 1)
 static size_t remainingBytes = CTE;
 
 /*
-    Con una estructura en el stack que apunte al principio del heap
-    y un puntero al final, podemos movernos por todo el heap
+    With a struct in stack and a struct pointer to the end
+    of the heap, we can move through it
 */
 static a_block heapStart, *heapEnd = NULL;
 
@@ -44,23 +51,13 @@ void pInitHeap(void *, void *);
 void pFree(void *);
 void pInsertBlockIntoList(a_block *);
 
-void h(void)
-{
-    printf("llegue\n");
-}
-
-void printDirections(char *p, int dim)
-{
-    for (int i = 0; i < dim; i++)
-    {
-        printf(" - Pos: %d at dir: %p - ", i, p + i);
-    }
-    printf("\n");
-}
 int main(void)
 {
-    //reserve 4mb
-    char *baseAddress = malloc(1024 * 1024 * 4); //(void*)0x7efec7045010
+    /*
+        Reserve 4mb.
+        CAMBIAR ESTO POR CTES EN DEFINE
+    */
+    char *baseAddress = malloc(1024 * 1024 * 4);
 
     pInitHeap(baseAddress, baseAddress + (1024 * 1024 * 4 - 1));
 
@@ -68,29 +65,31 @@ int main(void)
     pFree(temp);
 
     temp = pMalloc(sizeof(char) * 2);
-    printDirections(temp, 2);
     char *p = pMalloc(sizeof(char) * 4);
-    printDirections(p, 4);
     char *k = pMalloc(sizeof(char) * 2);
-    printDirections(k, 2);
     pFree(p);
     p = pMalloc(sizeof(char) * 9);
     k = pMalloc(9);
 
-    p[0]='a';
-    p[1]='b';
-    p[2]='c';
-    p[3]='d';
-    k[0]='e';
-    k[1]='f';
-    for(int i = 0 ; i < 4 ; i++){
-        printf("%c",p[i]);
+    p[0] = 'a';
+    p[1] = 'b';
+    p[2] = 'c';
+    p[3] = 'd';
+    k[0] = 'e';
+    k[1] = 'f';
+    for (int i = 0; i < 4; i++)
+    {
+        printf("%c", p[i]);
     }
-    for(int i = 0 ; i < 2 ; i++){
-        printf("%c",k[i]);
+    for (int i = 0; i < 2; i++)
+    {
+        printf("%c", k[i]);
     }
 }
 
+/*
+    Reserve requestedSize bytes in heap
+*/
 void *pMalloc(size_t requestedSize)
 {
     void *pReturnBlock = NULL;
@@ -102,7 +101,7 @@ void *pMalloc(size_t requestedSize)
     {
         //pInitHeap(0x800000, 0xC000000);
     }
-    //creo q esto no va a aca xq sino siempre devuelve null en la primer iter, chequear
+    //MODIFICAR SIN EL ELSE (chequear por las dudas)
     else
     {
         if (remainingBytes < requestedSize)
@@ -127,7 +126,7 @@ void *pMalloc(size_t requestedSize)
 
             Alternativa ineficiente en operaciones nivel procesador:
                 requestedSize += (WORD_ALIGN - requestedSize%WORD_ALIGN)%WORD_ALIGN
-            */
+        */
         if ((requestedSize & WORD_ALIGN_MASK) != 0)
         {
             requestedSize += WORD_ALIGN;
@@ -140,7 +139,7 @@ void *pMalloc(size_t requestedSize)
         a_block *pPrevBlock, *pActualBlock;
         pPrevBlock = &heapStart;
         pActualBlock = pPrevBlock->pNextBlock;
-        printf("Actual: %p, requested: %ld\n", pActualBlock, requestedSize);
+
         /*
             Lookup doing first fit algorithm, tambien me fijo si esta libre
         */
@@ -149,7 +148,6 @@ void *pMalloc(size_t requestedSize)
             pPrevBlock = pActualBlock;
             pActualBlock = pActualBlock->pNextBlock;
         }
-        printf("Actual post while: %p\n", pActualBlock);
 
         if (pActualBlock->pNextBlock == NULL)
         {
@@ -172,23 +170,20 @@ void *pMalloc(size_t requestedSize)
             as its mandatory to allocate memory).
             If not, then do not link, oppositly, link it
         */
-        printf("%p y %ld\n", pActualBlock, pActualBlock->BlockSize);
-        printf("%ld <= %ld\n", pActualBlock->BlockSize - requestedSize, remainingBytes);
         if ((pActualBlock->BlockSize - requestedSize) <= (remainingBytes))
         {
             a_block *pLinkBlock = (a_block *)((u_int8_t *)pActualBlock + requestedSize);
             pLinkBlock->BlockSize = pActualBlock->BlockSize - requestedSize;
-            pLinkBlock->free = 1; //Esto no es necesario porque este seria el libre, va, si 1 es ocupado, ademas como esta implementado no es necesario
-            //pPrevBlock->pNextBlock = pLinkBlock;
+            pLinkBlock->free = 1;
+
             /*
                 Update new size as its less than before
             */
             pActualBlock->BlockSize = requestedSize;
-            printf("link: %p\n", pLinkBlock);
             pInsertBlockIntoList(pLinkBlock);
         }
 
-        remainingBytes -= pActualBlock->BlockSize; //aca lo mismo no falta sumar el heap size?
+        remainingBytes -= pActualBlock->BlockSize;
 
         /*
             Take out the block from the list
@@ -196,8 +191,7 @@ void *pMalloc(size_t requestedSize)
         pActualBlock->pNextBlock = NULL;
         pActualBlock->free = 0;
     }
-    printf("return %p\n", pReturnBlock);
-    printf("------\n\n");
+
     return pReturnBlock;
 }
 
@@ -209,7 +203,6 @@ void pInitHeap(void *baseAddress, void *endAddress)
     /*
         Set start struct allocated in stack
     */
-    printf("Base: %p & End: %p\n", baseAddress, endAddress);
     heapStart.pNextBlock = (a_block *)baseAddress;
     heapStart.BlockSize = (size_t)0;
     heapStart.free = 0;
@@ -235,7 +228,6 @@ void pFree(void *pointer)
     /*
         Cast pointer as we are going to move 1 byte per address
     */
-    printf("%p\n", pointer);
     u_int8_t *pNextABlock = (u_int8_t *)pointer;
     a_block *pLinkBlock;
 
@@ -256,15 +248,12 @@ void pFree(void *pointer)
     } //we did something wrong so
 
     remainingBytes += pLinkBlock->BlockSize;
-    
-        printf("FREE\n");
-    printf("FREE\n");
+
     pInsertBlockIntoList(pLinkBlock);
 }
 
 void pInsertBlockIntoList(a_block *pInsertBlock)
 {
-    printf("insert: %p\n", pInsertBlock);
     a_block *pPrevBlock = &heapStart;
 
     /*
@@ -273,10 +262,8 @@ void pInsertBlockIntoList(a_block *pInsertBlock)
     */
     while (pPrevBlock->pNextBlock < pInsertBlock)
     {
-        printf("1");
         pPrevBlock = pPrevBlock->pNextBlock;
     }
-    printf("%p & %p\n", pPrevBlock->pNextBlock, pPrevBlock);
 
     if (pPrevBlock->pNextBlock == NULL)
     {
@@ -289,7 +276,6 @@ void pInsertBlockIntoList(a_block *pInsertBlock)
     */
     if ((a_block *)((u_int8_t *)pPrevBlock + pPrevBlock->BlockSize) == pInsertBlock)
     {
-        printf("1");
         pPrevBlock->BlockSize += pInsertBlock->BlockSize;
         pInsertBlock = pPrevBlock;
     }
@@ -301,7 +287,6 @@ void pInsertBlockIntoList(a_block *pInsertBlock)
     */
     if ((a_block *)((u_int8_t *)pInsertBlock + pInsertBlock->BlockSize) == pPrevBlock->pNextBlock)
     {
-        printf("2");
         /*
             If end was reached, then dont increase size.
             Else, skip intermediate block
@@ -329,6 +314,4 @@ void pInsertBlockIntoList(a_block *pInsertBlock)
     {
         pPrevBlock->pNextBlock = pInsertBlock;
     }
-
-    printf("Prev: %p, Insert: %p, Next: %p\n", pPrevBlock->pNextBlock, pInsertBlock, pInsertBlock->pNextBlock);
 }
