@@ -1,4 +1,5 @@
 #include "standardlib.h"
+extern int calc();
 extern int syswrite(int fd, const char *buff, int bytes);
 void shell()
 {
@@ -19,6 +20,13 @@ void shell()
             else if(strcmp(command, "help") == 0) manShell();
             else if(strcmp(command,"coreTemp") == 0) printCoreTemp();
             else if(strcmp(command,"printmem")==0) printf("\nprintmem requires an input address\nUsage: 'printmem [ADDRESS]'\n");
+            else if (strcmp(command,"calc") == 0)
+            {
+                char * argv[] = {'calc',NULL};
+                execv(calc,1,argv);
+                printf("sigo aca!\n");
+            }
+            
             else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);
         }
         else if(argsRead == 2){

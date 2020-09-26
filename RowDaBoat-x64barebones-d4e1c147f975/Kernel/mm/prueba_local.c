@@ -1,24 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-/*
-    Store 4mb.
-    MODIFICAR ESTO
-*/
-#define CTE (size_t)1024 * 1024 * 4  
-
-/*
-    On Pure's manual: https://tracker.pureos.net/w/pureos/hardware_requirements/
-*/
-#define WORD_ALIGN 8 
-#define WORD_ALIGN_MASK 7
-
-typedef struct A_BLOCK
-{
-    struct A_BLOCK *pNextBlock;
-    size_t BlockSize;
-} a_block;
-
+#include "memory_manager.h"
 /*
     Knowing the size of the header by bitwise operations 
     and word alignment to set it to a multiply of 8, we
@@ -50,41 +30,42 @@ void pInitHeap(void *, void *);
 void pFree(void *);
 void pInsertBlockIntoList(a_block *);
 
-int main(void)
-{
-    /*
-        Reserve 4mb.
-        CAMBIAR ESTO POR CTES EN DEFINE
-    */
-    char *baseAddress = malloc(1024 * 1024 * 4);
+// int main(void)
+// {
+//     /*
+//         Reserve 4mb.
+//         CAMBIAR ESTO POR CTES EN DEFINE
+//     */
+//     char *baseAddress = malloc(1024 * 1024 * 4);
 
-    pInitHeap(baseAddress, baseAddress + (1024 * 1024 * 4 - 1));
+//     pInitHeap(baseAddress, baseAddress + (1024 * 1024 * 4 - 1));
 
-    char *temp = pMalloc(sizeof(char) * 4);
-    pFree(temp);
+//     char *temp = pMalloc(sizeof(char) * 4);
+//     pFree(temp);
 
-    temp = pMalloc(sizeof(char) * 2);
-    char *p = pMalloc(sizeof(char) * 4);
-    char *k = pMalloc(sizeof(char) * 2);
-    pFree(p);
-    p = pMalloc(sizeof(char) * 9);
-    k = pMalloc(9);
+//     temp = pMalloc(sizeof(char) * 2);
+//     char *p = pMalloc(sizeof(char) * 4);
+//     char *k = pMalloc(sizeof(char) * 2);
+//     pFree(p);
+//     p = pMalloc(sizeof(char) * 9);
+//     k = pMalloc(9);
 
-    p[0] = 'a';
-    p[1] = 'b';
-    p[2] = 'c';
-    p[3] = 'd';
-    k[0] = 'e';
-    k[1] = 'f';
-    for (int i = 0; i < 4; i++)
-    {
-        printf("%c", p[i]);
-    }
-    for (int i = 0; i < 2; i++)
-    {
-        printf("%c", k[i]);
-    }
-}
+//     p[0] = 'a';
+//     p[1] = 'b';
+//     p[2] = 'c';
+//     p[3] = 'd';
+//     k[0] = 'e';
+//     k[1] = 'f';
+//     for (int i = 0; i < 4; i++)
+//     {
+//         printf("%c", p[i]);
+//     }
+//     for (int i = 0; i < 2; i++)
+//     {
+//         printf("%c", k[i]);
+//     }
+// }
+
 
 /*
     Reserve requestedSize bytes in heap
@@ -98,11 +79,11 @@ void *pMalloc(size_t requestedSize)
     */
     if (heapEnd == NULL)
     {
-        //pInitHeap(0x800000, 0xC000000);
+        pInitHeap(0x800000, 0xC000000);
     }
     //MODIFICAR SIN EL ELSE (chequear por las dudas)
-    else
-    {
+   // else
+   // {
         if (remainingBytes < requestedSize)
         {
 
@@ -156,7 +137,7 @@ void *pMalloc(size_t requestedSize)
         /*
             Set block to be returned without header as well
         */
-        pReturnBlock = (void *)((u_int8_t *)pActualBlock + heapHeaderSize);
+        pReturnBlock = (void *)((uint8_t *)pActualBlock + heapHeaderSize);
 
         /*
             Skip block pointer as its going to be occupied 
@@ -171,7 +152,7 @@ void *pMalloc(size_t requestedSize)
         */
         if ((pActualBlock->BlockSize - requestedSize) <= (remainingBytes))
         {
-            a_block *pLinkBlock = (a_block *)((u_int8_t *)pActualBlock + requestedSize);
+            a_block *pLinkBlock = (a_block *)((uint8_t *)pActualBlock + requestedSize);
             pLinkBlock->BlockSize = pActualBlock->BlockSize - requestedSize;
 
             /*
@@ -187,7 +168,7 @@ void *pMalloc(size_t requestedSize)
             Take out the block from the list
         */
         pActualBlock->pNextBlock = NULL;
-    }
+ //   }
 
     return pReturnBlock;
 }
@@ -222,7 +203,7 @@ void pFree(void *pointer)
     /*
         Cast pointer as we are going to move 1 byte per address
     */
-    u_int8_t *pNextABlock = (u_int8_t *)pointer;
+    uint8_t *pNextABlock = (uint8_t *)pointer;
     a_block *pLinkBlock;
 
     if (pNextABlock == NULL)
@@ -268,7 +249,7 @@ void pInsertBlockIntoList(a_block *pInsertBlock)
         Check if the previous block to the one being inserted make
         a big block that is next to each other, if yes, then merge
     */
-    if ((a_block *)((u_int8_t *)pPrevBlock + pPrevBlock->BlockSize) == pInsertBlock)
+    if ((a_block *)((uint8_t *)pPrevBlock + pPrevBlock->BlockSize) == pInsertBlock)
     {
         pPrevBlock->BlockSize += pInsertBlock->BlockSize;
         pInsertBlock = pPrevBlock;
@@ -279,7 +260,7 @@ void pInsertBlockIntoList(a_block *pInsertBlock)
         If a previous merge was done, it doesnt modify
         anything as we are dealing with pointers
     */
-    if ((a_block *)((u_int8_t *)pInsertBlock + pInsertBlock->BlockSize) == pPrevBlock->pNextBlock)
+    if ((a_block *)((uint8_t *)pInsertBlock + pInsertBlock->BlockSize) == pPrevBlock->pNextBlock)
     {
         /*
             If end was reached, then dont increase size.
