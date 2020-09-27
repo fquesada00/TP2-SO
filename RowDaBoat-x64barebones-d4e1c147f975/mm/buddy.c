@@ -1,111 +1,199 @@
 #include <stdio.h>
 #include <stdlib.h>
-/*
-Al pensar como implementar buddy se nos ocurrieron tres alternativas: 
-La primera, utilizaba una combinacion entre bitMap y arbol binario 
-Representabamos un arbol (arbol linearizado) con un solo bit que se leia por niveles, de izquierda a derecha, un 1 representaba que estaba lleno y un 0 vacio
-Este metodo era probablemente el mas eficiente posible pero era increiblemente compleja el manejo del arbon con bits
-No solo eso, sino que ademas no permitia (aunque no se haya pedido implementar) defragmentar el buddy system.
-Finalmente teniamos que tener constantemente todo el arbol en memoria, aunque solo sean bits, hacia ruido.
-Por estas tres razones, no fuimos por este camino.
 
-Por otro lado se nos ocurrio la opcion de poner un header al principio de cada bloque y cuando lo partiamos
-hacer dos nuevos bloques con el nuevo header. Esta opcion era muy intuitiva y facil de programar.
-Llegamos a un problema cuando pensamos como guardar el arbol izquierda recursivamente
-Seria un gran bloque de header header header ocupando espacio en memoria.
-Este si era mas facil de defragmentar, aunque no tanto.
 
-Finalmente, nos iluminamos (hubo un poco de internet aca)
-Nos inspiramos en la implementacion de Linux, unos genios
-Y hicimos la implementacion actual, donde tenemos un array de listas
-donde cada lista es un puntero al tipo de nodo
-Este si esta cheto, tenemos la operacion de bit linearizada pero sin tener que siga siendo leyendo
-*/
-
-//LINK COPADO https://github.com/evanw/buddy-malloc
-#define HEADER 8 //NECESITO 8 BYTES PARA SABER CUANTO OCUPO; ESTO VA EN EL HEAP
-
-#define MINIMUM_BLOCK_SIZE_LOG2  4 //ALGO MENOR ME SACA EL DEALINEAMIENTO A PALABRA
+#define MINIMUM_BLOCK_SIZE_LOG2 8                                 //ALGO MENOR ME SACA EL DEALINEAMIENTO A PALABRA
 #define MINIMUN_BLOCK_SIZE ((size_t)1 << MINIMUM_BLOCK_SIZE_LOG2) //8 bytes
 
 #define MAXIMUM_BLOCK_SIZE_LOG2 21 // MAXIMO 2MB
 #define MAXIMUM_BLOCK_SIZE ((size_t)1 << MAXIMUM_BLOCK_SIZE_LOG2)
 
-
 #define LEVELS (MAXIMUM_BLOCK_SIZE_LOG2 - MINIMUM_BLOCK_SIZE_LOG2)
 
 #define WORD_ALIGN 8 //Buscamos en el manual del Pure y usa 8 bytes https://tracker.pureos.net/w/pureos/hardware_requirements/
-#define TRUE 1
-#define FALSE 0
 
- //GASTON: RECORDA SIEMPRE QUE ESTE ALGORITMO ES EFICIENTE POR OPERACION DE BIT DE DECALAJE, NO USES DIVISIONES, IMBECIL.
+#define BASE_ADDRESS 0 //Esto seria el offset
+#define MAX_NODES (((size_t)1 << (LEVELS + 1)) - 1)
 
-typedef struct TREE_NODE
+static char initialized = 0;
+static size_t remainingBytes = 2; //es la cant de mb que se reserven
+typedef struct A_BLOCK
 {
-	
-    struct TREE_NODE * next;
-    //struct TREE_NODE * previous;
-    size_t occupied; //hago size t para alinear a palabra
-    size_t address;
-}treeList; //Este nombre es una estafa, es solo una lista 
+    struct A_BLOCK *nextBlock;
+    struct A_BLOCK *prevBlock; //podria guardarme otra cosa como un id o algo asi
+    size_t level;
+} a_block;
 
+#define HEADER (sizeof(a_block)) //NECESITO 8 BYTES PARA SABER CUANTO OCUPO; ESTO VA EN EL HEAP
 
-static treeList treeByLevels[LEVELS];
+static a_block *headers[LEVELS + 1];
 
-void * pMalloc(size_t bytes);
-void pInitHeap(void * heapStart,size_t memSize);
-void pFree(void *);
+void *pMalloc(size_t requestedSize);
+void *recursiveMalloc(size_t level);
+void free(void *userStart);
+void recursiveFree(void *kernelStart, size_t level);
+size_t getLevel(void *userStart);
+void *removeHeaderFromList(level);
+int findLevel(size_t requestedBytes);
+void insertHeaderIntoList(void *kernelStart, size_t level);
+size_t getBlockNumber(a_block *kernelStart);
+void initialize();
 
-void * pMalloc(size_t bytes){
-	if(bytes < MINIMUN_BLOCK_SIZE)
-		return NULL; //O algun excepecion
-	
-	int level = findLevel(bytes)
-	if(level == -1)
-		return NULL; //o algun error
-
-	//me fijo si hay alguna lista libre
-
-	treeList currentNode = treeByLevels[level];
-	while(currentNode != NULL && currentNode.occupied) {
-		currentNode = currentNode.next;
-	}
-	if(currentNode != NULL) {
-		currentNode.occupied = TRUE;
-		return currentNode.address + HEADER;
-	}
-
-	else{
-		//Busco algun padre que tenga espacio, si ninguno lo tiene, pregunto en su padre, etc. si no, no hay memoria
-		for(int i = level - 1; i >= 0; i--){ //recorro a los padres
-			currentNode = treeByLevels[level] //Tengo el primer de la lista
-			while(currentNode != NULL && currentNode.occupied) {
-				currentNode = currentNode.next;
-			}
-			if(currentNode != NULL) 
-				createChilds(currentNode,i, level); //Crea recursivamente desde el indice i hasta el indice level
-			}
-
-		}
-	}
-
+void *pMalloc(size_t requestedSize)
+{
+    if (!initialized)
+    {
+        initialize();
+        initialized = 1;
+    }
+    size_t level = findLevel(requestedSize);
+    if (level)
+        return recursiveMalloc(level);
+    return headers[0] != NULL? (void*)((u_int8_t *)headers[0]->nextBlock + HEADER) : NULL;
 }
 
-void createChilds(treeList currentNode,int from, int to) {
-	
+void *recursiveMalloc(size_t level)
+{
+    void *memory;
+    if (headers[level] == NULL)
+    {
+        
+        memory = recursiveMalloc(level - 1);
+        if (!memory)
+            return NULL; //No tengo memoria
+
+        size_t size = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 -  level); //Tamaño de este bloque
+
+        //Tengo que partir este bloque en dos
+        insertHeaderIntoList(memory, level);
+        insertHeaderIntoList(memory + size, level);
+    }
+    return removeHeaderFromList(level);
 }
 
-int findLevel(size_t bytes){
-	int ans = 0;
-	size_t memoryPartition = MAXIMUM_BLOCK_SIZE;
-
-	if(bytes > memoryPartition)
-		return -1;
-
-	while(ans < LEVELS) {
-		memoryPartition = memoryPartition >> 1;
-		if(bytes > memoryPartition)
-			return ans;
-		ans++;
-	}
+void free(void *userStart)
+{
+    recursiveFree(userStart - HEADER,getLevel(userStart))
 }
+
+void recursiveFree(void *kernelStart, size_t level)
+{
+    void *buddy;
+    size_t linearTreeNumber = getBlockNumber(kernelStart);
+    size_t sizeLevel = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level);
+
+    if (index & 1) == 0)
+        buddy = (u_int8_t)kernelStart + size;
+    else
+        buddy = (u_int8_t)kernelStart – size;
+
+    //Tengo, mi direccion y la de mi buddy, ahora tengo que
+    insertHeaderIntoList(kernelStart, level); //Meto la direccion asi es mas facil la recursion
+
+    block = headers[level];
+    while (block != NULL)
+    {
+        if (block == buddy)
+        {
+            removeSpecificHeaderFromList(block, level);
+            removeSpecificHeaderFromList(kernelStart, level);
+            if (index & 1) == 0)
+                recursiveFree(kernelStart, level - 1);
+            else
+                recursiveFree(buddy, level - 1);
+            return;
+        }
+        block = block->nextBlock;
+    }
+}
+
+void removeSpecificHeaderFromList(void * kernelStart,size_t level){
+    a_block *block = headers[level];
+    
+    while(block != NULL) {
+        if(block == kernelStart){
+            block = block->prevBlock
+            block->next = block->next->next;
+            return;
+        }
+    }
+    return;
+}
+
+size_t getLevel(void *userStart)
+{
+    userStart = (u_int8_t *)userStart - HEADER;
+    return ((a_block *)userStart)->level;
+}
+
+void *removeHeaderFromList(level)
+{
+    if (headers[level] == NULL)
+        return NULL;
+    void *returnValue = headers[level];
+    headers[level] = headers[level]->next;
+    if (headers[level] != NULL)
+        headers[level]->prevBlock = NULL;
+    return returnValue;
+}
+
+
+int findLevel(size_t requestedBytes)
+{
+    int level = 0, totalBytes = 2; //completar con una cte
+    requestedBytes += HEADER;
+    if (requestedBytes > totalBytes)
+        return -1;
+    while (level < LEVELS)
+    {
+
+        if (requestedBytes < totalBytes)
+        {
+            totalBytes >>= 1;
+            level++;
+        }
+        else return level;
+    }
+    return LEVELS - 1;
+}
+
+void insertHeaderIntoList(void *kernelStart, size_t level)
+{
+    a_block *block = headers[level];
+    if (block == NULL)
+    {
+        block = (a_block *)kernelStart;
+        block->nextBlock = NULL;
+        block->prevBlock = NULL;
+        block->level = level;
+        headers[level] = block;
+    }
+    else
+    {
+        while (block->nextBlock != NULL)
+        {
+            block = block->nextBlock;
+        }
+        block->nextBlock = (a_block *)kernelStart;
+        block->nextBlock->prevBlock = block;
+        block = block->nextBlock;
+        block->level = level;
+        block->nextBlock = NULL;
+    }
+}
+
+size_t getBlockNumber(a_block *kernelStart)
+{
+    int level = kernelStart->level;
+    int block_size = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level);
+    int relativeStart = kernelStart - OFFSET;
+    int relativeBlockNumber = relativeStart / block_size;
+    return relativeBlockNumber + 1; //Hay que verificarlo en papel esto
+}    
+
+
+void initialize()
+{
+    insertHeaderIntoList(BASE_ADDRESS, 0);
+}
+
