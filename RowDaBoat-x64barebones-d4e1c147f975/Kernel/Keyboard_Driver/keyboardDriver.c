@@ -44,12 +44,12 @@ void keyboardHandler(uint64_t rsp)
             if (scan == 0x02)
             {
                 //changeScreen(0);
-                continueProgram(0, rsp);
+                //continueProgram(0, rsp);
             }
             else if (scan == 0x03)
             {
                 //changeScreen(1);
-                continueProgram(1, rsp);
+                //continueProgram(1, rsp);
             }
             else if (scan == 0x13)
             {

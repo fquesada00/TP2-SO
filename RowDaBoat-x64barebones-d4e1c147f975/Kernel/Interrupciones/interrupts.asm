@@ -240,7 +240,7 @@ _syscallHandler:
 	call syscall_registers
 	jmp .end
 .exe:
-	call loadProgram
+	;call loadProgram
 	jmp .end
 .rtc:
 	call syscall_rtc

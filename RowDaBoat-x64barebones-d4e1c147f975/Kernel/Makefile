@@ -51,6 +51,6 @@ bin:$(KERNEL_GDB)
 	objcopy -O binary $(KERNEL_GDB) kernel.bin
 
 clean:
-	rm -rf asm/*.o *.o *.bin *.elf Interrupciones/*.o Keyboard_Driver/*.o Video_Driver/*.o Exceptions/*.o
+	rm -rf asm/*.o *.o *.bin *.elf Interrupciones/*.o Keyboard_Driver/*.o Video_Driver/*.o Exceptions/*.o scheduler/*.o mm/*.o
 
 .PHONY: all gdb clean bin

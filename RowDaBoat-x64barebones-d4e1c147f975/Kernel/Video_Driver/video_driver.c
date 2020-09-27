@@ -6,7 +6,7 @@
 #define SCREEN_WIDTH (WIDTH / SCREENS)
 #define HEIGHT 768
 /*Si desea cambiar el tamaño de la fuente por favor cargue un nuevo bitmap*/
-#define CHARSIZE 8
+#define CHARSIZE 16
 #define PIXELSIZE 3
 #define LINES (HEIGHT / CHARSIZE)
 #define COLS ((WIDTH) / CHARSIZE)
