@@ -35,28 +35,24 @@ void insertSpecificHeaderIntoList(void *header, size_t level);
 
 static a_block *headers[LEVELS + 1];
 static char initialized = 0;
-static size_t remainingBytes = MAXIMUM_BLOCK_SIZE; //es la cant de bytes que se reserven
+static size_t remainingBytes = MAXIMUM_BLOCK_SIZE; 
+
 
 void *pMalloc(size_t requestedSize)
 {
-    /*
-        If heap is not initialized, then do it, only one time
-    */
     if (!initialized)
     {
         initialize();
         initialized = 1;
     }
+
     requestedSize += HEADER_SIZE;
     size_t level = findLevel(requestedSize);
     if (level == -1 || requestedSize > remainingBytes)
     {
         return NULL;
-    } //throw exception not enough space
+    } 
 
-    /*
-        Must skip header
-    */
     void *returnPointer = recursiveMalloc(level) + HEADER_SIZE;
 
     remainingBytes -= requestedSize;
@@ -73,19 +69,11 @@ void *recursiveMalloc(size_t level)
         if (returnPointer == NULL)
         {
             return NULL;
-        } //throw exception not enough space
-
-        /*
-            Obtain block's size of the level
-        */
+        } 
         size_t blockSize = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level);
 
-        /*
-            Now we are in the "child", so it has to be splitted in two
-        */
-        insertHeaderIntoList(returnPointer + blockSize, level);
-
-        insertHeaderIntoList(returnPointer, level);
+        insertSpecificHeaderIntoList(returnPointer, level);
+        insertSpecificHeaderIntoList(returnPointer + blockSize, level);
     }
     return removeHeaderFromList(level);
 }
@@ -104,32 +92,20 @@ void recursiveFree(void *header, size_t level)
     size_t blockIdx = getBlockNumber(header);
     size_t blockSize = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level);
 
-    /*
-        Check if buddy is on right (blockIdx is odd), if not
-        then is on left (bloclkIdx is even)
-    */
+
     if (blockIdx & 1)
         buddy = (uint8_t *)header + blockSize;
     else
         buddy = (uint8_t *)header - blockSize;
 
-    /*
-        Insert block in the free list of the level
-    */
-    insertHeaderIntoList(header, level);
+    insertSpecificHeaderIntoList(header, level);
 
-    /*
-        Lookup to obtain buddy's header from the start of the level
-    */
     a_block *block = headers[level];
 
     while (block != NULL)
     {
         if ((void *)block == buddy)
         {
-            /*
-                If buddy exists, then remove both of them
-            */
             removeSpecificHeaderFromList(header, level);
             removeSpecificHeaderFromList(buddy, level);
             a_block *aux;
@@ -161,16 +137,13 @@ void insertSpecificHeaderIntoList(void *header, size_t level)
         toInsert->level = level;
         toInsert->nextBlock = NULL;
         return;
-    } //list not initialized
+    } 
 
     while (block->nextBlock != NULL && block->nextBlock < toInsert)
     {
         block = block->nextBlock;
     }
 
-    /*
-        If block has to be inserted at the end, check it doesn't reach end
-    */
     if (block->nextBlock == NULL)
     {
         block->nextBlock = toInsert;
@@ -190,18 +163,12 @@ void removeSpecificHeaderFromList(void *header, size_t level)
     a_block *toRemove = (a_block *)header;
     a_block *aux;
 
-    /*
-        Maybe toRemove is the first block
-    */
     if (block == toRemove)
     {
         headers[level] = block->nextBlock;
         return;
     }
 
-    /*
-        Lookup to obtain the block to remove from the level
-    */
     while (block->nextBlock != NULL)
     {
         if (block->nextBlock == toRemove)
@@ -213,9 +180,6 @@ void removeSpecificHeaderFromList(void *header, size_t level)
         block = block->nextBlock;
     }
 
-    /*
-        Maybe toRemove is the last block
-    */
     if (block == toRemove)
     {
         aux->nextBlock = NULL;
@@ -233,7 +197,7 @@ void *removeHeaderFromList(int level)
     if (headers[level] == NULL)
     {
         return NULL;
-    } //not enough space
+    } //not enough space 
 
     void *returnValue = (void *)headers[level];
     headers[level] = headers[level]->nextBlock;
@@ -262,19 +226,14 @@ int findLevel(size_t requestedBytes)
     return LEVELS - 1;
 }
 
-void insertHeaderIntoList2(void *header, size_t level)
-{
-    a_block *aux = (a_block *) header;
-    aux->nextBlock = headers[level];
-    headers[level] = aux;
-}
-
 /*
     Insert a header at the end of the list of the level
 */
 void insertHeaderIntoList(void *header, size_t level)
 {
-
+    /*
+        Iterate trough the list of the level from the start
+    */
     a_block *block = headers[level];
     if (block == NULL)
     {
