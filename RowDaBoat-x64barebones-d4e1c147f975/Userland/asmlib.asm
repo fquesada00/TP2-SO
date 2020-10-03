@@ -11,6 +11,7 @@ GLOBAL loadPrgrm
 GLOBAL sysrtc
 GLOBAL invalidOpCode
 GLOBAL read_mem
+GLOBAL sys_execv
 
 SECTION .text
 
@@ -205,6 +206,15 @@ read_mem:
     push rbp
     mov rbp,rsp
     mov rax,6
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+sys_execv:
+    push rbp
+    mov rbp,rsp
+    mov rax,11
     int 80h
     mov rsp,rbp
     pop rbp

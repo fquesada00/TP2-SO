@@ -1,6 +1,7 @@
 #ifndef _STANDARD_LIB__H__
 #define _STANDARD_LIB__H__
 #include <stdint.h>
+#include <stddef.h>
 void vaArg(int n, ...);
 int strcmp(const char*, const char*);
 int printf(const char*,...);
@@ -20,4 +21,5 @@ void printRtc();
 void invOpCode();
 void printCoreTemp();
 void manShell();
+int execv(void *entry_point, int argc, char *argv[]);
 #endif

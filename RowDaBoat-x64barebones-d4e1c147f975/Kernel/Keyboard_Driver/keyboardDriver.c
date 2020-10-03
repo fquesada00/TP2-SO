@@ -1,8 +1,6 @@
 #include "keyboardDriver.h"
 #include <stdint.h>
-#include "TaskManager.h"
 extern char getKeyboardScanCode();
-#include "States.h"
 static char keyboard_buffer[256];
 static int buff_size = 0;
 static int current = 0;
@@ -44,12 +42,12 @@ void keyboardHandler(uint64_t rsp)
             if (scan == 0x02)
             {
                 //changeScreen(0);
-                continueProgram(0, rsp);
+                //continueProgram(0, rsp);
             }
             else if (scan == 0x03)
             {
                 //changeScreen(1);
-                continueProgram(1, rsp);
+                //continueProgram(1, rsp);
             }
             else if (scan == 0x13)
             {

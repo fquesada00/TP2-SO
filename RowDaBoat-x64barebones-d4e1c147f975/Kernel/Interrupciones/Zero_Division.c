@@ -7,5 +7,5 @@ void zero_division_handler(uint64_t rsp)
     State * currentState = (void*)rsp;
     putsColor("ZERO DIVISION EXCEPTION\n", 255, 0, 0);
     printreg(*currentState);
-    restartProgram(rsp);
+   // restartProgram(rsp);
 }

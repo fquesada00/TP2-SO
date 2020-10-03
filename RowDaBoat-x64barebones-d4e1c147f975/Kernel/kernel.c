@@ -4,6 +4,9 @@
 #include <moduleLoader.h>
 #include "idtLoader.h"
 #include "video_driver.h"
+
+extern int initProcessManager(void *entry_point, int argc, char *argv[], uint64_t rsp);
+
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -48,7 +51,9 @@ void * initializeKernelBinary()
 int main(){
 	load_idt();
 	init_video();
-	((EntryPoint)sampleCodeModuleAddress)();
+	char * argv[] = {"shell",NULL};
+	initProcessManager(sampleCodeModuleAddress,1,argv,0);
+	puts("Somthing wrong");
 	return 0;
 	
 	
