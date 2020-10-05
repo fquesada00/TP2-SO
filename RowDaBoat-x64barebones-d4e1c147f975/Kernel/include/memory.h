@@ -3,9 +3,17 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define BASE_ADDRESS 0x800000
 
-void *pMalloc(size_t requestedSize);
-void pfree(void *userStart);
+/*
+    Reserve requestedSize bytes in heap
+*/
+void *pMalloc(size_t);
+
+/*
+    Receive a pointer to be freed
+*/
+void pFree(void *pointer);
 
 
 #endif

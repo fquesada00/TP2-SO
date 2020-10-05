@@ -2,6 +2,13 @@
     #include "memory_manager.h"
 
     /*
+        LINKS DE INTERES
+        https://courses.cs.washington.edu/courses/cse351/10sp/lectures/15-memallocation.pdf
+        https://www.youtube.com/watch?v=74s0m4YoHgM
+        https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/master/portable/MemMang/heap_4.c
+    */
+
+    /*
         Knowing the size of the header by bitwise operations 
         and word alignment to set it to a multiply of 8, we
         can move through the heap efficiently
@@ -19,14 +26,6 @@
     */
     static a_block heapStart, *heapEnd = NULL;
 
-    /*
-        LINKS DE INTERES
-        https://courses.cs.washington.edu/courses/cse351/10sp/lectures/15-memallocation.pdf
-        https://www.youtube.com/watch?v=74s0m4YoHgM
-        https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/master/portable/MemMang/heap_4.c
-        using implicit free list with first fit algorithm 
-    */
-
     void *pMalloc(size_t requestedSize)
     {
         void *pReturnBlock = NULL;
@@ -39,17 +38,16 @@
             pInitHeap(BASE_ADDRESS, END_ADDRESS);
         }
 
-        if (remainingBytes < requestedSize)
-        {
-
-        } //throw exception not enough space
+        /*
+            Warning (not an error or exception)
+        */
         if (requestedSize < 0)
         {
 
-        } //throw exception negative sizes not accepted
+        } 
 
         /*
-                Header struct is part of the size
+            Header struct is part of the size
         */
         requestedSize += heapHeaderSize;
 
@@ -69,6 +67,14 @@
         }
 
         /*
+            Throw error not enough space
+        */
+        if (remainingBytes < requestedSize)
+        {
+            return NULL;
+        } 
+        
+        /*
             Initialize search blocks
         */
         a_block *pPrevBlock, *pActualBlock;
@@ -78,16 +84,19 @@
         /*
             Lookup doing first fit algorithm
         */
-        while (pActualBlock->BlockSize < requestedSize && pActualBlock->pNextBlock != NULL)
+        while (pActualBlock->blockSize < requestedSize && pActualBlock->pNextBlock != NULL)
         {
             pPrevBlock = pActualBlock;
             pActualBlock = pActualBlock->pNextBlock;
         }
 
+        /*
+            Throw error not enough space
+        */
         if (pActualBlock->pNextBlock == NULL)
         {
             return NULL;
-        } //throw exception not enough space (reached end)
+        }
 
         /*
             Set block to be returned without header as well
@@ -105,19 +114,19 @@
             as its mandatory to allocate memory).
             If not, then do not link, oppositly, link it
         */
-        if ((pActualBlock->BlockSize - requestedSize) <= (remainingBytes))
+        if ((pActualBlock->blockSize - requestedSize) <= (remainingBytes))
         {
             a_block *pLinkBlock = (a_block *)((uint8_t *)pActualBlock + requestedSize);
-            pLinkBlock->BlockSize = pActualBlock->BlockSize - requestedSize;
+            pLinkBlock->blockSize = pActualBlock->blockSize - requestedSize;
 
             /*
                 Update new size as its less than before
             */
-            pActualBlock->BlockSize = requestedSize;
+            pActualBlock->blockSize = requestedSize;
             pInsertBlockIntoList(pLinkBlock);
         }
 
-        remainingBytes -= pActualBlock->BlockSize;
+        remainingBytes -= pActualBlock->blockSize;
 
         /*
             Take out the block from the list
@@ -133,17 +142,17 @@
             Set start struct allocated in stack
         */
         heapStart.pNextBlock = (a_block *)baseAddress;
-        heapStart.BlockSize = (size_t)0;
+        heapStart.blockSize = (size_t)0;
 
         heapEnd = endAddress - heapHeaderSize;
         heapEnd->pNextBlock = NULL;
-        heapEnd->BlockSize = (size_t)0;
+        heapEnd->blockSize = (size_t)0;
 
         a_block *pFirstBlock = (a_block *)baseAddress;
         pFirstBlock->pNextBlock = heapEnd;
-        pFirstBlock->BlockSize = (size_t)heapEnd - (size_t)pFirstBlock;
+        pFirstBlock->blockSize = (size_t)heapEnd - (size_t)pFirstBlock;
 
-        remainingBytes = pFirstBlock->BlockSize;
+        remainingBytes = pFirstBlock->blockSize;
     }
 
     void pFree(void *pointer)
@@ -154,10 +163,13 @@
         uint8_t *pNextABlock = (uint8_t *)pointer;
         a_block *pLinkBlock;
 
+        /*
+            Nothing to do here
+        */
         if (pNextABlock == NULL)
         {
             return;
-        } //nothing to do here
+        } 
 
         /*
             Before the pointer there is a_block struct
@@ -165,12 +177,15 @@
         pNextABlock -= heapHeaderSize;
         pLinkBlock = (a_block *)pNextABlock;
 
+        /*
+            Its an error of the memory manager
+        */
         if (pLinkBlock->pNextBlock != NULL)
         {
             return;
-        } //we did something wrong so
+        }
 
-        remainingBytes += pLinkBlock->BlockSize;
+        remainingBytes += pLinkBlock->blockSize;
 
         pInsertBlockIntoList(pLinkBlock);
     }
@@ -188,18 +203,21 @@
             pPrevBlock = pPrevBlock->pNextBlock;
         }
 
+        /*
+            Its an error of the memory manager
+        */
         if (pPrevBlock->pNextBlock == NULL)
         {
             return;
-        } //we did something wrong
+        } 
 
         /*
             Check if the previous block to the one being inserted make
             a big block that is next to each other, if yes, then merge
         */
-        if ((a_block *)((uint8_t *)pPrevBlock + pPrevBlock->BlockSize) == pInsertBlock)
+        if ((a_block *)((uint8_t *)pPrevBlock + pPrevBlock->blockSize) == pInsertBlock)
         {
-            pPrevBlock->BlockSize += pInsertBlock->BlockSize;
+            pPrevBlock->blockSize += pInsertBlock->blockSize;
             pInsertBlock = pPrevBlock;
         }
 
@@ -208,7 +226,7 @@
             If a previous merge was done, it doesnt modify
             anything as we are dealing with pointers
         */
-        if ((a_block *)((uint8_t *)pInsertBlock + pInsertBlock->BlockSize) == pPrevBlock->pNextBlock)
+        if ((a_block *)((uint8_t *)pInsertBlock + pInsertBlock->blockSize) == pPrevBlock->pNextBlock)
         {
             /*
                 If end was reached, then dont increase size.
@@ -220,7 +238,7 @@
             }
             else
             {
-                pInsertBlock->BlockSize += pPrevBlock->pNextBlock->BlockSize;
+                pInsertBlock->blockSize += pPrevBlock->pNextBlock->blockSize;
                 pInsertBlock->pNextBlock = pPrevBlock->pNextBlock->pNextBlock;
             }
         }
