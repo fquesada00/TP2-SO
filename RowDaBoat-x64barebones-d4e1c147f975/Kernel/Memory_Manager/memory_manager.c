@@ -39,14 +39,6 @@
         }
 
         /*
-            Warning (not an error or exception)
-        */
-        if (requestedSize < 0)
-        {
-
-        } 
-
-        /*
             Header struct is part of the size
         */
         requestedSize += heapHeaderSize;
@@ -73,7 +65,7 @@
         {
             return NULL;
         } 
-        
+
         /*
             Initialize search blocks
         */

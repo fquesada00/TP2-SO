@@ -5,11 +5,6 @@
 #include <stdlib.h>
 #include "memory.h"
 
-#define END_ADDRESS 0xC00000
-#define HEAP_SIZE (size_t) BASE_ADDRESS - (size_t)END_ADDRESS   
-#define WORD_ALIGN 8 
-#define WORD_ALIGN_MASK 7
-
 typedef struct a_block
 {
     struct a_block *pNextBlock;
