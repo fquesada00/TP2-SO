@@ -1,10 +1,10 @@
 #ifndef _MEMORY_H_
 #define _MEMORY_H_
-#include <stdio.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #define BASE_ADDRESS 0x800000
-#define END_ADDRESS 0xC00000
+#define END_ADDRESS 0x2000000
 #define HEAP_SIZE (size_t) BASE_ADDRESS - (size_t)END_ADDRESS 
 
 #define WORD_ALIGN 8 

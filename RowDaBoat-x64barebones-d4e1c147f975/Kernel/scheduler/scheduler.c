@@ -1,12 +1,13 @@
 #include "scheduler.h"
 #include "list.h"
+#include "standardstring.h"
 extern void _hlt();
 
-static Header readyHeader={0};
-static Header blockedHeader = {0};
+Header readyHeader={0};
+Header blockedHeader = {0};
 int currentPIDs;
 int initializing = 1;
-uint64_t stackSize = 0x5000;
+uint64_t stackSize = 0x100000;
 
 extern char * stdin;
 extern char * stdout;
@@ -37,7 +38,7 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
     rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t)) + stackSize - (sizeof(uint64_t));
     int pid = currentPIDs++;
     init_registers(entry_point, argc, argv, rsp);
-    init_PCB(rsp, pid);
+    init_PCB(rsp, pid,argv[0]);
     _hlt();
     return -1;
 }
@@ -65,16 +66,17 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->r14 = 14;
     init->r15 = 15;
 }
-void init_PCB(uint64_t rsp, int pid)
+void init_PCB(uint64_t rsp, int pid,char * name)
 {
     elem_t e = {0};
-    e.state = READY;
     e.PID = pid;
     e.rsp = rsp - sizeof(Swapping);
+    e.StackBase = rsp - sizeof(uint64_t);
     e.privilege = 5;
     e.fds[0] = stdin;
     e.fds[1] = stdout;
     e.fdBlock = -1;
+    strcpy(e.name,name);
     if (initializing)
         initList(&readyHeader,e,5,5);
     else

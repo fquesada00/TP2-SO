@@ -133,6 +133,7 @@ listElem_t removeElement(Header * head,elem_t elem)
     current->next = next->next;
     le = *next;
     pFree(next);
+
     return le;    
 }
 

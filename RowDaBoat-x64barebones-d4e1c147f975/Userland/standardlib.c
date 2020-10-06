@@ -20,42 +20,15 @@ extern int read_mem(uint64_t address, char * buff);
 extern int sys_execv(void *entry_point, int argc, char *argv[]);
 extern syscallMalloc(size_t size);
 extern syscallFree(void * block);
+extern syscallKill(int pid);
+extern void syscallProcesses();
+
 void puts(char * c){
     int i = 0;
     while(c[i]){
         putchar(c[i++]);
     }
     putchar('\n');
-}
-
-
-/* return 1 if s is greater than v
-** 0 if s is equal to v
-** -1 if s is lower than v */
-int strcmp(const char *s, const char *v)
-{
-    int i = 0;
-    for ( ; s[i] != '\0' && v[i] != '\0'; i++)
-    {
-        if (s[i] > v[i])
-            return 1;
-        else if (s[i] < v[i])
-            return -1;
-    }
-    if (s[i] == '\0' && v[i] != '\0')
-        return -1;
-    else if (s[i] != '\0' && v[i] == '\0')
-        return 1;
-    return 0;
-}
-
-int strlen(char *s)
-{
-    int i = 0;
-    while (s[i] != 0){
-        i++;
-    }
-    return i;
 }
 
 int printf(const char * fmt, ...){
@@ -568,4 +541,11 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 	}
 
 	return destination;
+}
+int kill(int pid){
+    syscallKill(pid);
+}
+void ps()
+{
+    syscallProcesses();
 }

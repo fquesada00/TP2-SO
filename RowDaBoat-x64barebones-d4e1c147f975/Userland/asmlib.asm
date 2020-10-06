@@ -14,6 +14,8 @@ GLOBAL read_mem
 GLOBAL sys_execv
 GLOBAL syscallMalloc
 GLOBAL syscallFree
+GLOBAL syscallKill
+GLOBAL syscallProcesses
 SECTION .text
 
 ;REHACER
@@ -233,6 +235,23 @@ sys_execv:
     push rbp
     mov rbp,rsp
     mov rax,11
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallKill:
+    push rbp
+    mov rbp,rsp
+    mov rax,7
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+syscallProcesses:
+    push rbp
+    mov rbp,rsp
+    mov rax,8
     int 80h
     mov rsp,rbp
     pop rbp

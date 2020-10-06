@@ -53,7 +53,7 @@ int main(){
 	init_video();
 	char * argv[] = {"shell",NULL};
 	initProcessManager(sampleCodeModuleAddress,1,argv,0);
-	puts("Somthing wrong");
+	puts("Something wrong");
 	return 0;
 	
 	

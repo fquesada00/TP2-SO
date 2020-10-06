@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stddef.h>
 void vaArg(int n, ...);
-int strcmp(const char*, const char*);
 int printf(const char*,...);
 int uintToBase(uint64_t,char*,uint32_t);
 void processorInfo(void);
@@ -13,7 +12,6 @@ int getchar();
 void putchar(char c);
 int scanf(const char *,...);
 int doubleToString(double,char*);
-int strlen(char * s);
 void printReg();
 void DivZero();
 int programLoader(void(*program)(void));
@@ -25,4 +23,6 @@ int execv(void *entry_point, int argc, char *argv[]);
 void * pMalloc(size_t size);
 void pFree(void * block);
 void * memcpy(void * destination, const void * source, uint64_t length);
+int kill(int pid);
+void ps();
 #endif
