@@ -10,6 +10,7 @@ typedef enum State
 } State;
 typedef struct PCB
 {
+    char name[255];
     int PID;
     State state;
     char * fds[512];

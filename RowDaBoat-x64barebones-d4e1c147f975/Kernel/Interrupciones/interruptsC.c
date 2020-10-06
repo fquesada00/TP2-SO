@@ -1,8 +1,11 @@
 #include "keyboardDriver.h"
 #include "video_driver.h"
+#include "scheduler.h"
+#include "list.h"
 #include <stdint.h>
 #include <lib.h>
 extern void _hlt();
+extern Header readyHeader;
 int syscall_read(int fd, char * buffer,int n)
 {
     int i;
@@ -32,6 +35,14 @@ int syscall_registers(uint64_t * regs)
 int syscall_read_mem(uint64_t address, char * buff)
 {
     memcpy((void *) buff,(void *) address,32);
+    return 0;
+}
+
+int pKill(int pid)
+{
+    elem_t e;
+    e.PID = pid;
+    removeElement(&readyHeader,e);
     return 0;
 }
 

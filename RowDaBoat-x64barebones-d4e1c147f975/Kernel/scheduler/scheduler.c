@@ -2,8 +2,8 @@
 #include "list.h"
 extern void _hlt();
 
-static Header readyHeader={0};
-static Header blockedHeader = {0};
+Header readyHeader={0};
+Header blockedHeader = {0};
 int currentPIDs;
 int initializing = 1;
 uint64_t stackSize = 0x5000;
@@ -37,7 +37,7 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
     rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t)) + stackSize - (sizeof(uint64_t));
     int pid = currentPIDs++;
     init_registers(entry_point, argc, argv, rsp);
-    init_PCB(rsp, pid);
+    init_PCB(rsp, pid,char * name);
     _hlt();
     return -1;
 }
@@ -65,7 +65,7 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->r14 = 14;
     init->r15 = 15;
 }
-void init_PCB(uint64_t rsp, int pid)
+void init_PCB(uint64_t rsp, int pid,char * name)
 {
     elem_t e = {0};
     e.state = READY;
@@ -75,6 +75,7 @@ void init_PCB(uint64_t rsp, int pid)
     e.fds[0] = stdin;
     e.fds[1] = stdout;
     e.fdBlock = -1;
+    e.name = 
     if (initializing)
         initList(&readyHeader,e,5,5);
     else

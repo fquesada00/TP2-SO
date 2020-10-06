@@ -65,6 +65,7 @@ void shell()
         }
         else if(argsRead == 2){
             if(strcmp(command,"printmem") == 0) printMemoryFromAddress(memoryAddress);
+            else if(strcmp(command,"kill") == 0) kill(memoryAddress);
             else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);
         }
     }while(1);
