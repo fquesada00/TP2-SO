@@ -1,6 +1,6 @@
 #ifdef MM_BUDDY
     #include <stdint.h>
-    #include "memory.h"
+    #include "buddy_memory_manager.h"
 
     #define MINIMUM_BLOCK_SIZE_LOG2 5                                 //ALGO MENOR ME SACA EL DEALINEAMIENTO A PALABRA
     #define MINIMUM_BLOCK_SIZE ((size_t)1 << MINIMUM_BLOCK_SIZE_LOG2) //8 bytes
@@ -36,7 +36,7 @@
 
     static a_block *headers[LEVELS + 1];
     static char initialized = 0;
-    static size_t remainingBytes = MAXIMUM_BLOCK_SIZE; //es la cant de bytes que se reserven
+    static size_t remainingBytes = MAXIMUM_BLOCK_SIZE; 
 
     void *pMalloc(size_t requestedSize)
     {
@@ -48,12 +48,17 @@
             initialize();
             initialized = 1;
         }
+
         requestedSize += HEADER_SIZE;
         size_t level = findLevel(requestedSize);
+
+        /*
+            Not enough space exception
+        */
         if (level == -1 || requestedSize > remainingBytes)
         {
             return NULL;
-        } //throw exception not enough space
+        } 
 
         /*
             Must skip header
@@ -71,21 +76,24 @@
         if (headers[level] == NULL)
         {
             returnPointer = recursiveMalloc(level - 1);
+
+            /*
+                Not enough space
+            */
             if (returnPointer == NULL)
             {
                 return NULL;
-            } //throw exception not enough space
+            }
 
             /*
                 Obtain block's size of the level
             */
-            size_t blockSize = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level);
+            size_t blockSize = BLOCK_SIZE(level);
 
             /*
                 Now we are in the "child", so it has to be splitted in two
             */
             insertHeaderIntoList(returnPointer + blockSize, level);
-
             insertHeaderIntoList(returnPointer, level);
         }
         return removeHeaderFromList(level);
@@ -96,14 +104,14 @@
         void *toFree = pointer - HEADER_SIZE;
         a_block *blockToFree = (a_block *)toFree;
         recursiveFree(toFree, blockToFree->level);
-        remainingBytes += (1 << (MAXIMUM_BLOCK_SIZE_LOG2 - blockToFree->level));
+        remainingBytes += BLOCK_SIZE(blockToFree->level);
     }
 
     void recursiveFree(void *header, size_t level)
     {
         void *buddy;
         size_t blockIdx = getBlockNumber(header);
-        size_t blockSize = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level);
+        size_t blockSize = BLOCK_SIZE(level);
 
         /*
             Check if buddy is on right (blockIdx is odd), if not
@@ -119,11 +127,11 @@
         */
         insertHeaderIntoList(header, level);
 
+        a_block *block = headers[level];
+
         /*
             Lookup to obtain buddy's header from the start of the level
         */
-        a_block *block = headers[level];
-
         while (block != NULL)
         {
             if ((void *)block == buddy)
@@ -150,39 +158,6 @@
             }
             block = block->nextBlock;
         }
-    }
-
-    void insertSpecificHeaderIntoList(void *header, size_t level)
-    {
-        a_block *block = headers[level];
-        a_block *toInsert = (a_block *)header;
-        if (block == NULL)
-        {
-            headers[level] = toInsert;
-            toInsert->level = level;
-            toInsert->nextBlock = NULL;
-            return;
-        } //list not initialized
-
-        while (block->nextBlock != NULL && block->nextBlock < toInsert)
-        {
-            block = block->nextBlock;
-        }
-
-        /*
-            If block has to be inserted at the end, check it doesn't reach end
-        */
-        if (block->nextBlock == NULL)
-        {
-            block->nextBlock = toInsert;
-            toInsert->nextBlock = NULL;
-        }
-        else
-        {
-            toInsert->nextBlock = block->nextBlock;
-            block->nextBlock = toInsert;
-        }
-        block->nextBlock->level = level;
     }
 
     void removeSpecificHeaderFromList(void *header, size_t level)
@@ -220,21 +195,24 @@
         if (block == toRemove)
         {
             aux->nextBlock = NULL;
+            return;
         }
-    }
 
-    size_t getLevel(void *userStart)
-    {
-        userStart = (uint8_t *)userStart - HEADER_SIZE;
-        return ((a_block *)userStart)->level;
+        /*
+            If reached here, then the pointer is not in the list.
+            Then throw an exception
+        */
     }
 
     void *removeHeaderFromList(int level)
     {
+        /*
+            If list its not initialized, then there is no element
+        */
         if (headers[level] == NULL)
         {
             return NULL;
-        } //not enough space
+        } 
 
         void *returnValue = (void *)headers[level];
         headers[level] = headers[level]->nextBlock;
@@ -263,19 +241,14 @@
         return LEVELS - 1;
     }
 
-    void insertHeaderIntoList2(void *header, size_t level)
-    {
-        a_block *aux = (a_block *) header;
-        aux->nextBlock = headers[level];
-        headers[level] = aux;
-    }
-
     /*
         Insert a header at the end of the list of the level
     */
     void insertHeaderIntoList(void *header, size_t level)
     {
-
+        /*
+            Iterate trough the list of the level from the start
+        */
         a_block *block = headers[level];
         if (block == NULL)
         {
@@ -295,25 +268,23 @@
             block->level = level;
             block->nextBlock = NULL;
         }
-
-        block = headers[level];
-        while (block != NULL)
-        {
-            block = block->nextBlock;
-        }
     }
 
-    size_t getBlockNumber(a_block *kernelStart)
+    size_t getBlockNumber(a_block *header)
     {
-        int level = kernelStart->level;
-        int block_size = 1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level);
-        int relativeStart = (uint8_t *)kernelStart - (uint8_t *)BASE_ADDRESS;
-        int relativeBlockNumber = relativeStart / block_size;
+        size_t relativeStart = (uint8_t *)kernelStart - (uint8_t *)BASE_ADDRESS;
+        size_t relativeBlockNumber = relativeStart / BLOCK_SIZE(header->level);
+
+        /*
+            Add one so blocks are numbered: 1, 2, 3, 4 ...
+            meaning first block is always odd (except the only block
+            of the list at level 0, which number is 0)
+        */
         return relativeBlockNumber + 1;
     }
 
     void initialize()
     {
-        insertHeaderIntoList(BASE_ADDRESS, 0);
+        insertHeaderIntoList((void *)BASE_ADDRESS, 0);
     }
 #endif
