@@ -23,6 +23,9 @@ typedef struct{
     int size;
 }Header;
 
+Header blockedHeader = {0};
+
+
 void initList(Header * head,elem_t firstNode, int p, int ticket);
 
 listElem_t* newNode(elem_t d, int p, int tickets);
