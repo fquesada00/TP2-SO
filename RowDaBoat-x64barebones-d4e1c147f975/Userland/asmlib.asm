@@ -15,6 +15,7 @@ GLOBAL sys_execv
 GLOBAL syscallMalloc
 GLOBAL syscallFree
 GLOBAL syscallKill
+GLOBAL syscallProcesses
 SECTION .text
 
 ;REHACER

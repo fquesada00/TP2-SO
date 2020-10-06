@@ -29,6 +29,7 @@ EXTERN init_process
 EXTERN pMalloc
 EXTERN pFree
 EXTERN pKill
+EXTERN processes
 SECTION .text
 
 %macro pushState 0
@@ -220,6 +221,8 @@ _syscallHandler:
 	je .read_mem ;syscall read memory
 	cmp rax,7
 	je .kill
+	cmp rax,8
+	je .ps
 	cmp rax,9
 	je .malloc
 	cmp rax,10
@@ -272,6 +275,9 @@ _syscallHandler:
 	jmp .end
 .kill:
 	call pKill
+	jmp .end
+.ps:
+	call processes
 	jmp .end
 .end:
 	popStateNoRAX

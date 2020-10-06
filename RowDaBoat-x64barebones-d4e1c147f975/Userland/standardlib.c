@@ -21,6 +21,8 @@ extern int sys_execv(void *entry_point, int argc, char *argv[]);
 extern syscallMalloc(size_t size);
 extern syscallFree(void * block);
 extern syscallKill(int pid);
+extern void syscallProcesses();
+
 void puts(char * c){
     int i = 0;
     while(c[i]){
@@ -542,4 +544,8 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 }
 int kill(int pid){
     syscallKill(pid);
+}
+void ps()
+{
+    syscallProcesses();
 }

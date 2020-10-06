@@ -59,8 +59,11 @@ void shell()
                 printf("sigo aca!\n");
             }
             else if(strcmp(command,"loop") == 0){ 
-                char * argvLoop={"loop",NULL};
+                char * argvLoop[]={"loop",NULL};
                 execv(loop,1,argvLoop); }
+            else if(strcmp(command,"ps") == 0){
+                ps();
+            }
             else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);
         }
         else if(argsRead == 2){

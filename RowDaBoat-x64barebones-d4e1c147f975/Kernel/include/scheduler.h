@@ -2,19 +2,13 @@
 #define _SCHEDULER_H_
 #include "memory_manager.h"
 #include "video_driver.h"
-typedef enum State
-{
-    READY,
-    BLOCKED,
-    TERMINATED
-} State;
 typedef struct PCB
 {
     char name[255];
     int PID;
-    State state;
     char * fds[512];
     uint64_t rsp;
+    uint64_t StackBase;
     int privilege;
     int fdBlock;
 }PCB;

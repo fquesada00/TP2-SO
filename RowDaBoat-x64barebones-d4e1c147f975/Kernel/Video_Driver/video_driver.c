@@ -100,10 +100,10 @@ void putCharColor(char c, char r, char g, char b)
     else if (c == '\b')
         deleteChar();
     else if (c == '\t')
-        puts("  ");
+        puts("    ");
     else if (c == 1)
         changeScreen(0);
-    else if (c == 2)
+   else if (c == 2)
         changeScreen(1);
     else
     {

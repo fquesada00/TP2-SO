@@ -24,4 +24,5 @@ void * pMalloc(size_t size);
 void pFree(void * block);
 void * memcpy(void * destination, const void * source, uint64_t length);
 int kill(int pid);
+void ps();
 #endif
