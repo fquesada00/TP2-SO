@@ -1,47 +1,56 @@
 #include "list.h"
 #include "memory_manager.h"
+
+void initList(Header * head,elem_t firstNode, int p, int ticket){
+    head->first = newNode(firstNode, p, ticket);
+    head->current = head->first;
+    head->size = 1;
+}
+
 listElem_t* newNode(elem_t d, int p,int ticket) 
 { 
     listElem_t* temp = (listElem_t*)pMalloc(sizeof(listElem_t)); 
     temp->data = d; 
     temp->priority = p; 
     temp->next = NULL;
-    temp->current = temp;
+    temp->prev =NULL;
     temp->tickets = ticket; 
-  
+    
     return temp; 
 } 
   
 // Return the value at head 
-elem_t peek(listElem_t** head) 
+elem_t peek(Header * head) 
 { 
-    return (*head)->data; 
+    return (head->first->data); 
 } 
   
 // Removes the element with the 
 // highest priority form the list 
-void pop(listElem_t** head) 
+void pop(Header * head) 
 { 
-    listElem_t* temp = *head; 
-    (*head) = (*head)->next; 
+    listElem_t* temp = (head->first); 
+    head->first = head->first->next;
     pFree(temp); 
 } 
   
 // Function to push according to priority 
-void push(listElem_t** head, elem_t d, int p,int tickets) 
-{ 
-    listElem_t* start = (*head); 
+void push(Header * head, elem_t d, int p,int tickets) 
+{   
+    head->size++;
+    listElem_t* start = head->first; 
   
     // Create new Node 
     listElem_t* temp = newNode(d, p,tickets); 
     // Special Case: The head of list has lesser 
     // priority than new ListElem. So insert new 
     // ListElem before head ListElem and change head ListElem. 
-    if ((*head)->priority > p) { 
+    if (head->first->priority > p) { 
   
         // Insert New Node before head 
-        temp->next = *head; 
-        (*head) = temp; 
+        temp->next = head->first;
+        head->first->prev = temp; 
+        head->first = temp; 
     } 
     else { 
   
@@ -55,25 +64,65 @@ void push(listElem_t** head, elem_t d, int p,int tickets)
         // Either at the ends of the list 
         // or at required position 
         temp->next = start->next; 
+        temp->prev = start;
         start->next = temp; 
     } 
 } 
   
 // Function to check is list is empty 
-int isEmpty(listElem_t** head) 
+int isEmpty(Header * head) 
 { 
-    return (*head) == NULL; 
+    return head->first == NULL; 
 }
 
-elem_t next(listElem_t ** head)
+elem_t next(Header* head)
 {
-    listElem_t * start = (*head);
-    elem_t ret = {-1,-1,-1};
-    if(start == NULL || start->current == NULL)
+    listElem_t * start = head->first;
+    elem_t ret = {0};
+    if(start == NULL || head == NULL)
         return  ret;
-    if(start->current->next == NULL)
-        start->current = start;
+    if(head->current->next == NULL)
+        head->current = start;
     else
-        start->current = start->current->next;
-    return start->current->data;
+        head->current = head->current->next;
+    elem_t e = (head->current->data);
+    return e;
+}
+
+//gets element and removes the node from the list
+listElem_t removeElement(Header * head,elem_t elem)
+{
+    listElem_t le = {0};
+    if(head == NULL || head->current == NULL)
+        return le;
+    listElem_t * current = head->first; 
+    listElem_t * next = current;
+    while (next != NULL && next->data.PID != elem.PID)
+    {
+        current = next;
+        next = current->next;
+    }
+    if(next == NULL)
+        return le;
+    
+    current->next = next->next;
+    le = *next;
+    pFree(next);
+    return le;
+    
+
+    
+}
+listElem_t remove(Header * head)
+{
+    listElem_t e;
+    listElem_t * next = head->current;
+    head->current->prev->next = head->current->next;
+    head->current=head->current->prev;
+    e =*next;
+    pFree(next);
+    return e;
+    
+
+    
 }

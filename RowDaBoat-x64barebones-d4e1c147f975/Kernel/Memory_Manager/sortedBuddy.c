@@ -5,14 +5,14 @@
     #define MINIMUM_BLOCK_SIZE_LOG2 5                                 //ALGO MENOR ME SACA EL DEALINEAMIENTO A PALABRA
     #define MINIMUM_BLOCK_SIZE ((size_t)1 << MINIMUM_BLOCK_SIZE_LOG2) //8 bytes
 
-    #define MAXIMUM_BLOCK_SIZE_LOG2 24
+    #define MAXIMUM_BLOCK_SIZE_LOG2 31
     #define MAXIMUM_BLOCK_SIZE ((size_t)1 << MAXIMUM_BLOCK_SIZE_LOG2)
 
     #define LEVELS (MAXIMUM_BLOCK_SIZE_LOG2 - MINIMUM_BLOCK_SIZE_LOG2) + 1
 
     #define WORD_ALIGN 8 //Buscamos en el manual del Pure y usa 8 bytes https://tracker.pureos.net/w/pureos/hardware_requirements/
 
-    #define BASE_ADDRESS 0 //Esto seria el offset
+    #define BASE_ADDRESS 0x800000 //Esto seria el offset
     #define MAX_NODES (((size_t)1 << (LEVELS + 1)) - 1)
 
     #define HEADER_SIZE sizeof(a_block)

@@ -1,7 +1,7 @@
 #include "keyboardDriver.h"
 #include <stdint.h>
 extern char getKeyboardScanCode();
-static char keyboard_buffer[256];
+char stdin[256];
 static int buff_size = 0;
 static int current = 0;
 
@@ -51,12 +51,12 @@ void keyboardHandler(uint64_t rsp)
             }
             else if (scan == 0x13)
             {
-                save_regs(rsp);
+                // save_regs(rsp);
             }
         }
         else
         {
-            keyboard_buffer[buff_size++] = (signed char)latinasccode[scan][shift];
+            stdin[buff_size++] = (signed char)latinasccode[scan][shift];
         }
     }
     //Release code shift
@@ -89,5 +89,5 @@ char get_buffer()
         return 0;
     if (current >= 256)
         current = 0;
-    return keyboard_buffer[current++];
+    return stdin[current++];
 }

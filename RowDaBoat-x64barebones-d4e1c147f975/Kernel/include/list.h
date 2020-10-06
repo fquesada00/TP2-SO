@@ -2,9 +2,8 @@
 #define _LIST_H_
 #include "scheduler.h"
 //Implementacion de listas de prioridad basada en https://www.geeksforgeeks.org/priority-queue-using-linked-list/
-typedef struct elem{
-    PCB pcb;
-}elem_t;
+typedef PCB elem_t;
+
 typedef struct ListElem { 
     elem_t data; 
   
@@ -14,21 +13,31 @@ typedef struct ListElem {
     int tickets; 
   
     struct ListElem* next;
-
-    struct ListElem * current;
+    struct ListElem* prev;
   
 }listElem_t;
 
+typedef struct{
+    listElem_t * first;
+    listElem_t * current;
+    int size;
+}Header;
+
+void initList(Header * head,elem_t firstNode, int p, int ticket);
+
 listElem_t* newNode(elem_t d, int p, int tickets);
 
-elem_t peek(listElem_t** head);
+elem_t peek(Header * head);
 
-void pop(listElem_t** head);
+void pop(Header * head);
 
-void push(listElem_t** head, elem_t d, int p, int tickets);
+void push(Header * head, elem_t d, int p, int tickets);
 
-int isEmpty(listElem_t** head);
+int isEmpty(Header * head);
 
-elem_t next(listElem_t ** head);
+elem_t next(Header * head);
 
+listElem_t remove(Header * head);
+
+listElem_t removeElement(Header * head,elem_t elem);
 #endif
