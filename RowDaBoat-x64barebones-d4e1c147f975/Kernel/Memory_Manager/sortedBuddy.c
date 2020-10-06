@@ -1,31 +1,30 @@
 #ifdef MM_BUDDY2
-    #include <stdint.h>
     #include "buddy_memory_manager.h"
+    /*
+        This buddy memory manager works with lists of blocks
+        of different size.
 
-    #define MINIMUM_BLOCK_SIZE_LOG2 5                                 //ALGO MENOR ME SACA EL DEALINEAMIENTO A PALABRA
-    #define MINIMUM_BLOCK_SIZE ((size_t)1 << MINIMUM_BLOCK_SIZE_LOG2) //8 bytes
+        When setting the minimum and maximum size, its set of
+        powers of 2, e.g.: minimum size 2^5 -> 32 bytes and
+        maximum size 2^7 -> 128 bytes, then level 0 block is one block
+        of 128 bytes and level 2 blocks are 128/32=4 blocks of 32 bytes.
+        Obviously, neither minimum nor maximum size can exceed the HEAP_SIZE.
 
-    #define MAXIMUM_BLOCK_SIZE_LOG2 31
-    #define MAXIMUM_BLOCK_SIZE ((size_t)1 << MAXIMUM_BLOCK_SIZE_LOG2)
-
-    #define LEVELS (MAXIMUM_BLOCK_SIZE_LOG2 - MINIMUM_BLOCK_SIZE_LOG2) + 1
-
-    #define WORD_ALIGN 8 //Buscamos en el manual del Pure y usa 8 bytes https://tracker.pureos.net/w/pureos/hardware_requirements/
-
-    #define BASE_ADDRESS 0x800000 //Esto seria el offset
-    #define MAX_NODES (((size_t)1 << (LEVELS + 1)) - 1)
-
-    #define HEADER_SIZE sizeof(a_block)
+        Continuing with the example, if 32 bytes are requested with pMalloc(32), 
+        level 2 list its NOT going to be initialized or even try to search for a 
+        free block as every request has one header size (mentioned bellow) before 
+        the pointer. In this buddy, the header size is of 16 bytes, so 
+        to wrap it up, if a search on last list (level 2 list here) is wanted,
+        pMalloc must be called with 16-k bytes, where k goes from 0 to 16.
+    */
 
     /*
         LINKS DE INTERES
         http://brokenthorn.com/Resources/OSDev26.html
     */
-
     static a_block *headers[LEVELS + 1];
     static char initialized = 0;
     static size_t remainingBytes = MAXIMUM_BLOCK_SIZE; 
-
 
     void *pMalloc(size_t requestedSize)
     {
@@ -37,10 +36,8 @@
             initialize();
             initialized = 1;
         }
-
         requestedSize += HEADER_SIZE;
         size_t level = findLevel(requestedSize);
-
         /*
             Not enough space exception
         */
@@ -48,14 +45,11 @@
         {
             return NULL;
         } 
-
         /*
             Must skip header
         */
         void *returnPointer = recursiveMalloc(level) + HEADER_SIZE;
-
         remainingBytes -= requestedSize;
-
         return returnPointer;
     }
 
@@ -65,7 +59,6 @@
         if (headers[level] == NULL)
         {
             returnPointer = recursiveMalloc(level - 1);
-
             /*
                 Not enough space
             */
@@ -73,12 +66,10 @@
             {
                 return NULL;
             } 
-
             /*
                 Obtain block's size of the level
             */
             size_t blockSize = BLOCK_SIZE(level);
-
             /*
                 Now we are in the "child", so it has to be splitted in two
             */
@@ -101,7 +92,6 @@
         void *buddy;
         size_t blockIdx = getBlockNumber(header);
         size_t blockSize = BLOCK_SIZE(level);
-
         /*
             Check if buddy is on right (blockIdx is odd), if not
             then is on left (bloclkIdx is even)
@@ -110,14 +100,11 @@
             buddy = (uint8_t *)header + blockSize;
         else
             buddy = (uint8_t *)header - blockSize;
-
         /*
             Insert block in the free list of the level
         */
         insertSpecificHeaderIntoList(header, level);
-
         a_block *block = headers[level];
-
         /*
             Lookup to obtain buddy's header from the start of the level
         */
@@ -153,7 +140,6 @@
     {
         a_block *block = headers[level];
         a_block *toInsert = (a_block *)header;
-
         /*
             List is not initialized, then do it
         */
@@ -164,12 +150,10 @@
             toInsert->nextBlock = NULL;
             return;
         } 
-
         while (block->nextBlock != NULL && block->nextBlock < toInsert)
         {
             block = block->nextBlock;
         }
-
         /*
             If block has to be inserted at the end, check it doesn't reach end
         */
@@ -191,7 +175,6 @@
         a_block *block = headers[level];
         a_block *toRemove = (a_block *)header;
         a_block *aux;
-
         /*
             Maybe toRemove is the first block
         */
@@ -200,7 +183,6 @@
             headers[level] = block->nextBlock;
             return;
         }
-
         /*
             Lookup to obtain the block to remove from the level
         */
@@ -214,7 +196,6 @@
             aux = block;
             block = block->nextBlock;
         }
-
         /*
             Maybe toRemove is the last block
         */
@@ -222,7 +203,6 @@
         {
             aux->nextBlock = NULL;
         }
-
         /*
             If reached here, then the pointer is not in the list.
             Then throw an exception
@@ -238,16 +218,11 @@
         {
             return NULL;
         }
-
         void *returnValue = (void *)headers[level];
         headers[level] = headers[level]->nextBlock;
-
         return returnValue;
     }
 
-    /*
-        Return the level of an specific amount of bytes (header size must be included)
-    */
     int findLevel(size_t requestedBytes)
     {
         int level = 0, totalBytes = 1 << MAXIMUM_BLOCK_SIZE_LOG2;
@@ -270,7 +245,6 @@
     {
         size_t relativeStart = (uint8_t *)kernelStart - (uint8_t *)BASE_ADDRESS;
         size_t relativeBlockNumber = relativeStart / BLOCK_SIZE(header->level);
-
         /*
             Add one so blocks are numbered: 1, 2, 3, 4 ...
             meaning first block is always odd (except the only block
@@ -278,7 +252,7 @@
         */
         return relativeBlockNumber + 1;
     }
-
+    
     void initialize()
     {
         insertSpecificHeaderIntoList((void *)BASE_ADDRESS, 0);

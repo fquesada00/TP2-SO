@@ -1,8 +1,6 @@
 #ifndef _MEMORY_MANAGER_H_
 #define _MEMORY_MANAGER_H_
 
-#include <stdint.h>
-#include <stdlib.h>
 #include "memory.h"
 
 typedef struct a_block
