@@ -12,12 +12,13 @@ typedef struct PCB
 {
     int PID;
     State state;
-    int fds[512];
+    char * fds[512];
     uint64_t rsp;
     int privilege;
+    int fdBlock;
 }PCB;
 
-typedef struct SwappingnNoRAX
+typedef struct Swapping
 {
     uint64_t r15;
     uint64_t r14;
@@ -33,10 +34,13 @@ typedef struct SwappingnNoRAX
     uint64_t rdx;
     uint64_t rcx;
     uint64_t rbx;
+    uint64_t rax;
     uint64_t rip;
     uint64_t cs;
     uint64_t flags;
     uint64_t rsp;
     uint64_t ss;
-} SwappingNoRAX;
+} Swapping;
+void readyProcess(int pid);
+void blockProcess(int pid,int fdBlock);
 #endif

@@ -1,17 +1,7 @@
 #include <stdint.h>
 #include "video_driver.h"
 #include "font8x8_basic.h"
-#define SCREENS 1
-#define WIDTH 1024
-#define SCREEN_WIDTH (WIDTH / SCREENS)
-#define HEIGHT 768
-/*Si desea cambiar el tamaño de la fuente por favor cargue un nuevo bitmap*/
-#define CHARSIZE 16
-#define PIXELSIZE 3
-#define LINES (HEIGHT / CHARSIZE)
-#define COLS ((WIDTH) / CHARSIZE)
-#define START_POS WIDTH *PIXELSIZE *CHARSIZE *(LINES - 1)
-#define START_SCREEN 0
+char stdout[SCREEN_WIDTH];
 struct vbe_mode_info_structure
 {
     uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.

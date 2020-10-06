@@ -2,39 +2,39 @@
 #include "list.h"
 extern void _hlt();
 
-listElem_t *PCBs;
+static Header readyHeader={0};
+static Header blockedHeader = {0};
 int currentPIDs;
 int initializing = 1;
-uint64_t stackSize = 0x200;
+uint64_t stackSize = 0x5000;
+
+extern char * stdin;
+extern char * stdout;
 
 int schedule(uint64_t rsp)
 {
     if (!initializing)
     {
-        (PCBs)->current->data.pcb.rsp = rsp;
+        (readyHeader).current->data.rsp = rsp;
     }
     else
         initializing = 0;
-    if (PCBs->current->tickets--)
-        return PCBs->current->data.pcb.rsp;
+    if (readyHeader.current->tickets--)
+        return readyHeader.current->data.rsp;
     else
     {
-        PCBs->current->tickets = PCBs->current->priority;
+        readyHeader.current->tickets = readyHeader.current->priority;
         elem_t e;
-        do
-        {
-            e = next(&PCBs);
-        } while (e.pcb.state == BLOCKED);
-        return e.pcb.rsp;
+        e = next(&readyHeader);
+        return e.rsp;
     }
 }
 
 int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
 {
     if (rsp != 0)
-        PCBs->current->data.pcb.rsp = rsp;
+        readyHeader.current->data.rsp = rsp;
     rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t)) + stackSize - (sizeof(uint64_t));
-    rsp -= sizeof(SwappingNoRAX);
     int pid = currentPIDs++;
     init_registers(entry_point, argc, argv, rsp);
     init_PCB(rsp, pid);
@@ -43,12 +43,13 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
 }
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
 {
-    SwappingNoRAX *init = rsp;
+    Swapping *init = rsp - sizeof(Swapping);
     init->ss = 0x0;
-    init->rsp = (uint64_t)(rsp + sizeof(struct SwappingnNoRAX));
+    init->rsp = rsp;
     init->flags = 0x202;
     init->cs = 0x8;
     init->rip = entry_point;
+    init->rax = 1;
     init->rbx = 2;
     init->rcx = 3;
     init->rdx = 4;
@@ -66,14 +67,45 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
 }
 void init_PCB(uint64_t rsp, int pid)
 {
-    elem_t e;
-    e.pcb.state = READY;
-    e.pcb.PID = pid;
-    e.pcb.rsp = rsp;
-    e.pcb.privilege = 5;
-    e.pcb.state = READY;
+    elem_t e = {0};
+    e.state = READY;
+    e.PID = pid;
+    e.rsp = rsp - sizeof(Swapping);
+    e.privilege = 5;
+    e.fds[0] = stdin;
+    e.fds[1] = stdout;
+    e.fdBlock = -1;
     if (initializing)
-        PCBs = newNode(e, 5, 5);
+        initList(&readyHeader,e,5,5);
     else
-        push(&PCBs, e, 5, 5);
+        push(&readyHeader, e, 5, 5);
+}
+
+//Bloquea el proceso con cuyo PID sea pid y le establece como motivo el numero de fd que lo bloqueo
+void blockProcess(int pid,int fdBlock)
+{
+    elem_t e;
+    e.PID = pid;
+    listElem_t removed = remove(&readyHeader);
+    removed.data.fdBlock = fdBlock;
+    if(blockedHeader.current == NULL)
+        initList(&blockedHeader,removed.data,removed.priority,removed.tickets);
+    else
+        push(&blockedHeader,removed.data,removed.priority,removed.tickets);
+    
+}
+
+void readyProcess(int pid)
+{
+    elem_t e;
+    e.PID = pid;
+    listElem_t removed = removeElement(&readyHeader,e);
+    removed.data.fdBlock = -1;
+    if(readyHeader.current == NULL)
+        initList(&readyHeader,removed.data,removed.priority,removed.tickets);
+    else
+        push(&readyHeader,removed.data,removed.priority,removed.tickets);
+    _hlt();
+
+    
 }

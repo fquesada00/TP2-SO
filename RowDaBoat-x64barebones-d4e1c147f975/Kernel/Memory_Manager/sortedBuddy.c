@@ -2,23 +2,20 @@
     #include <stdint.h>
     #include "buddy_memory_manager.h"
 
-    /*
-        This buddy memory manager works with lists of blocks
-        of different size.
+    #define MINIMUM_BLOCK_SIZE_LOG2 5                                 //ALGO MENOR ME SACA EL DEALINEAMIENTO A PALABRA
+    #define MINIMUM_BLOCK_SIZE ((size_t)1 << MINIMUM_BLOCK_SIZE_LOG2) //8 bytes
 
-        When setting the minimum and maximum size, its set of
-        powers of 2, e.g.: minimum size 2^5 -> 32 bytes and
-        maximum size 2^7 -> 128 bytes, then level 0 block is one block
-        of 128 bytes and level 2 blocks are 128/32=4 blocks of 32 bytes.
-        Obviously, neither minimum nor maximum size can exceed the HEAP_SIZE.
+    #define MAXIMUM_BLOCK_SIZE_LOG2 31
+    #define MAXIMUM_BLOCK_SIZE ((size_t)1 << MAXIMUM_BLOCK_SIZE_LOG2)
 
-        Continuing with the example, if 32 bytes are requested with pMalloc(32), 
-        level 2 list its NOT going to be initialized or even try to search for a 
-        free block as every request has one header size (mentioned bellow) before 
-        the pointer. In this buddy, the header size is of 16 bytes, so 
-        to wrap it up, if a search on last list (level 2 list here) is wanted,
-        pMalloc must be called with 16-k bytes, where k goes from 0 to 16.
-    */
+    #define LEVELS (MAXIMUM_BLOCK_SIZE_LOG2 - MINIMUM_BLOCK_SIZE_LOG2) + 1
+
+    #define WORD_ALIGN 8 //Buscamos en el manual del Pure y usa 8 bytes https://tracker.pureos.net/w/pureos/hardware_requirements/
+
+    #define BASE_ADDRESS 0x800000 //Esto seria el offset
+    #define MAX_NODES (((size_t)1 << (LEVELS + 1)) - 1)
+
+    #define HEADER_SIZE sizeof(a_block)
 
     /*
         LINKS DE INTERES

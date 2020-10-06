@@ -26,6 +26,8 @@ EXTERN loadProgram
 EXTERN syscall_read_mem
 EXTERN schedule
 EXTERN init_process
+EXTERN pMalloc
+EXTERN pFree
 SECTION .text
 
 %macro pushState 0
@@ -162,14 +164,14 @@ picSlaveMask:
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	pushStateNoRAX
+	pushState
 	mov rdi,rsp
 	call schedule
 	mov rsp,rax
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
-	popStateNoRAX
+	popState
 	iretq
 
 ;Keyboard
@@ -215,6 +217,10 @@ _syscallHandler:
 	je .tmp
 	cmp rax,6
 	je .read_mem ;syscall read memory
+	cmp rax,9
+	je .malloc
+	cmp rax,10
+	je .free
 	cmp rax,11
 	je .execv
 	jmp .end
@@ -254,6 +260,13 @@ _syscallHandler:
 .execv:
 	mov rcx,rsp
 	call init_process
+	jmp .end
+.malloc:
+	call pMalloc
+	jmp .end
+.free:
+	call pFree
+	jmp .end
 .end:
 	popStateNoRAX
 	iretq

@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "limits": "cpp",
+        "font8x8_basic.h": "c",
+        "cstdio": "c"
     }
 }

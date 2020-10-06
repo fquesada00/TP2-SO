@@ -2,7 +2,6 @@
 #include "video_driver.h"
 #include <stdint.h>
 #include <lib.h>
-#include "States.h"
 extern void _hlt();
 int syscall_read(int fd, char * buffer,int n)
 {
@@ -25,8 +24,8 @@ int syscall_write(int fd, const char * buffer,int n)
 }
 int syscall_registers(uint64_t * regs)
 {
-    State * savedState = getRegs();
-    memcpy(regs,savedState,sizeof(State));
+   // State * savedState = getRegs();
+    //memcpy(regs,savedState,sizeof(State));
     return 0;    
 }
 
