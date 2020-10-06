@@ -15,6 +15,8 @@ typedef struct ListElem {
   
     struct ListElem* next;
 
+    struct ListElem* prev;
+
     struct ListElem * current;
   
 }listElem_t;
@@ -30,5 +32,9 @@ void push(listElem_t** head, elem_t d, int p, int tickets);
 int isEmpty(listElem_t** head);
 
 elem_t next(listElem_t ** head);
+
+void removeCurrent(listElem_t ** head); //podria devovler si lo pudo borrar o no pero no se porque fallaria, 
+
+
 
 #endif
