@@ -108,11 +108,9 @@ listElem_t removeElement(Header * head,elem_t elem)
     current->next = next->next;
     le = *next;
     pFree(next);
-    return le;
-    
-
-    
+    return le; 
 }
+
 listElem_t remove(Header * head)
 {
     listElem_t e;
@@ -121,8 +119,5 @@ listElem_t remove(Header * head)
     head->current=head->current->prev;
     e =*next;
     pFree(next);
-    return e;
-    
-
-    
+    return e;    
 }

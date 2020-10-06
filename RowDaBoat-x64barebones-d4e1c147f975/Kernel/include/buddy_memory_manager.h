@@ -12,7 +12,7 @@
 /*
     Set maximum size of block
 */
-#define MAXIMUM_BLOCK_SIZE_LOG2 24
+#define MAXIMUM_BLOCK_SIZE_LOG2 25
 #define MAXIMUM_BLOCK_SIZE ((size_t)1 << MAXIMUM_BLOCK_SIZE_LOG2)
 
 /*
