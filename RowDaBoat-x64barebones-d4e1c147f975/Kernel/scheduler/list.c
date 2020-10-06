@@ -6,6 +6,7 @@ listElem_t* newNode(elem_t d, int p,int ticket)
     temp->data = d; 
     temp->priority = p; 
     temp->next = NULL;
+    temp->prev = NULL;
     temp->current = temp;
     temp->tickets = ticket; 
   
@@ -41,6 +42,7 @@ void push(listElem_t** head, elem_t d, int p,int tickets)
   
         // Insert New Node before head 
         temp->next = *head; 
+        head->
         (*head) = temp; 
     } 
     else { 
@@ -76,4 +78,19 @@ elem_t next(listElem_t ** head)
     else
         start->current = start->current->next;
     return start->current->data;
+}
+
+void removeCurrent(listElem_t ** head) {
+    listElem_t * start = (*head);
+
+    toFree = head->current;
+
+    if(toFree == start) { //Si es igual a la primera muevo todos los valores del segundo al primero y borro el segundo
+        toFree = start->next;
+        start->data = toFree->data;
+        start->priority = toFree->priority;
+        start->tickets = toFree->tickets;
+        start->next = toFree->next;
+        //start->current = ? CHAN! 
+    }
 }
