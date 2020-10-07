@@ -24,7 +24,8 @@ int syscall_read(int fd, char *buffer, int n)
     for (i = 0; i < n; i++)
     {
         if (fds[fd]->idxRead == fds[fd]->idxWrite)
-            insertAndBlockPid(fd);
+            insertBlockPid(fd, pid);//chequear error
+            blockProcess(pid, fd);
         if ((BUFFER_SIZE - fds[fd]->idxRead) == 1)
             fds[fd]->idxRead = 0;
         buffer[i] = fds[fd]->buffer[(fds[fd]->idxRead)++];
@@ -44,12 +45,13 @@ int syscall_write(int fd, const char *buffer, int n)
         if ((BUFFER_SIZE - fds[fd]->idxWrite) == 1)
             fds[fd]->idxWrite = 0;
         fds[fd]->buffer[(fds[fd]->idxWrite)++] = buffer[i];
-        if(fd == 1) putChar(buffer[i]);
+        if(fd == 1) putChar(buffer[i]);//habilitar ints post PIPE_BUF
     }
-    fds[fd]->buffer[fds[fd]->idxWrite] = '\0';
-    removeAndUnblockPid(fd);
+    //fds[fd]->buffer[fds[fd]->idxWrite] = '\0';
+    readyProcess(removeBlockPid(fd));
     return i;
 }
+
 int syscall_registers(uint64_t *regs)
 {
     // State * savedState = getRegs();

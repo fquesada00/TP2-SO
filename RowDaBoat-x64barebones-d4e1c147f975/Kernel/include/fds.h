@@ -8,7 +8,7 @@
 
 typedef struct{
     size_t pids[PROCESSES];
-    size_t blockedPids[PROCESSES];
+    size_t blockedPids[PROCESSES+1];
     size_t idxWrite;
     size_t idxRead;
     size_t pidQty;
@@ -16,8 +16,8 @@ typedef struct{
 }FILE_DESCRIPTOR;
 
 int initFd(int fd);
-void insertAndBlockPid(int fd);
-void removeAndUnblockPid(int fd);
+int insertBlockPid(int fd, size_t pid);
+size_t removeBlockPid(int fd);
 int close(int fd);
 void add(int fd);
 int retrieveFds(size_t pid, int * read, int * write);

@@ -13,17 +13,21 @@ int initFd(int fd)
     fds[fd]->pidQty = 0;
     fds[fd]->idxRead = 0;
     fds[fd]->idxWrite = 0;
-    for (int i = 0; i < TOTAL_FDS; i++)
+    for (int i = 0; i < PROCESSES; i++)
     {
-        fds[fd]->blockedPids[i] = -1;
-        fds[fd]->pids[i] = -1;
+        fds[fd]->blockedPids[i] = 0;
+        fds[fd]->pids[i] = 0;
     }
+    fds[fd]->blockedPids[PROCESSES] = 0;
     return 1;
 }
 
-int addPid(int fd, size_t pid){
-    for(int i = 0 ; i < PROCESSES ; i++){
-        if(fds[fd]->pids[i] == -1){
+int addPid(int fd, size_t pid)
+{
+    for (int i = 0; i < PROCESSES; i++)
+    {
+        if (fds[fd]->pids[i] == -1)
+        {
             fds[fd]->pids[i] = pid;
             fds[fd]->pidQty++;
             return 1;
@@ -32,9 +36,12 @@ int addPid(int fd, size_t pid){
     return -1;
 }
 
-int removePid(int fd, size_t pid){
-    for(int i = 0 ; i < PROCESSES ; i++){
-        if(fds[fd]->pids[i] == pid){
+int removePid(int fd, size_t pid)
+{
+    for (int i = 0; i < PROCESSES; i++)
+    {
+        if (fds[fd]->pids[i] == pid)
+        {
             fds[fd]->pids[i] = -1;
             fds[fd]->pidQty--;
             return 1;
@@ -43,41 +50,31 @@ int removePid(int fd, size_t pid){
     return -1;
 }
 
-
-void insertAndBlockPid(int fd)
-{
-    size_t *buffer = fds[fd]->blockedPids, pid = blockedHeader.current->data.PID;
-    int i;
-    for (i = 0; i < TOTAL_FDS; i++)
-    {
-        if (buffer[i] == -1)
-        {
-            buffer[i] = pid;
-            blockProcess(pid, fd);
-            return;
-        }
-    }
-}
-
-void removeAndUnblockPid(int fd)
+int insertBlockPid(int fd, size_t pid)
 {
     size_t *buffer = fds[fd]->blockedPids;
-    int i, done = 0;
-    for (i = 0; !done && i < TOTAL_FDS; i++)
+    for (int i = 0; i < PROCESSES; i++)
     {
-        if (buffer[i] != -1)
-            done = 1;
-    }
-    listElem_t *list = blockedHeader.current;
-    while (list != NULL)
-    {
-        if (buffer[i] == list->data.PID)
+        if (buffer[i] == 0)
         {
-            readyProcess(buffer[i]);
-            buffer[i] = -1;
+            buffer[i] = pid;
+            return 1;
         }
     }
+    return -1;
 }
+
+size_t removeBlockPid(int fd)
+{
+    size_t *buffer = fds[fd]->blockedPids;
+    if (buffer[PROCESSES] == (PROCESSES - 1))
+        buffer[PROCESSES] = 0;
+    size_t circularBegin = buffer[PROCESSES]++;
+    size_t PID = buffer[circularBegin];
+    buffer[circularBegin] = 0;
+    return PID;
+}
+
 
 int close(int fd)
 {
@@ -87,7 +84,12 @@ void add(int fd)
 {
 }
 
-
+int retrieveFds(size_t pid, int *read, int *write)
+{
+    *read = fds[0];
+    *write = fds[1];
+}
+/*
 int retrieveFds(size_t pid, int *read, int *write)
 {
     int doneRead = 0;
@@ -111,3 +113,4 @@ int retrieveFds(size_t pid, int *read, int *write)
     }
     return -1;
 }
+*/

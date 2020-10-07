@@ -59,6 +59,7 @@ void keyboardHandler(uint64_t rsp)
         else
         {
             fds[1]->buffer[(fds[1]->idxWrite)++] = (signed char)latinasccode[scan][shift];
+            putChar(latinasccode[scan][shift]);
         }
     }
     //Release code shift
