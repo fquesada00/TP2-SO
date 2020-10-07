@@ -1,5 +1,7 @@
 #include "keyboardDriver.h"
 #include <stdint.h>
+#include "../include/fds.h"
+extern FILE_DESCRIPTOR *fds[TOTAL_FDS];
 extern char getKeyboardScanCode();
 char stdin[256];
 static int buff_size = 0;
@@ -56,7 +58,7 @@ void keyboardHandler(uint64_t rsp)
         }
         else
         {
-            stdin[buff_size++] = (signed char)latinasccode[scan][shift];
+            fds[1]->buffer[(fds[1]->idxWrite)++] = (signed char)latinasccode[scan][shift];
         }
     }
     //Release code shift
@@ -70,24 +72,6 @@ void keyboardHandler(uint64_t rsp)
     }
 
     //Buffer circular
-    if (buff_size >= 256)
-        buff_size = 0;
-}
-
-/* Si donde se inserto el anterior menos la pos donde recupera el 
-* ultimo char es 0, el buffer esta vacio */
-int is_buffer_empty()
-{
-    return (buff_size - current) == 0;
-}
-
-/* Buffer circular, cuando llega a 256 chars, vuelve al principio
-*  y sobreescribe */
-char get_buffer()
-{
-    if (is_buffer_empty())
-        return 0;
-    if (current >= 256)
-        current = 0;
-    return stdin[current++];
+    if (fds[1]->buffer[fds[1]->idxWrite] == BUFFER_SIZE)
+        fds[1]->buffer[fds[1]->idxWrite] = 0;
 }

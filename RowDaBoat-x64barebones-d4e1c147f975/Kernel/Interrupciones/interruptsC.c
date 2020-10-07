@@ -14,73 +14,50 @@ extern Header readyHeader;
 extern Header blockedHeader;
 extern uint64_t stackSize;
 
-void initFd(int fd)
+int initFd(fd)
 {
     fds[fd] = (FILE_DESCRIPTOR *)pMalloc(sizeof(FILE_DESCRIPTOR));
+    if (fds[fd] == NULL)
+        return -1;
+    for (int i = 0; i < TOTAL_FDS; i++)
+    {
+        fds[fd]->blockedPids[i] = -1;
+        fds[fd]->pids[i] = -1;
+    }
+    return 1;
 }
-
 int syscall_read(int fd, char *buffer, int n)
 {
-    if (fds[fd] == NULL)
-        initFd(fd);
-    if (fds[fd] == NULL)
-        return -1; //error on pmalloc
+    if (fd != 0 && fd != 1 && fds[fd] == NULL)
+        if (initFd(fd) == -1)
+            return -1;
     int i;
     for (i = 0; i < n; i++)
     {
-        if (fds[fd]->buffer)
+        if (fds[fd]->idxRead == fds[fd]->idxWrite)
+            insertAndBlockPid(fd);
+        if ((BUFFER_SIZE - fds[fd]->idxRead) == 1)
+            fds[fd]->idxRead = 0;
+        buffer[i] = fds[fd]->buffer[(fds[fd]->idxRead)++];
     }
-    for (i = 0; i < n; i++)
-    {
-        while (is_buffer_empty())
-        {
-            _hlt();
-        }
-        if (!is_buffer_empty())
-            buffer[i] = get_buffer();
-    }
-
     return i;
-}
-
-int fdOccupied(int fds[], int fd)
-{
-    for (int i = 0; i < TOTAL_FDS; i++)
-    {
-        if (fds[i] == fd)
-            return 1;
-    }
-    return 0;
-}
-
-void unblockPID(int fd)
-{
-    Header h = blockedHeader;
-    while (h.current != NULL)
-    {
-        if (h.current->data.fdBlock == fd)
-        {
-            readyProcess(h.current->data.PID);
-            return;
-        }
-        h.current = h.current->next; //es null el ultimo o es circular el next?
-    }
 }
 
 int syscall_write(int fd, const char *buffer, int n)
 {
-    if (fds[fd] == NULL)
+    if (fd != 0 && fd != 1 && fds[fd] == NULL)
         initFd(fd);
     if (fds[fd] == NULL)
         return -1; //error on pmalloc
     int i;
     for (i = 0; i < n; i++)
     {
-        if(fds[fd]->idxWrite )
-        fds[fd]->buffer[i] = buffer[i];
+        if ((BUFFER_SIZE - fds[fd]->idxWrite) == 1)
+            fds[fd]->idxWrite = 0;
+        fds[fd]->buffer[(fds[fd]->idxWrite)++] = buffer[i];
     }
-    fds[fd]->buffer[i] = '\0';
-    unblockPID(fd);
+    fds[fd]->buffer[fds[fd]->idxWrite] = '\0';
+    removeAndUnblockPid(fd);
     return i;
 }
 int syscall_registers(uint64_t *regs)
