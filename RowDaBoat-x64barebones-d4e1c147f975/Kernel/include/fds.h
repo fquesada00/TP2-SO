@@ -20,6 +20,9 @@ void insertAndBlockPid(int fd);
 void removeAndUnblockPid(int fd);
 int close(int fd);
 void add(int fd);
-void retrieveFds(size_t pid, int * read, int * write);
+int retrieveFds(size_t pid, int * read, int * write);
 
+int initFd(int fd);
+int addPid(int fd, size_t pid);
+int removePid(int fd, size_t pid);
 #endif

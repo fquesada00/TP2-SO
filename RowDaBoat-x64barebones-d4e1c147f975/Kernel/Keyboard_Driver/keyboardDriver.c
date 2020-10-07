@@ -72,6 +72,13 @@ void keyboardHandler(uint64_t rsp)
     }
 
     //Buffer circular
-    if (fds[1]->buffer[fds[1]->idxWrite] == BUFFER_SIZE)
-        fds[1]->buffer[fds[1]->idxWrite] = 0;
+    if (fds[1]->idxWrite == BUFFER_SIZE)
+        fds[1]->idxWrite = 0;
+}
+
+char getBuffer(){
+    char c = fds[1]->buffer[(fds[1]->idxRead)++];
+    if(fds[1]->idxRead == fds[1]->idxWrite) return -1;
+    if(fds[1]->idxRead == BUFFER_SIZE) fds[1]->idxRead = 0;
+    return c;
 }

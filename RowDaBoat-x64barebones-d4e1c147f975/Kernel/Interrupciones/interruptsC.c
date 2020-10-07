@@ -14,23 +14,12 @@ extern Header readyHeader;
 extern Header blockedHeader;
 extern uint64_t stackSize;
 
-int initFd(fd)
-{
-    fds[fd] = (FILE_DESCRIPTOR *)pMalloc(sizeof(FILE_DESCRIPTOR));
-    if (fds[fd] == NULL)
-        return -1;
-    for (int i = 0; i < TOTAL_FDS; i++)
-    {
-        fds[fd]->blockedPids[i] = -1;
-        fds[fd]->pids[i] = -1;
-    }
-    return 1;
-}
 int syscall_read(int fd, char *buffer, int n)
 {
     if (fd != 0 && fd != 1 && fds[fd] == NULL)
         if (initFd(fd) == -1)
             return -1;
+        addPid(fd,/*aca iria el pid del proceso q la llamo*/);
     int i;
     for (i = 0; i < n; i++)
     {
@@ -46,15 +35,16 @@ int syscall_read(int fd, char *buffer, int n)
 int syscall_write(int fd, const char *buffer, int n)
 {
     if (fd != 0 && fd != 1 && fds[fd] == NULL)
-        initFd(fd);
-    if (fds[fd] == NULL)
-        return -1; //error on pmalloc
+        if (initFd(fd) == -1)
+            return -1;
+        addPid(fd,/*aca iria el pid del proceso q la llamo*/);
     int i;
     for (i = 0; i < n; i++)
     {
         if ((BUFFER_SIZE - fds[fd]->idxWrite) == 1)
             fds[fd]->idxWrite = 0;
         fds[fd]->buffer[(fds[fd]->idxWrite)++] = buffer[i];
+        if(fd == 1) putChar(buffer[i]);
     }
     fds[fd]->buffer[fds[fd]->idxWrite] = '\0';
     removeAndUnblockPid(fd);

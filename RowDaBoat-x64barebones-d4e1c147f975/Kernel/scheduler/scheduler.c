@@ -2,7 +2,7 @@
 #include "list.h"
 #include "standardstring.h"
 extern void _hlt();
-
+extern FILE_DESCRIPTOR * fds[TOTAL_FDS];
 Header readyHeader={0};
 Header blockedHeader = {0};
 int currentPIDs;
@@ -73,8 +73,9 @@ void init_PCB(uint64_t rsp, int pid,char * name)
     e.rsp = rsp - sizeof(Swapping);
     e.StackBase = rsp - sizeof(uint64_t);
     e.privilege = 5;
-    e.fds[0] = stdin;
-    e.fds[1] = stdout;
+    e.fds[0] = fds[0];
+    e.fds[1] = fds[1];
+    for(int i = 2 ; i < TOTAL_FDS ; i++) e.fds[i] = NULL;
     e.fdBlock = -1;
     strcpy(e.name,name);
     if (initializing)

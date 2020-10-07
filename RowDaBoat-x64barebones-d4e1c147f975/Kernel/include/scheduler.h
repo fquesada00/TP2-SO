@@ -2,16 +2,17 @@
 #define _SCHEDULER_H_
 #include "memory_manager.h"
 #include "video_driver.h"
+#include "fds.h"
 typedef struct PCB
 {
     char name[255];
     int PID;
-    char * fds[512];
-    uint64_t rsp;
-    uint64_t StackBase;
     int privilege;
     int fdBlock;
-}PCB;
+    FILE_DESCRIPTOR *fds[TOTAL_FDS];
+    uint64_t rsp;
+    uint64_t StackBase;
+} PCB;
 
 typedef struct Swapping
 {
@@ -37,5 +38,5 @@ typedef struct Swapping
     uint64_t ss;
 } Swapping;
 void readyProcess(int pid);
-void blockProcess(int pid,int fdBlock);
+void blockProcess(int pid, int fdBlock);
 #endif
