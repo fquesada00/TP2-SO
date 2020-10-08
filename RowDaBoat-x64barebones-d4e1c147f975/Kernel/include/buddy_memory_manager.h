@@ -24,12 +24,6 @@
 
 #define BLOCK_SIZE(level) (size_t)(1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level))
 
-typedef struct A_BLOCK
-{
-    struct A_BLOCK *nextBlock;
-    size_t level;
-} a_block;
-
 /*
     Auxiliar function to iterate through each list
 */

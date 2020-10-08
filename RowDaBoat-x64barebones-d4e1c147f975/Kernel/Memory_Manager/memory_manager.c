@@ -1,5 +1,5 @@
 #if !defined MM_BUDDY && !defined MM_BUDDY2
-    #include "memory_manager.h"
+    #include "../include/memory_manager.h"
 
     /*
         LINKS DE INTERES
@@ -35,7 +35,7 @@
         */
         if (heapEnd == NULL)
         {
-            pInitHeap(BASE_ADDRESS, END_ADDRESS);
+            pInitHeap((void *)BASE_ADDRESS, (void *)END_ADDRESS);
         }
 
         /*
@@ -71,21 +71,21 @@
         */
         a_block *pPrevBlock, *pActualBlock;
         pPrevBlock = &heapStart;
-        pActualBlock = pPrevBlock->pNextBlock;
+        pActualBlock = pPrevBlock->nextBlock;
 
         /*
             Lookup doing first fit algorithm
         */
-        while (pActualBlock->blockSize < requestedSize && pActualBlock->pNextBlock != NULL)
+        while (pActualBlock->blockSize < requestedSize && pActualBlock->nextBlock != NULL)
         {
             pPrevBlock = pActualBlock;
-            pActualBlock = pActualBlock->pNextBlock;
+            pActualBlock = pActualBlock->nextBlock;
         }
 
         /*
             Throw error not enough space
         */
-        if (pActualBlock->pNextBlock == NULL)
+        if (pActualBlock->nextBlock == NULL)
         {
             return NULL;
         }
@@ -98,7 +98,7 @@
         /*
             Skip block pointer as its going to be occupied 
         */
-        pPrevBlock->pNextBlock = pActualBlock->pNextBlock;
+        pPrevBlock->nextBlock = pActualBlock->nextBlock;
 
         /*
             Now memory must be partitioned as its free space available
@@ -123,7 +123,7 @@
         /*
             Take out the block from the list
         */
-        pActualBlock->pNextBlock = NULL;
+        insertOccupiedBlock(pActualBlock);
 
         return pReturnBlock;
     }
@@ -133,15 +133,15 @@
         /*
             Set start struct allocated in stack
         */
-        heapStart.pNextBlock = (a_block *)baseAddress;
+        heapStart.nextBlock = (a_block *)baseAddress;
         heapStart.blockSize = (size_t)0;
 
         heapEnd = endAddress - heapHeaderSize;
-        heapEnd->pNextBlock = NULL;
+        heapEnd->nextBlock = NULL;
         heapEnd->blockSize = (size_t)0;
 
         a_block *pFirstBlock = (a_block *)baseAddress;
-        pFirstBlock->pNextBlock = heapEnd;
+        pFirstBlock->nextBlock = heapEnd;
         pFirstBlock->blockSize = (size_t)heapEnd - (size_t)pFirstBlock;
 
         remainingBytes = pFirstBlock->blockSize;
@@ -169,14 +169,10 @@
         pNextABlock -= heapHeaderSize;
         pLinkBlock = (a_block *)pNextABlock;
 
-        /*
-            Its an error of the memory manager
-        */
-        if (pLinkBlock->pNextBlock != NULL)
-        {
+        if (removeOccupiedBlock(pLinkBlock) == -1){
             return;
         }
-
+        
         remainingBytes += pLinkBlock->blockSize;
 
         pInsertBlockIntoList(pLinkBlock);
@@ -190,15 +186,15 @@
             Starting from first block, we iterate along the list
             until we find a block with a higher address than pInsertBlock
         */
-        while (pPrevBlock->pNextBlock < pInsertBlock)
+        while (pPrevBlock->nextBlock < pInsertBlock)
         {
-            pPrevBlock = pPrevBlock->pNextBlock;
+            pPrevBlock = pPrevBlock->nextBlock;
         }
 
         /*
             Its an error of the memory manager
         */
-        if (pPrevBlock->pNextBlock == NULL)
+        if (pPrevBlock->nextBlock == NULL)
         {
             return;
         } 
@@ -218,25 +214,25 @@
             If a previous merge was done, it doesnt modify
             anything as we are dealing with pointers
         */
-        if ((a_block *)((uint8_t *)pInsertBlock + pInsertBlock->blockSize) == pPrevBlock->pNextBlock)
+        if ((a_block *)((uint8_t *)pInsertBlock + pInsertBlock->blockSize) == pPrevBlock->nextBlock)
         {
             /*
                 If end was reached, then dont increase size.
                 Else, skip intermediate block
             */
-            if (pPrevBlock->pNextBlock == heapEnd)
+            if (pPrevBlock->nextBlock == heapEnd)
             {
-                pInsertBlock->pNextBlock = heapEnd;
+                pInsertBlock->nextBlock = heapEnd;
             }
             else
             {
-                pInsertBlock->blockSize += pPrevBlock->pNextBlock->blockSize;
-                pInsertBlock->pNextBlock = pPrevBlock->pNextBlock->pNextBlock;
+                pInsertBlock->blockSize += pPrevBlock->nextBlock->blockSize;
+                pInsertBlock->nextBlock = pPrevBlock->nextBlock->nextBlock;
             }
         }
         else
         {
-            pInsertBlock->pNextBlock = pPrevBlock->pNextBlock;
+            pInsertBlock->nextBlock = pPrevBlock->nextBlock;
         }
 
         /*
@@ -245,7 +241,7 @@
         */
         if (pInsertBlock != pPrevBlock)
         {
-            pPrevBlock->pNextBlock = pInsertBlock;
+            pPrevBlock->nextBlock = pInsertBlock;
         }
     }
 #endif

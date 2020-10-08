@@ -3,12 +3,6 @@
 
 #include "memory.h"
 
-typedef struct a_block
-{
-    struct a_block *pNextBlock;
-    size_t blockSize;
-} a_block;
-
 /*
     Here baseAddress & endAddress must be word aligned
 */
