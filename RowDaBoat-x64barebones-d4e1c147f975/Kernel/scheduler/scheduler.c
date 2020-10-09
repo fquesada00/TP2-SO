@@ -42,6 +42,17 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
     _hlt();
     return -1;
 }
+
+int init_process_with_pipes(void *entry_point, int argc, char *argv[], uint64_t rsp,int read_pipe,int write_pipe){
+    init_process(entry_point,argc,argv,rsp);
+    //creo que se caga por el hlt
+    elem_t e = pop(&readyHeader);
+    e->read_pipe = read_pipe;
+    e->write_pipe = write_pipe;
+    _hlt();
+    return -1;
+}
+
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
 {
     Swapping *init = rsp - sizeof(Swapping);
