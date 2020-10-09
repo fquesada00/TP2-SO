@@ -22,7 +22,9 @@ extern syscallMalloc(size_t size);
 extern syscallFree(void * block);
 extern syscallKill(int pid);
 extern void syscallProcesses();
-
+extern int syscallBlock(int pid, int block);
+extern int syscallPID();
+extern void syscallNice(int pid, int p);
 void puts(char * c){
     int i = 0;
     while(c[i]){
@@ -548,4 +550,18 @@ int kill(int pid){
 void ps()
 {
     syscallProcesses();
+}
+int block(int pid,int block)
+{
+    if (block >1 || block < 0)
+        return -1;
+    return syscallBlock(pid,block);
+}
+int getPID()
+{
+    return syscallPID();
+}
+void nice(int pid, int p)
+{
+    syscallNice(pid,p);
 }

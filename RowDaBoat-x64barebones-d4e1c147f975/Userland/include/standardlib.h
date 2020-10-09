@@ -25,4 +25,7 @@ void pFree(void * block);
 void * memcpy(void * destination, const void * source, uint64_t length);
 int kill(int pid);
 void ps();
+int block(int pid,int block);
+int getPID();
+void nice(int pid, int p);
 #endif

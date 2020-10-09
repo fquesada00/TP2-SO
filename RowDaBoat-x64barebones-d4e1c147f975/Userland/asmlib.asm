@@ -16,6 +16,9 @@ GLOBAL syscallMalloc
 GLOBAL syscallFree
 GLOBAL syscallKill
 GLOBAL syscallProcesses
+GLOBAL syscallBlock
+GLOBAL syscallPID
+GLOBAL syscallNice
 SECTION .text
 
 ;REHACER
@@ -252,6 +255,31 @@ syscallProcesses:
     push rbp
     mov rbp,rsp
     mov rax,8
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallBlock:
+    push rbp
+    mov rbp,rsp
+    mov rax,12
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+syscallPID:
+    push rbp
+    mov rbp,rsp
+    mov rax,13
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+syscallNice:
+    push rbp
+    mov rbp,rsp
+    mov rax,14
     int 80h
     mov rsp,rbp
     pop rbp

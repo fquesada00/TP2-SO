@@ -5,6 +5,7 @@ GLOBAL picMasterMask
 GLOBAL picSlaveMask
 GLOBAL haltcpu
 GLOBAL _hlt
+GLOBAL _hltAndCli
 
 GLOBAL _irq00Handler
 GLOBAL _irq01Handler
@@ -16,6 +17,8 @@ GLOBAL _syscallHandler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 GLOBAL initProcessManager
+GLOBAL execvAuxi
+GLOBAL _int20
 
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
@@ -30,6 +33,10 @@ EXTERN pMalloc
 EXTERN pFree
 EXTERN pKill
 EXTERN processes
+EXTERN blockProcess
+EXTERN getPID
+EXTERN nice
+
 SECTION .text
 
 %macro pushState 0
@@ -138,6 +145,12 @@ _hlt:
 	hlt
 	ret
 
+_hltAndCli:
+	sti
+	hlt
+	cli
+	ret
+
 _cli:
 	cli
 	ret
@@ -229,6 +242,12 @@ _syscallHandler:
 	je .free
 	cmp rax,11
 	je .execv
+	cmp rax,12
+	je .block
+	cmp rax,13
+	je .pid
+	cmp rax,14
+	je .nice
 	jmp .end
 .read:
 	push rdi
@@ -261,6 +280,7 @@ _syscallHandler:
 	call syscall_tmp
 	jmp .end
 .read_mem:
+	mov rcx, rsp
 	call syscall_read_mem
 	jmp .end
 .execv:
@@ -278,6 +298,16 @@ _syscallHandler:
 	jmp .end
 .ps:
 	call processes
+	jmp .end
+.block:
+	mov rdx, rsp
+	call blockProcess
+	jmp .end
+.pid:
+	call getPID
+	jmp .end
+.nice:
+	call nice
 	jmp .end
 .end:
 	popStateNoRAX
@@ -348,4 +378,16 @@ initProcessManager:
 	call init_process
 	int 20h
 	popState
+	ret
+execvAuxi:
+	push rbp
+	mov rbp,rsp
+	mov rax,11
+	int 80h
+	mov rsp,rbp
+	pop rbp
+	ret
+
+_int20:
+	int 20h
 	ret

@@ -2,16 +2,25 @@
 #define _SCHEDULER_H_
 #include "memory_manager.h"
 #include "video_driver.h"
+#include "fileDescriptor.h"
+#define MAX_PRIORITY 10
+typedef enum State
+{
+    Ready,
+    Blocked,
+    Terminated
+} State;
 typedef struct PCB
 {
     char name[255];
     int PID;
-    char * fds[512];
+    file_t * fds[MAX_FD];
     uint64_t rsp;
     uint64_t StackBase;
     int privilege;
     int fdBlock;
-}PCB;
+    State state;
+} PCB;
 
 typedef struct Swapping
 {
@@ -36,6 +45,7 @@ typedef struct Swapping
     uint64_t rsp;
     uint64_t ss;
 } Swapping;
-void readyProcess(int pid);
-void blockProcess(int pid,int fdBlock);
+int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp);
+void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp);
+void init_PCB(uint64_t rsp, int pid, char *name);
 #endif

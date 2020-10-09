@@ -1,10 +1,11 @@
 #include "standardlib.h"
 void loop()
 {
+    int pid =  getPID();
     while (1)
     {
-        printf("loop1");
-        for (int i = 0; i < 100000000; i++)
+        printf("loop %d ",pid);
+        for (int i = 0; i < 100000000*2; i++)
             ;
     }
 }

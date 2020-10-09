@@ -2,17 +2,21 @@
 extern int calc();
 extern int syswrite(int fd, const char *buff, int bytes);
 extern test_mm();
+extern void test_processes();
 extern void loop();
+extern void test_prio();
 void shell()
 {
     printf("\nInitializing shell\n");
     printf("\nType 'help' to see the shell commands list\n");
     //test_mm();
+    //test_processes();
+    //test_prio();
     char command[256]={0};
-    int argsRead, memoryAddress;
+    int argsRead, memoryAddress,arg3;
     do{
         printf("\nUser:> ");
-        argsRead = scanf("%s %d",command, &memoryAddress);
+        argsRead = scanf("%s %d %d",command, &memoryAddress,&arg3);
         putchar('\n');
         if(argsRead == 1){
             if(strcmp(command,"cpuInfo") == 0) processorInfo();
@@ -70,6 +74,11 @@ void shell()
             if(strcmp(command,"printmem") == 0) printMemoryFromAddress(memoryAddress);
             else if(strcmp(command,"kill") == 0) kill(memoryAddress);
             else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);
+        }
+        else if(argsRead == 3)
+        {
+            if(strcmp(command,"block") == 0) block(memoryAddress,arg3);
+            else if(strcmp(command,"nice" == 0)) nice(memoryAddress,arg3);
         }
     }while(1);
 }

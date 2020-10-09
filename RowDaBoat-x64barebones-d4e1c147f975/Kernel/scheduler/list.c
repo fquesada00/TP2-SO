@@ -110,7 +110,8 @@ elem_t next(Header* head)
 //gets element and removes the node from the list
 listElem_t removeElement(Header * head,elem_t elem)
 {
-    listElem_t le = {0};
+    listElem_t le;
+    le.priority = -1;
 
     if(isEmpty(head) || head->current == NULL)
         return le;
@@ -153,4 +154,14 @@ listElem_t removeCurrent(Header * head)
     e =*next;
     pFree(next);
     return e;
+}
+listElem_t * get(Header * head, elem_t elem){
+    if(head == NULL || head->first == NULL)
+        return NULL;
+    listElem_t * iter = head->first;
+    while (iter != NULL && iter->data.PID != elem.PID)
+    {
+        iter = iter->next;
+    }
+    return iter;
 }

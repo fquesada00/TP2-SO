@@ -24,6 +24,7 @@ typedef struct{
     listElem_t * first;
     listElem_t * current;
     int size;
+    int ready;
 }Header;
 
 void initList(Header * head,elem_t firstNode, int p, int ticket);
@@ -43,5 +44,7 @@ elem_t next(Header * head); //Este anda bien
 listElem_t removeCurrent(Header * head);
 
 listElem_t removeElement(Header * head,elem_t elem);
+
+listElem_t * get(Header * head, elem_t elem);
 
 #endif

@@ -3,15 +3,15 @@
 #include "standardstring.h"
 extern void _hlt();
 
-Header readyHeader={0};
+Header readyHeader = {0};
 Header blockedHeader = {0};
-int currentPIDs;
+int currentPIDs = 1;
 int initializing = 1;
-uint64_t stackSize = 0x100000;
-
-extern char * stdin;
-extern char * stdout;
-
+uint64_t stackSize = 0x70000;
+extern file_t stdin;
+extern file_t stdout;
+extern void idle();
+extern int idle_pid;
 int schedule(uint64_t rsp)
 {
     if (!initializing)
@@ -20,13 +20,33 @@ int schedule(uint64_t rsp)
     }
     else
         initializing = 0;
-    if (readyHeader.current->tickets--)
+    if (    readyHeader.current->data.state == Terminated)
+    {
+        listElem_t l = removeCurrent(&readyHeader);
+        pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
+    }
+    
+    if (readyHeader.ready == 0)
+    {
+        listElem_t * iter = readyHeader.first;
+        while (iter != NULL && iter->data.PID != idle_pid)
+        {
+            iter = iter->next;
+        }
+        if(iter != NULL){
+            iter->data.state = Ready;
+            readyHeader.ready++;
+        }
+    }
+    if (readyHeader.current->data.state == Ready &&  readyHeader.current->tickets--)
         return readyHeader.current->data.rsp;
     else
     {
-        readyHeader.current->tickets = readyHeader.current->priority;
+        readyHeader.current->tickets = (MAX_PRIORITY - readyHeader.current->priority);
         elem_t e;
+        do{
         e = next(&readyHeader);
+        }while(e.state != Ready);
         return e.rsp;
     }
 }
@@ -35,11 +55,17 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
 {
     if (rsp != 0)
         readyHeader.current->data.rsp = rsp;
-    rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t)) + stackSize - (sizeof(uint64_t));
-    int pid = currentPIDs++;
-    init_registers(entry_point, argc, argv, rsp);
-    init_PCB(rsp, pid,argv[0]);
-    _hlt();
+    rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
+    if (rsp != NULL)
+    {
+        rsp += stackSize - (sizeof(uint64_t));
+        int pid = currentPIDs++;
+        init_registers(entry_point, argc, argv, rsp);
+        init_PCB(rsp, pid, argv[0]);
+        if (initializing)
+            _hlt();
+        return pid;
+    }
     return -1;
 }
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
@@ -54,7 +80,7 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->rbx = 2;
     init->rcx = 3;
     init->rdx = 4;
-    init->rbp = init->rsp;
+    init->rbp = rsp;
     init->rdi = argc;
     init->rsi = argv;
     init->r8 = 8;
@@ -66,48 +92,50 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->r14 = 14;
     init->r15 = 15;
 }
-void init_PCB(uint64_t rsp, int pid,char * name)
+void init_PCB(uint64_t rsp, int pid, char *name)
 {
     elem_t e = {0};
     e.PID = pid;
     e.rsp = rsp - sizeof(Swapping);
-    e.StackBase = rsp - sizeof(uint64_t);
+    e.StackBase = rsp;
     e.privilege = 5;
-    e.fds[0] = stdin;
-    e.fds[1] = stdout;
+    e.fds[0] = &stdin;
+    stdin.reading++;
+    e.fds[1] = &stdout;
+    stdout.writing++;
     e.fdBlock = -1;
-    strcpy(e.name,name);
+    e.state = Ready;
+    readyHeader.ready++;
+    strcpy(e.name, name);
     if (initializing)
-        initList(&readyHeader,e,5,5);
+        initList(&readyHeader, e, 5, 5);
     else
         push(&readyHeader, e, 5, 5);
 }
 
 //Bloquea el proceso con cuyo PID sea pid y le establece como motivo el numero de fd que lo bloqueo
-void blockProcess(int pid,int fdBlock)
-{
-    elem_t e;
-    e.PID = pid;
-    listElem_t removed = remove(&readyHeader);
-    removed.data.fdBlock = fdBlock;
-    if(blockedHeader.current == NULL)
-        initList(&blockedHeader,removed.data,removed.priority,removed.tickets);
-    else
-        push(&blockedHeader,removed.data,removed.priority,removed.tickets);
-    
-}
+// void blockProcess(int pid,int fdBlock)
+// {
+//     elem_t e;
+//     e.PID = pid;
+//     listElem_t removed = removeCurrent(&readyHeader);
+//     removed.data.fdBlock = fdBlock;
+//     if(blockedHeader.current == NULL)
+//         initList(&blockedHeader,removed.data,removed.priority,removed.tickets);
+//     else
+//         push(&blockedHeader,removed.data,removed.priority,removed.tickets);
+
+// }
 
 void readyProcess(int pid)
 {
     elem_t e;
     e.PID = pid;
-    listElem_t removed = removeElement(&readyHeader,e);
+    listElem_t removed = removeElement(&readyHeader, e);
     removed.data.fdBlock = -1;
-    if(readyHeader.current == NULL)
-        initList(&readyHeader,removed.data,removed.priority,removed.tickets);
+    if (readyHeader.current == NULL)
+        initList(&readyHeader, removed.data, removed.priority, removed.tickets);
     else
-        push(&readyHeader,removed.data,removed.priority,removed.tickets);
+        push(&readyHeader, removed.data, removed.priority, removed.tickets);
     _hlt();
-
-    
 }

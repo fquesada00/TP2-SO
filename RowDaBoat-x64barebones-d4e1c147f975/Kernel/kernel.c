@@ -6,7 +6,7 @@
 #include "video_driver.h"
 
 extern int initProcessManager(void *entry_point, int argc, char *argv[], uint64_t rsp);
-
+extern void init();
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -16,7 +16,7 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void * const sampleCodeModuleAddress = (void*)0x400000;
+void * const sampleCodeModuleAddress = (void*)0x400000;
 //static void * const sampleDataModuleAddress = (void*)0x500000;
 
 typedef int (*EntryPoint)();
@@ -52,7 +52,7 @@ int main(){
 	load_idt();
 	init_video();
 	char * argv[] = {"shell",NULL};
-	initProcessManager(sampleCodeModuleAddress,1,argv,0);
+	initProcessManager(init,1,argv,0);
 	puts("Something wrong");
 	return 0;
 	
