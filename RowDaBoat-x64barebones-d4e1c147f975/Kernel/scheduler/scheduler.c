@@ -7,7 +7,7 @@ Header readyHeader = {0};
 Header blockedHeader = {0};
 int currentPIDs = 1;
 int initializing = 1;
-uint64_t stackSize = 0x70000;
+uint64_t stackSize = 0x50000;
 extern file_t stdin;
 extern file_t stdout;
 extern void idle();
