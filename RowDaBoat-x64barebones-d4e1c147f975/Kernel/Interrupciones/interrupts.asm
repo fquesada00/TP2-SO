@@ -1,4 +1,4 @@
-
+GLOBAL _xchg
 GLOBAL _cli
 GLOBAL _sti
 GLOBAL picMasterMask
@@ -391,3 +391,9 @@ execvAuxi:
 _int20:
 	int 20h
 	ret
+
+;chequear
+_xchg:
+	xchg [rdi],rsi
+	ret
+
