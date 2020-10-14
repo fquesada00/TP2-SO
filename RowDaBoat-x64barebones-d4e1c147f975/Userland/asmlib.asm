@@ -21,62 +21,62 @@ GLOBAL syscallPID
 GLOBAL syscallNice
 SECTION .text
 
-;REHACER
+; REHACER
 ; -----------------------------------------------------------------------------
 inforeg:
     push rbp
     mov rbp,rsp
-    mov rax,2 ;id syscall registers
+    mov rax,2          ; id syscall registers
     int 80h
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
 
-; -----------------------------------------------------------------------------
-;int syswrite(int fd (en 1 por default), const char * buff, int bytes)
+    ; -----------------------------------------------------------------------------
+    ; int syswrite(int fd (en 1 por default), const char * buff, int bytes)
 syswrite:
     push rbp
     mov rbp,rsp
-    mov rax,1 ;id syscall write
+    mov rax,1          ; id syscall write
     int 80h
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
 
-; -----------------------------------------------------------------------------
-;int sysread(int fd (en 0 por default), const char * buff, int bytes)
+    ; -----------------------------------------------------------------------------
+    ; int sysread(int fd (en 0 por default), const char * buff, int bytes)
 sysread:
     push rbp
     mov rbp,rsp
-    mov rax,0 ;id syscall read
+    mov rax,0          ; id syscall read
     int 80h
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
 
-; -----------------------------------------------------------------------------
-;int sysrtc(int n)
+    ; -----------------------------------------------------------------------------
+    ; int sysrtc(int n)
 sysrtc:
     push rbp
     mov rbp,rsp
-    mov rax,3 ;id syscall rtc
+    mov rax,3          ; id syscall rtc
     int 80h
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
-; -----------------------------------------------------------------------------
-;Params
-;   rdi -> char * buffer
-;Ret
-;   -
+    ; -----------------------------------------------------------------------------
+    ; Params
+    ; rdi -> char * buffer
+    ; Ret
+    ; -
 processorName:
     push rbp
     mov rbp,rsp
@@ -93,32 +93,32 @@ processorName:
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
 
-; -----------------------------------------------------------------------------
-;Params
-;   rdi -> char * buffer
-;Ret
-;   -
+    ; -----------------------------------------------------------------------------
+    ; Params
+    ; rdi -> char * buffer
+    ; Ret
+    ; -
 processorExtendedName:
     push rbp
     mov rbp,rsp
     push rbx
     push rax
-    mov rax,0x80000002 ;extended processor name string
+    mov rax,0x80000002 ; extended processor name string
     cpuid
     mov [rdi],eax
     mov [rdi + 4],ebx
     mov [rdi + 8],ecx
     mov [rdi + 12],edx
-    mov rax,0x80000003 ;extended processor name string
+    mov rax,0x80000003 ; extended processor name string
     cpuid
     mov [rdi + 16],eax
     mov [rdi + 20],ebx
     mov [rdi + 24],edx
     mov [rdi + 28],ecx
-    mov rax,0x80000004 ;extended processor name string
+    mov rax,0x80000004 ; extended processor name string
     cpuid
     mov [rdi + 32],eax
     mov [rdi + 36],ebx
@@ -130,39 +130,39 @@ processorExtendedName:
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
 
-; -----------------------------------------------------------------------------
-;Params
-;   -
-;Ret
-;   rax -> int processor model
+    ; -----------------------------------------------------------------------------
+    ; Params
+    ; -
+    ; Ret
+    ; rax -> int processor model
 processorModel:
     push rbp
     mov rbp,rsp
     push rbx
-    mov rax,1 
+    mov rax,1
     cpuid
-    shr rax,4 
-    and rax,0x0F ;first 4 bits -> processor model
+    shr rax,4
+    and rax,0x0F       ; first 4 bits -> processor model
     pop rbx
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
 
-; -----------------------------------------------------------------------------
-;Params
-;   -
-;Ret
-;   rax -> int processor family
+    ; -----------------------------------------------------------------------------
+    ; Params
+    ; -
+    ; Ret
+    ; rax -> int processor family
 processorFamily:
     push rbp
     mov rbp,rsp
     push rbx
-    mov rax,1 
+    mov rax,1
     cpuid
     shr rax,8
     and rax,0x0F
@@ -170,7 +170,7 @@ processorFamily:
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 
 loadPrgrm:
     push rbp
@@ -190,7 +190,7 @@ divExc:
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 processorTemperature:
     push rbp
     mov rbp,rsp
@@ -199,7 +199,7 @@ processorTemperature:
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 invalidOpCode:
     push rbp
     mov rbp,rsp
@@ -207,7 +207,7 @@ invalidOpCode:
     mov rsp,rbp
     pop rbp
     ret
-; -----------------------------------------------------------------------------
+    ; -----------------------------------------------------------------------------
 read_mem:
     push rbp
     mov rbp,rsp
@@ -280,6 +280,15 @@ syscallNice:
     push rbp
     mov rbp,rsp
     mov rax,14
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallSemOpen:
+    push rbp
+    mov rbp, rsp
+    mov rax,15
     int 80h
     mov rsp,rbp
     pop rbp

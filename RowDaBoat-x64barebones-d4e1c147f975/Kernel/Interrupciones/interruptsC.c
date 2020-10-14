@@ -33,11 +33,7 @@ int syscall_read(int fd, char *buffer, int n)
         {
             blockCurrent(fd);
         }
-        buffer[i] = f->read[(f->idxR)++];
-        if (f->idxR == BUF_SIZE)
-        {
-            f->idxR = 0;
-        }
+        buffer[i] = f->read[((f->idxR)++)%BUF_SIZE];
     }
     return i;
 }
@@ -52,11 +48,9 @@ int syscall_write(int fd, const char *buffer, int n)
     if (f == NULL)
         return -1;
     for(i = 0 ; i < n ; i++){
-        f->write[(f->idxW)++] = buffer[i];
-        if(f->idxW == BUF_SIZE){
-            f->idxW = 0;
-        }
-        putChar(buffer[i]);
+        f->write[((f->idxW)++)%BUF_SIZE] = buffer[i];
+
+        // putChar(buffer[i]);
     }
     unblockProcess(fd);
     return i;

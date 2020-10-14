@@ -36,6 +36,9 @@ EXTERN processes
 EXTERN blockProcess
 EXTERN getPID
 EXTERN nice
+EXTERN sem_open
+EXTERN sem_wait
+EXTERN sem_post
 
 SECTION .text
 
@@ -248,6 +251,12 @@ _syscallHandler:
 	je .pid
 	cmp rax,14
 	je .nice
+	cmp rax,15
+	je .semaphore_open
+	cmp rax,16
+	je .semaphore_wait
+	cmp rax,17
+	je .semaphore_post
 	jmp .end
 .read:
 	push rdi
@@ -308,6 +317,15 @@ _syscallHandler:
 	jmp .end
 .nice:
 	call nice
+	jmp .end
+.semaphore_open:
+	call sem_open
+	jmp .end
+.semaphore_wait:
+	call sem_wait
+	jmp .end
+.semaphore_post:
+	call sem_post
 	jmp .end
 .end:
 	popStateNoRAX
