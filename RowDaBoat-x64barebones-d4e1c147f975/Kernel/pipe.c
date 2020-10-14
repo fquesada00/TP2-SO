@@ -55,6 +55,7 @@ int pipe(int fds[2], char *name)
     readyHeader.current->data.fds[j] = fd2;
     p.fd[0] = fd1;
     p.fd[1] = fd2;
+    pipes[i] = p;
     return 0;
 }
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, char *pipe, int mode) //mode en r9
@@ -101,7 +102,7 @@ int init_PCBwithPipe(uint64_t rsp, int pid, char *name, int fd, pipe_t pipe, int
     e.fds[fd] = pipe.fd[mode];
     e.fds[fd]->idxR = 0;
     e.fds[fd]->idxW = 0;
-    if(mode)
+    if (mode)
         e.fds[fd]->writing++;
     else
         e.fds[fd]->reading++;
@@ -109,4 +110,46 @@ int init_PCBwithPipe(uint64_t rsp, int pid, char *name, int fd, pipe_t pipe, int
     readyHeader.ready++;
     strcpy(e.name, name);
     push(&readyHeader, e, 5, 5);
+}
+
+int pipeClose(int fd, const char *name)
+{
+    int i = 0;
+    while (i < MAX_PIPE && strcmp(pipes[i].name, name) != 0)
+    {
+        i++;
+    }
+    if (i == MAX_PIPE)
+    {
+        return -1;
+    }
+    int mode;
+    file_t *f = readyHeader.current->data.fds[fd];
+    if (f == NULL)
+    {
+        return -1;
+    }
+    if (f->write != NULL)
+    {
+        if (--f->writing)
+        {
+            pFree(f);
+            pipes[i].fd[1] = NULL;
+        }
+    }
+    else
+    {
+        if (--f->reading)
+        {
+            pFree(f);
+            pipes[i].fd[0] = NULL;
+        }
+    }
+
+    if(pipes[i].fd[1] == NULL && pipes[i].fd[0] == NULL){
+        strcpy(pipes[i].name,"");
+    }
+
+    readyHeader.current->data.fds[fd] = NULL;
+    return 1;
 }
