@@ -293,3 +293,30 @@ syscallSemOpen:
     mov rsp,rbp
     pop rbp
     ret
+
+syscallSemWait:
+    push rbp
+    mov rbp,rsp
+    mov rax,16
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallSemPost:
+    push rbp
+    mov rbp,rsp
+    mov rax,17
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallSemClose:
+    push rbp
+    mov rbp,rsp
+    mov rax,18
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret

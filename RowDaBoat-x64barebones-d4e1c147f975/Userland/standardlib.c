@@ -25,6 +25,11 @@ extern void syscallProcesses();
 extern int syscallBlock(int pid, int block);
 extern int syscallPID();
 extern void syscallNice(int pid, int p);
+extern int syscallSemOpen(const char *name, size_t value, char created);
+extern int syscallSemWait(const char *name);
+extern int syscallSemPost(const char *name);
+extern int syscallSemClose(const char *name);
+
 void puts(char * c){
     int i = 0;
     while(c[i]){
@@ -556,12 +561,4 @@ int block(int pid,int block)
     if (block >1 || block < 0)
         return -1;
     return syscallBlock(pid,block);
-}
-int getPID()
-{
-    return syscallPID();
-}
-void nice(int pid, int p)
-{
-    syscallNice(pid,p);
 }

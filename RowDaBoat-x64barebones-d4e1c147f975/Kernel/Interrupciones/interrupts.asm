@@ -39,6 +39,7 @@ EXTERN nice
 EXTERN sem_open
 EXTERN sem_wait
 EXTERN sem_post
+EXTERN sem_close
 
 SECTION .text
 
@@ -257,6 +258,8 @@ _syscallHandler:
 	je .semaphore_wait
 	cmp rax,17
 	je .semaphore_post
+	cmp rax,18
+	je .semaphore_close
 	jmp .end
 .read:
 	push rdi
@@ -326,6 +329,9 @@ _syscallHandler:
 	jmp .end
 .semaphore_post:
 	call sem_post
+	jmp .end
+.semaphore_close:
+	call sem_close
 	jmp .end
 .end:
 	popStateNoRAX
