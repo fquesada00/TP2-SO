@@ -17,8 +17,8 @@ GLOBAL syscallFree
 GLOBAL syscallKill
 GLOBAL syscallProcesses
 GLOBAL syscallBlock
-GLOBAL syscallPID
-GLOBAL syscallNice
+GLOBAL getPID
+GLOBAL nice
 GLOBAL syscallPipeClose
 GLOBAL syscallPipeOpen
 GLOBAL syscallInitProcessWithPipe
@@ -276,7 +276,7 @@ syscallBlock:
     mov rsp,rbp
     pop rbp
     ret
-syscallPID:
+getPID:
     push rbp
     mov rbp,rsp
     mov rax,13
@@ -284,7 +284,7 @@ syscallPID:
     mov rsp,rbp
     pop rbp
     ret
-syscallNice:
+nice:
     push rbp
     mov rbp,rsp
     mov rax,14
