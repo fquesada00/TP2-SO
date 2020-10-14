@@ -19,6 +19,14 @@ GLOBAL syscallProcesses
 GLOBAL syscallBlock
 GLOBAL syscallPID
 GLOBAL syscallNice
+GLOBAL syscallPipeClose
+GLOBAL syscallPipeOpen
+GLOBAL syscallInitProcessWithPipe
+GLOBAL syscallSemClose
+GLOBAL syscallSemOpen
+GLOBAL syscallSemPost
+GLOBAL syscallSemWait
+
 SECTION .text
 
 ; REHACER
@@ -316,6 +324,33 @@ syscallSemClose:
     push rbp
     mov rbp,rsp
     mov rax,18
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallPipeOpen:
+    push rbp
+    mov rbp,rsp
+    mov rax,19
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallPipeClose:
+    push rbp
+    mov rbp,rsp
+    mov rax,20
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallInitProcessWithPipe:
+    push rbp
+    mov rbp,rsp
+    mov rax,21
     int 80h
     mov rsp,rbp
     pop rbp

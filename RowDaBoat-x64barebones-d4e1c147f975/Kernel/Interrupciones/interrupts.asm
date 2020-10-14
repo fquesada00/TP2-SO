@@ -40,6 +40,9 @@ EXTERN sem_open
 EXTERN sem_wait
 EXTERN sem_post
 EXTERN sem_close
+EXTERN pipeOpen
+EXTERN init_process_with_pipe
+EXTERN pipeClose
 
 SECTION .text
 
@@ -260,6 +263,12 @@ _syscallHandler:
 	je .semaphore_post
 	cmp rax,18
 	je .semaphore_close
+	cmp rax,19
+	je .create_pipe
+	cmp rax,20
+	je .close_pipe
+	cmp rax,21
+	je .create_process_with_pipe
 	jmp .end
 .read:
 	push rdi
@@ -332,6 +341,15 @@ _syscallHandler:
 	jmp .end
 .semaphore_close:
 	call sem_close
+	jmp .end
+.create_pipe:
+	call pipeOpen
+	jmp .end
+.close_pipe:
+	call pipeClose
+	jmp .end
+.create_process_with_pipe
+	call init_process_with_pipe
 	jmp .end
 .end:
 	popStateNoRAX

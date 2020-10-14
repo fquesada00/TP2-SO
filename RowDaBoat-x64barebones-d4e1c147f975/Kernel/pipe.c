@@ -11,7 +11,7 @@ extern int currentPIDs;
 extern file_t stdin;
 extern file_t stdout;
 
-int pipe(int fds[2], char *name)
+int pipeOpen(int fds[2], const char *name)
 {
     int i = 0;
     while (i < MAX_PIPE && strcmp(pipes[i].name, "") != 0)
@@ -58,7 +58,7 @@ int pipe(int fds[2], char *name)
     pipes[i] = p;
     return 0;
 }
-int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, char *pipe, int mode) //mode en r9
+int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode) //mode en r9
 {
     uint64_t rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
     if (rsp != NULL)
@@ -78,7 +78,7 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, char *pi
     }
     return -1;
 }
-int init_PCBwithPipe(uint64_t rsp, int pid, char *name, int fd, pipe_t pipe, int mode)
+int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t pipe, int mode)
 {
     if (fd > MAX_FD || fd < 0)
         return -1;
