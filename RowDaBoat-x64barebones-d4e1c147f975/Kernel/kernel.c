@@ -7,6 +7,7 @@
 
 extern int initProcessManager(void *entry_point, int argc, char *argv[], uint64_t rsp);
 extern void init();
+extern void init_fds();
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -51,6 +52,7 @@ void * initializeKernelBinary()
 int main(){
 	load_idt();
 	init_video();
+	init_fds();
 	char * argv[] = {"shell",NULL};
 	initProcessManager(init,1,argv,0);
 	puts("Something wrong");

@@ -8,8 +8,8 @@ Header blockedHeader = {0};
 int currentPIDs = 1;
 int initializing = 1;
 uint64_t stackSize = 0x50000;
-extern file_t stdin;
-extern file_t stdout;
+extern file_t * stdin;
+extern file_t * stdout;
 extern void idle();
 extern int idle_pid;
 int schedule(uint64_t rsp)
@@ -99,10 +99,10 @@ void init_PCB(uint64_t rsp, int pid, char *name)
     e.rsp = rsp - sizeof(Swapping);
     e.StackBase = rsp;
     e.privilege = 5;
-    e.fds[0] = &stdin;
-    stdin.reading++;
-    e.fds[1] = &stdout;
-    stdout.writing++;
+    e.fds[0] = stdin;
+    stdin->reading++;
+    e.fds[1] = stdout;
+    stdout->writing++;
     e.fdBlock = -1;
     e.state = Ready;
     readyHeader.ready++;

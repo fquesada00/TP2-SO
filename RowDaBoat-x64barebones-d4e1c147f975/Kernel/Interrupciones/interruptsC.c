@@ -52,6 +52,7 @@ int syscall_write(int fd, const char *buffer, int n)
 
         // putChar(buffer[i]);
     }
+    //f->write[((f->idxW)++)%BUF_SIZE] = 0;
     unblockProcess(fd);
     return i;
 }
@@ -243,6 +244,7 @@ void unblockProcess(int fd)
     }
     if(iter == NULL)
         return;
+    //puts(iter->data.name);
     iter->data.fdBlock = -1;
     readyHeader.ready++;
     iter->data.state = Ready;

@@ -2,7 +2,7 @@
 #include "video_driver.h"
 #include "font8x8_basic.h"
 #include "fileDescriptor.h"
-file_t stdout;
+file_t * stdout;
 struct vbe_mode_info_structure
 {
     uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.

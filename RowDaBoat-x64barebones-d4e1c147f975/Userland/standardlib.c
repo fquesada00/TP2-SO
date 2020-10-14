@@ -112,12 +112,12 @@ int scanf(const char *fmt, ...)
         if (c != '\b')
         {
             buffer[idxBuffer++] = (char) c;
-            putchar(c);
+            //putchar(c);
         }
         else if (idxBuffer > 0)
         {
             idxBuffer--;
-            putchar(c);
+            //putchar(c);
         }
     }
     buffer[idxBuffer] = 0;
