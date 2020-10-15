@@ -442,6 +442,7 @@ _int20:
 
 ;chequear
 _xchg:
-	xchg [rdi],rsi
+	xchg [rdi], rsi
+	mov rax,rsi
 	ret
 

@@ -73,7 +73,7 @@ int sem_open(const char *name, size_t value, char created)
     {
         return -1;
     }
-    sem_t s;
+    sem_t s = {0};
     strcpy(s.name, name);
     s.value = value;
     s.lock = 1;
@@ -160,12 +160,12 @@ int sem_close(const char *name)
 }
 void acquire(sem_t *sem)
 {
-    while (_xchg((uint64_t) & (sem->lock), 0) != 1)
+    while (_xchg(&(sem->lock), 0) != 1)
         ;
 }
 void release(sem_t *sem)
 {
-    _xchg((uint64_t) & (sem->lock), 1);
+    _xchg(&(sem->lock), 1);
 }
 
 void sem()
@@ -203,7 +203,7 @@ void sem()
             for (int j = 0; j < MAX_BLOCKED_PID; j++)
             {
                 pid = semaphores[i].blockedPID[j];
-                if (!pid)
+                if (pid)
                 {
                     if (k)
                     {

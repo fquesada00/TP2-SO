@@ -5,7 +5,7 @@
 #include <stddef.h>
 typedef struct sem
 {
-    char lock;
+    uint64_t lock;
     char name[256];
     size_t blockedPID[MAX_BLOCKED_PID+1];
     int value;
