@@ -170,7 +170,7 @@ void release(sem_t *sem)
 
 void sem()
 {
-    int print = 0, length = 0, headerLenght = 0;
+    int print = 0, headerLenght = 0;
     char headerBuffer[256] = {0};
     size_t pid;
     char buffer[256] = {0};
@@ -180,11 +180,11 @@ void sem()
         {
             if (!print)
             {
-                strcpy(buffer, "\n========================================\n");
+                strcpy(buffer, "\n================================================================\n");
                 syscall_write(1, buffer, strlen(buffer));
-                strcpy(buffer, "\nNAME\t\t\tVALUE\t\t\tBLOCKED PIDs\n");
+                strcpy(buffer, "NAME\t\t\t\t\t\t\tVALUE\t\t\tBLOCKED PIDs\n");
                 int auxHeaderLenght = strlen(buffer);
-                headerLenght = auxHeaderLenght - 2 - strlen("BLOCKED PIDs");
+                headerLenght = auxHeaderLenght - 1 - strlen("BLOCKED PIDs");
                 syscall_write(1, buffer, auxHeaderLenght);
                 for (int k = 0; k < headerLenght; k++)
                 {
@@ -193,34 +193,36 @@ void sem()
                 print = 1;
             }
             strcpy(buffer, semaphores[i].name);
-            length = strlen(buffer);
-            syscall_write(1, buffer, length);
+            syscall_write(1, buffer, strlen(buffer));
+            strcpy(buffer, "\t\t\t\t\t\t");
+            syscall_write(1, buffer, strlen(buffer));
+            syscall_write(1, buffer, uintToBase(semaphores[i].value, buffer, 10));
             strcpy(buffer, "\t\t\t");
             syscall_write(1, buffer, strlen(buffer));
-            uintToBase(semaphores[i].value, buffer, 10);
-            syscall_write(1, buffer, strlen(buffer));
-            strcpy(buffer, "\t\t\t");
-            syscall_write(1, buffer, strlen(buffer));
-            for (int j = 0, k = 0 ; j < MAX_BLOCKED_PID; j++)
+            int k = 0;
+            for (int j = 0; j < MAX_BLOCKED_PID; j++)
             {
                 pid = semaphores[i].blockedPID[j];
                 if (!pid)
                 {
-                    length = uintToBase(pid, buffer, 10);
                     if (k)
                     {
                         syscall_write(1, headerBuffer, headerLenght);
                     }
-                    syscall_write(1, buffer, length);
+                    syscall_write(1, buffer, uintToBase(pid, buffer, 10));
                     syscall_write(1, "\n", 1);
                     k = 1;
                 }
+            }
+            if (!k)
+            {
+                syscall_write(1, "\n", 1);
             }
         }
     }
     if (print)
     {
-        strcpy(buffer, "\n========================================\n");
+        strcpy(buffer, "\n================================================================\n");
         syscall_write(1, buffer, strlen(buffer));
     }
 }

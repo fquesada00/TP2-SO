@@ -26,6 +26,7 @@ GLOBAL syscallSemClose
 GLOBAL syscallSemOpen
 GLOBAL syscallSemPost
 GLOBAL syscallSemWait
+GLOBAL syscallSemPrint
 
 SECTION .text
 
