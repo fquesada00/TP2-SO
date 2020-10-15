@@ -237,6 +237,7 @@ void unblockForeground()
 }
 void unblockProcess(int fd)
 {
+    blockProcess(idle_pid,1);
     listElem_t * iter = readyHeader.first;
     while (iter != NULL && iter->data.fdBlock != fd)
     {

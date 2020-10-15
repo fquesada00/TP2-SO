@@ -29,6 +29,7 @@ extern int syscallSemOpen(const char *name, size_t value, char created);
 extern int syscallSemWait(const char *name);
 extern int syscallSemPost(const char *name);
 extern int syscallSemClose(const char *name);
+extern void syscallSemPrint();
 extern int syscallPipeClose(int fd, const char *name);
 extern int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);
 extern int syscallPipeOpen(int fd[2], const char * name);
