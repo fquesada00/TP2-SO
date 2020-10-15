@@ -40,6 +40,7 @@ EXTERN sem_open
 EXTERN sem_wait
 EXTERN sem_post
 EXTERN sem_close
+EXTERN sem
 EXTERN pipeOpen
 EXTERN init_process_with_pipe
 EXTERN pipeClose
@@ -264,10 +265,12 @@ _syscallHandler:
 	cmp rax,18
 	je .semaphore_close
 	cmp rax,19
-	je .create_pipe
+	je .semaphore_print
 	cmp rax,20
-	je .close_pipe
+	je .create_pipe
 	cmp rax,21
+	je .close_pipe
+	cmp rax,22
 	je .create_process_with_pipe
 	jmp .end
 .read:
@@ -341,6 +344,9 @@ _syscallHandler:
 	jmp .end
 .semaphore_close:
 	call sem_close
+	jmp .end
+.semaphore_print:
+	call sem
 	jmp .end
 .create_pipe:
 	call pipeOpen

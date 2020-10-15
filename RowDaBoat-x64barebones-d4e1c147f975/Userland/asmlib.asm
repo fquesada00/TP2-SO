@@ -329,7 +329,7 @@ syscallSemClose:
     pop rbp
     ret
 
-syscallPipeOpen:
+syscallSemPrint:
     push rbp
     mov rbp,rsp
     mov rax,19
@@ -338,7 +338,7 @@ syscallPipeOpen:
     pop rbp
     ret
 
-syscallPipeClose:
+syscallPipeOpen:
     push rbp
     mov rbp,rsp
     mov rax,20
@@ -347,10 +347,19 @@ syscallPipeClose:
     pop rbp
     ret
 
-syscallInitProcessWithPipe:
+syscallPipeClose:
     push rbp
     mov rbp,rsp
     mov rax,21
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+syscallInitProcessWithPipe:
+    push rbp
+    mov rbp,rsp
+    mov rax,22
     int 80h
     mov rsp,rbp
     pop rbp

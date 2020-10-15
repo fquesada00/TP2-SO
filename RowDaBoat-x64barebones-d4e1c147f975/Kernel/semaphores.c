@@ -4,8 +4,12 @@
 #include "include/semaphores.h"
 #include "include/scheduler.h"
 #include "include/list.h"
+#include "include/interrupts.h"
+
+extern uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 extern Header readyHeader;
 extern size_t _xchg(uint64_t pointer, size_t value);
+extern int syscall_write(int fd, const char *buff, size_t bytes);
 sem_t semaphores[MAX_SEM] = {0};
 int addPID(sem_t *sem, size_t pid)
 {
@@ -47,7 +51,13 @@ int sem_open(const char *name, size_t value, char created)
         {
             if (created)
             {
+                acquire(&semaphores[i]);
+                if (strcmp(semaphores[i].name, "") == 0)
+                {
+                    return -1;
+                }
                 semaphores[i].value = value;
+                release(&semaphores[i]);
                 return 1;
             }
             return -1;
@@ -139,7 +149,13 @@ int sem_close(const char *name)
     {
         return -1;
     }
+    acquire(&semaphores[i]);
     strcpy(semaphores[i].name, "");
+    if (strcmp(semaphores[i].name, "") == 0)
+    {
+        return -1;
+    }
+    release(&semaphores[i]);
     return 1;
 }
 void acquire(sem_t *sem)
@@ -150,4 +166,61 @@ void acquire(sem_t *sem)
 void release(sem_t *sem)
 {
     _xchg((uint64_t) & (sem->lock), 1);
+}
+
+void sem()
+{
+    int print = 0, length = 0, headerLenght = 0;
+    char headerBuffer[256] = {0};
+    size_t pid;
+    char buffer[256] = {0};
+    for (int i = 0; i < MAX_SEM; i++)
+    {
+        if (strcmp(semaphores[i].name, "") != 0)
+        {
+            if (!print)
+            {
+                strcpy(buffer, "\n========================================\n");
+                syscall_write(1, buffer, strlen(buffer));
+                strcpy(buffer, "\nNAME\t\t\tVALUE\t\t\tBLOCKED PIDs\n");
+                int auxHeaderLenght = strlen(buffer);
+                headerLenght = auxHeaderLenght - 2 - strlen("BLOCKED PIDs");
+                syscall_write(1, buffer, auxHeaderLenght);
+                for (int k = 0; k < headerLenght; k++)
+                {
+                    headerBuffer[k] = " ";
+                }
+                print = 1;
+            }
+            strcpy(buffer, semaphores[i].name);
+            length = strlen(buffer);
+            syscall_write(1, buffer, length);
+            strcpy(buffer, "\t\t\t");
+            syscall_write(1, buffer, strlen(buffer));
+            uintToBase(semaphores[i].value, buffer, 10);
+            syscall_write(1, buffer, strlen(buffer));
+            strcpy(buffer, "\t\t\t");
+            syscall_write(1, buffer, strlen(buffer));
+            for (int j = 0, k = 0 ; j < MAX_BLOCKED_PID; j++)
+            {
+                pid = semaphores[i].blockedPID[j];
+                if (!pid)
+                {
+                    length = uintToBase(pid, buffer, 10);
+                    if (k)
+                    {
+                        syscall_write(1, headerBuffer, headerLenght);
+                    }
+                    syscall_write(1, buffer, length);
+                    syscall_write(1, "\n", 1);
+                    k = 1;
+                }
+            }
+        }
+    }
+    if (print)
+    {
+        strcpy(buffer, "\n========================================\n");
+        syscall_write(1, buffer, strlen(buffer));
+    }
 }
