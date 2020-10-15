@@ -117,6 +117,8 @@ void writeToBuff(char c)
     else if (c == '\b' && buff_current != 0)
     {
         buff_current--;
+        auxi[0] = c;
+        syscall_write(1, auxi, 1);
     }
     else if (c == '\n')
     {

@@ -46,7 +46,7 @@ int schedule(uint64_t rsp)
         elem_t e;
         do{
         e = next(&readyHeader);
-        }while(e.state != Ready);
+        }while(e.state == Blocked);
         return e.rsp;
     }
 }
