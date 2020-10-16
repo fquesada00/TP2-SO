@@ -34,4 +34,5 @@ int strcpy(char * des, const char * source){
     {
         des[i] = source[i++];
     }
+    des[i] = '\0';
 }

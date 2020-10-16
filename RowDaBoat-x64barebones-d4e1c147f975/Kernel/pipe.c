@@ -91,7 +91,8 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t pip
     stdin.reading++;
     e.fds[1] = &stdout;
     stdout.writing++;
-    e.fdBlock = -1;
+    e.BlockID = -1;
+    e.reason = NOTHING;
     if (e.fds[fd] != NULL)
     {
         if (mode)

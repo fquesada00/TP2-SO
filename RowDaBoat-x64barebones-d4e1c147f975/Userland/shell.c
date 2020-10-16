@@ -5,8 +5,12 @@ extern test_mm();
 extern void test_processes();
 extern void loop();
 extern void test_prio();
+extern void test_sync();
+extern void test_no_sync();
 void shell()
 {
+    //test_no_sync();
+    test_sync();
     printf("\nInitializing shell\n");
     printf("\nType 'help' to see the shell commands list\n");
     //test_mm();
@@ -67,6 +71,11 @@ void shell()
                 execv(loop,1,argvLoop); }
             else if(strcmp(command,"ps") == 0){
                 ps();
+            }
+            else if(strcmp(command,"sem") == 0){
+                syscallSemOpen("mi_sem",1,0);
+                syscallSemOpen("mi_sem",2,1);
+                syscallSemPrint();
             }
             else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);
         }

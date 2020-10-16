@@ -27,6 +27,9 @@ GLOBAL syscallSemOpen
 GLOBAL syscallSemPost
 GLOBAL syscallSemWait
 GLOBAL syscallSemPrint
+GLOBAL waitPID
+GLOBAL yield
+GLOBAL _exit
 
 SECTION .text
 
@@ -361,6 +364,31 @@ syscallInitProcessWithPipe:
     push rbp
     mov rbp,rsp
     mov rax,22
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+
+waitPID:
+    push rbp
+    mov rbp,rsp
+    mov rax,23
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+yield:
+    push rbp
+    mov rbp,rsp
+    mov rax,24
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret
+_exit:
+    push rbp
+    mov rbp,rsp
+    mov rax,25
     int 80h
     mov rsp,rbp
     pop rbp

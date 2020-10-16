@@ -10,6 +10,13 @@ typedef enum State
     Blocked,
     Terminated
 } State;
+typedef enum BlockReason
+{
+    FD,
+    PID,
+    SEM,
+    NOTHING
+}BlockReason;
 typedef struct PCB
 {
     char name[255];
@@ -18,7 +25,8 @@ typedef struct PCB
     uint64_t rsp;
     uint64_t StackBase;
     int privilege;
-    int fdBlock;
+    BlockReason reason;
+    int BlockID;
     State state;
 } PCB;
 

@@ -53,7 +53,7 @@ int main(){
 	load_idt();
 	init_video();
 	init_fds();
-	char * argv[] = {"shell",NULL};
+	char * argv[] = {"init",NULL};
 	initProcessManager(init,1,argv,0);
 	puts("Something wrong");
 	return 0;

@@ -1,45 +1,66 @@
 #include <stdint.h>
 #include <stddef.h>
-#include "include/standardstring.h"
 #include "include/semaphores.h"
 #include "include/scheduler.h"
 #include "include/list.h"
 #include "include/interrupts.h"
+#include "include/standardstring.h"
 
 extern uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 extern Header readyHeader;
 extern size_t _xchg(uint64_t pointer, size_t value);
 extern int syscall_write(int fd, const char *buff, size_t bytes);
+extern void unblockProcess(int fd, BlockReason reason);
+extern PCB *getPCB(size_t pid);
+extern void blockCurrent(int fd, BlockReason reason);
+extern void _int20();
 sem_t semaphores[MAX_SEM] = {0};
-int addPID(sem_t *sem, size_t pid)
+extern int unblockProcessByPCB(PCB *pcb);
+void printPid(sem_t *sem)
 {
-    for (int i = sem->blockedPID[MAX_BLOCKED_PID], j = 0; j < MAX_BLOCKED_PID; i++, j++)
+    char buff[256] = {0};
+    for (int i = 0; i < MAX_BLOCKED_PID; i++)
+    {
+        uintToBase(sem->blockedPID[i]->PID, buff, 10);
+        puts(buff);
+        putChar('\n');
+    }
+    puts("==============");
+    putChar('\n');
+}
+int addPID(sem_t *sem, PCB *pcb)
+{
+    //printPid(sem);
+    for (int i = sem->idxBlockedPID, j = 0; j < MAX_BLOCKED_PID; i++, j++)
     {
         if (i == MAX_BLOCKED_PID)
         {
             i = 0;
         }
-        if (sem->blockedPID[i] == 0)
+        if (sem->blockedPID[i] == NULL)
         {
-            sem->blockedPID[i] = pid;
-            return 1;
+            sem->blockedPID[i] = pcb;
+            //printPid(sem);
+
+            return 0;
         }
     }
-    return -1;
+    return 1;
 }
 
-size_t removePID(sem_t *sem)
+PCB *removePID(sem_t *sem)
 {
-    if (sem->blockedPID[sem->blockedPID[MAX_BLOCKED_PID]] == 0)
-        return 0;
-    size_t auxPID = sem->blockedPID[sem->blockedPID[MAX_BLOCKED_PID]];
-    sem->blockedPID[sem->blockedPID[MAX_BLOCKED_PID]] = 0;
+    //printPid(sem);
+    if (sem->blockedPID[sem->idxBlockedPID] == NULL)
+        return NULL;
+    PCB *auxPCB = sem->blockedPID[sem->idxBlockedPID];
+    sem->blockedPID[sem->idxBlockedPID] = NULL;
 
-    if (sem->blockedPID[MAX_BLOCKED_PID] == (MAX_BLOCKED_PID - 1))
-        sem->blockedPID[MAX_BLOCKED_PID] = 0;
+    if (sem->idxBlockedPID == (MAX_BLOCKED_PID - 1))
+        sem->idxBlockedPID = 0;
     else
-        sem->blockedPID[MAX_BLOCKED_PID]++;
-    return auxPID;
+        sem->idxBlockedPID++;
+    return auxPCB;
 }
 
 int sem_open(const char *name, size_t value, char created)
@@ -54,13 +75,15 @@ int sem_open(const char *name, size_t value, char created)
                 acquire(&semaphores[i]);
                 if (strcmp(semaphores[i].name, "") == 0)
                 {
-                    return -1;
+                    release(&semaphores[i]);
+                    return 1;
                 }
                 semaphores[i].value = value;
+                //TODO BETTER
+                semaphores[i].openPID[semaphores[i].idxOpenedPID++] = readyHeader.current->data.PID;
                 release(&semaphores[i]);
-                return 1;
             }
-            return -1;
+            return 0;
         }
         if (!flag && strcmp(semaphores[i].name, "") == 0)
         {
@@ -71,14 +94,15 @@ int sem_open(const char *name, size_t value, char created)
     }
     if (!flag)
     {
-        return -1;
+        return 1;
     }
-    sem_t s;
+    sem_t s = {0};
     strcpy(s.name, name);
     s.value = value;
     s.lock = 1;
+    s.idxBlockedPID = 0;
     semaphores[idx] = s;
-    return 1;
+    return 0;
 }
 int sem_post(const char *name)
 {
@@ -89,22 +113,29 @@ int sem_post(const char *name)
     }
     if (i == MAX_SEM)
     {
-        return -1;
+        return 1;
     }
     acquire(&semaphores[i]);
     if (strcmp(semaphores[i].name, "") == 0)
     {
-        return -1;
+        release(&semaphores[i]);
+        return 1;
     }
-    semaphores[i].value++;
-    size_t pid = removePID(&semaphores[i]);
-    if (pid == 0)
+
+    PCB *pcb = removePID(&semaphores[i]);
+    if (pcb == NULL)
     {
-        return -1;
+        //return 1;
+        release(&semaphores[i]);
+        return 0;
     }
     //unblock(pid)
+    semaphores[i].value++;
+
+    unblockProcessByPCB(pcb);
+
     release(&semaphores[i]);
-    return 1;
+    return 0;
 }
 int sem_wait(const char *name)
 {
@@ -115,12 +146,13 @@ int sem_wait(const char *name)
     }
     if (i == MAX_SEM)
     {
-        return -1;
+        return 1;
     }
     acquire(&semaphores[i]);
     if (strcmp(semaphores[i].name, "") == 0)
     {
-        return -1;
+        release(&semaphores[i]);
+        return 1;
     }
     if (semaphores[i].value > 0)
     {
@@ -128,15 +160,56 @@ int sem_wait(const char *name)
     }
     else
     {
-        addPID(&semaphores[i], readyHeader.current->data.PID);
+        /*puts("\nSoy el proceso ");
+        char buff2[256] = {0};
+        uintToBase(readyHeader.current->data.PID, buff2, 10);
+        puts(buff2);
+        putChar('\n');
+        addPID(&semaphores[i], &readyHeader.current->data);
         release(&semaphores[i]);
+        int enter = 0;
         //block current process
+        while(semaphores[i].value == 0){
+            if()
+            release(&semaphores[i]);
+            addPID(&semaphores[i], &readyHeader.current->data);
+            blockCurrent(i, SEM);
+            acquire(&semaphores[i]);
+        }*/
+        // addPID(&semaphores[i], &readyHeader.current->data);
+        // release(&semaphores[i]);
+        // blockCurrent(i, SEM);
+        // do
+        // {
+        //     acquire(&semaphores[i]);
+        //     addPID(&semaphores[i], &readyHeader.current->data);
+        //     release(&semaphores[i]);
+        //     blockCurrent(i, SEM);
+        // } while (semaphores[i].value == 0);
+
+        do
+        {
+            addPID(&semaphores[i], &readyHeader.current->data);
+            release(&semaphores[i]);
+            blockCurrent(i, SEM);
+            acquire(&semaphores[i]);
+        } while (semaphores[i].value == 0);
+
         //desbloqueo spinlock -> bloqueo spinlock -> addPid -> bloqueoProceso->desbloque spinlock -> bloqueo spinlock -> resto value (PROBLEMA: el unblock desbloquea ints, entonces puede haber inanicion xq no hice release)
-        acquire(&semaphores[i]);
         semaphores[i].value--;
     }
+    /*puts("\nSoy el proceso ");
+    char buff2[256] = {0};
+    uintToBase(readyHeader.current->data.PID, buff2, 10);
+    puts(buff2);
+    putChar('\n');
+    char buff[256] = {0};
+    uintToBase(semaphores[i].value, buff, 10);
+    puts("ESTOY EN WAIT");
+    puts(buff);
+    putChar('\n');*/
     release(&semaphores[i]);
-    return 1;
+    return 0;
 }
 int sem_close(const char *name)
 {
@@ -147,32 +220,41 @@ int sem_close(const char *name)
     }
     if (i == MAX_SEM)
     {
-        return -1;
+        return 1;
     }
     acquire(&semaphores[i]);
-    strcpy(semaphores[i].name, "");
+    //TODO BETTER
     if (strcmp(semaphores[i].name, "") == 0)
     {
-        return -1;
+        release(&semaphores[i]);
+        return 1;
     }
+    if(isListEmpty(&semaphores[i]))
+        semaphores[i].name[0] = 0;
     release(&semaphores[i]);
-    return 1;
+    return 0;
 }
 void acquire(sem_t *sem)
 {
-    while (_xchg((uint64_t) & (sem->lock), 0) != 1)
-        ;
+    //puts("\naquire\n");
+    while (_xchg(&(sem->lock), 0) != 1)
+        _int20();
 }
 void release(sem_t *sem)
 {
-    _xchg((uint64_t) & (sem->lock), 1);
+    //puts("\nrelease\n");
+    _xchg(&(sem->lock), 1);
 }
 
+/*
+acquire
+        
+*/
 void sem()
 {
     int print = 0, headerLenght = 0;
     char headerBuffer[256] = {0};
-    size_t pid;
+    PCB *pcb;
     char buffer[256] = {0};
     for (int i = 0; i < MAX_SEM; i++)
     {
@@ -202,14 +284,14 @@ void sem()
             int k = 0;
             for (int j = 0; j < MAX_BLOCKED_PID; j++)
             {
-                pid = semaphores[i].blockedPID[j];
-                if (!pid)
+                pcb = semaphores[i].blockedPID[j];
+                if (pcb != NULL)
                 {
                     if (k)
                     {
                         syscall_write(1, headerBuffer, headerLenght);
                     }
-                    syscall_write(1, buffer, uintToBase(pid, buffer, 10));
+                    syscall_write(1, buffer, uintToBase(pcb->PID, buffer, 10));
                     syscall_write(1, "\n", 1);
                     k = 1;
                 }
@@ -225,4 +307,14 @@ void sem()
         strcpy(buffer, "\n================================================================\n");
         syscall_write(1, buffer, strlen(buffer));
     }
+}
+isListEmpty(sem_t * sem)
+{
+    for (size_t i = 0; i < MAX_BLOCKED_PID; i++)
+    {
+        if(sem->blockedPID[i]!=NULL)
+            return 0;
+    }
+    return 1;
+    
 }

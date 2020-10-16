@@ -31,7 +31,7 @@ int syscall_read(int fd, char *buffer, int n)
     {
         while (f->idxR == f->idxW)
         {
-            blockCurrent(fd);
+            blockCurrent(fd,FD);
         }
         buffer[i] = f->read[((f->idxR)++)%BUF_SIZE];
     }
@@ -53,7 +53,7 @@ int syscall_write(int fd, const char *buffer, int n)
         // putChar(buffer[i]);
     }
     //f->write[((f->idxW)++)%BUF_SIZE] = 0;
-    unblockProcess(fd);
+    unblockProcess(fd,FD);
     return i;
 }
 int syscall_registers(uint64_t *regs)
@@ -108,7 +108,7 @@ int blockProcess(int pid, int block)
     if (block)
     {
         change = Blocked;
-        if(readyHeader.ready > 0)
+        //if(readyHeader.ready > 0)
             readyHeader.ready--;
     }
     else
@@ -215,43 +215,39 @@ void nice(int pid, int p)
 int exit(int status)
 {
     readyHeader.current->data.state = Terminated;
-    readyHeader.ready--;
+    //if(readyHeader.ready > 0)
+        readyHeader.ready--;
+    readyHeader.current->tickets = 0;
     _int20();
+    puts("=========================NUNCA LLEGUE========================");
     return 1;
 }
-void unblockForeground()
-{
-    blockProcess(idle_pid, 1);
-    listElem_t *iter = readyHeader.first;
-    while (iter != NULL && (iter->data.state != Blocked || iter->data.PID == idle_pid))
+void unblockProcess(int id, BlockReason reason)
+{   
+    listElem_t * iter = readyHeader.first;
+    while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id))
     {
-        iter = iter->next;
+    
+        iter=iter->next;
     }
-    if (iter == NULL){
+    if(iter == NULL){
+        puts("NULL");
         blockProcess(idle_pid,0);
         return;
     }
-    iter->data.fdBlock = -1;
-    readyHeader.ready++;
-    iter->data.state = Ready;
-}
-void unblockProcess(int fd)
-{
-    blockProcess(idle_pid,1);
-    listElem_t * iter = readyHeader.first;
-    while (iter != NULL && iter->data.fdBlock != fd)
-    {
-        iter=iter->next;
-    }
-    if(iter == NULL)
-        return;
     //puts(iter->data.name);
-    iter->data.fdBlock = -1;
+    puts("El proceso que se desbloqueo fue: ");
+    char buff[256] = {0};
+    uintToBase(iter->data.PID,buff,10);
+    puts(buff);
+    putChar('\n');
+    iter->data.BlockID = -1;
+    iter->data.reason = NOTHING;
     readyHeader.ready++;
     iter->data.state = Ready;
             
 }
-void blockCurrent(int fd)
+void blockCurrent(int id, BlockReason reason)
 {
     /*listElem_t r = removeCurrent(&readyHeader);
     r.data.rsp = rsp;
@@ -260,10 +256,48 @@ void blockCurrent(int fd)
     else
         push(&blockedHeader,r.data,r.priority,r.tickets);
     _hlt();*/
-    if(readyHeader.ready > 0)
+    puts("El proceso que se bloqueo fue: ");
+    char buff[256] = {0};
+    uintToBase(readyHeader.current->data.PID,buff,10);
+    puts(buff);
+    putChar('\n');
+    //if(readyHeader.ready > 0)
         readyHeader.ready--;
     readyHeader.current->data.state = Blocked;
-    readyHeader.current->data.fdBlock = fd;
-    _hltAndCli();
+    readyHeader.current->data.BlockID = id;
+    readyHeader.current->data.reason = reason;
+    readyHeader.current->tickets = 0;
+    _int20();
     return;
+}
+int waitPID(int pid)
+{
+    blockCurrent(pid,PID);
+}
+void unblockProcessByPCB(PCB * process)
+{
+    if(process == NULL)
+        return;
+    puts("El proceso que se desbloqueo fue: ");
+    char buff[256] = {0};
+    uintToBase(process->PID,buff,10);
+    puts(buff);
+    putChar('\n');
+    blockProcess(idle_pid,1);
+    process->BlockID = -1;
+    process->reason = NOTHING;
+    process->state =Ready;
+    readyHeader.ready++;
+}
+PCB * getPCB(size_t pid)
+{
+    elem_t e;
+    e.PID = pid;
+    listElem_t * l = get(&readyHeader,e);
+    return &l->data;
+}
+void yield()
+{
+    readyHeader.current->tickets = 0;
+    _int20();
 }

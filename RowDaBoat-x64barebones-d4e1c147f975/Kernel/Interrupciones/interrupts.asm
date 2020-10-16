@@ -44,6 +44,9 @@ EXTERN sem
 EXTERN pipeOpen
 EXTERN init_process_with_pipe
 EXTERN pipeClose
+EXTERN waitPID
+EXTERN yield
+EXTERN exit
 
 SECTION .text
 
@@ -271,7 +274,13 @@ _syscallHandler:
 	cmp rax,21
 	je .close_pipe
 	cmp rax,22
+	je .wait
+	cmp rax,23
 	je .create_process_with_pipe
+	cmp rax,24
+	je .yield
+	cmp rax,25
+	je .exit
 	jmp .end
 .read:
 	push rdi
@@ -356,6 +365,15 @@ _syscallHandler:
 	jmp .end
 .create_process_with_pipe
 	call init_process_with_pipe
+	jmp .end
+.wait:
+	call waitPID
+	jmp .end
+.yield:
+	call yield
+	jmp .end
+.exit:
+	call exit
 	jmp .end
 .end:
 	popStateNoRAX
@@ -442,6 +460,7 @@ _int20:
 
 ;chequear
 _xchg:
-	xchg [rdi],rsi
+	xchg [rdi], rsi
+	mov rax,rsi
 	ret
 

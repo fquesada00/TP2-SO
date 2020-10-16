@@ -12,24 +12,26 @@ extern int blockProcess(int pid,int b);
 extern int exit(int s);
 extern int execvAuxi(void * entry,int argc, char * argv[]);
 extern void video_listener();
+extern _int20();
 void idle();
 void init(){
-    _sti();
-    char * argv1[] ={"shell",NULL};
-    int shell_pid = execvAuxi(sampleCodeModuleAddress,1,argv1);
+    _cli();
     char * argv2[] = {"idle",NULL};
     idle_pid = execvAuxi(idle,1,argv2);
     nice(idle_pid,9);
     blockProcess(idle_pid,1);
     char * argv3[] = {"video_listener",NULL};
     int video_listener_pid = execvAuxi(video_listener,1,argv3);
+    char * argv1[] ={"shell",NULL};
+    int shell_pid = execvAuxi(sampleCodeModuleAddress,1,argv1);
     exit(0);
 }
 
 void idle(){
+    
     while (1)
     {
         //puts("idle ");
-        _hlt();   
+        _hlt();  
     }
 }

@@ -566,3 +566,18 @@ int block(int pid,int block)
         return -1;
     return syscallBlock(pid,block);
 }
+int myAtoi(char *str)
+{
+    puts(str);
+    int res = 0;
+    int neg = 0;
+    for(int i = 0 ; str[i] != 0 ; i++){
+        if(str[i] == '-'){
+            neg = 1;
+            continue;
+        }
+        res = res * 10 + str[i] - '0';
+    }
+    if(neg) res *=-1;
+    return res;
+}

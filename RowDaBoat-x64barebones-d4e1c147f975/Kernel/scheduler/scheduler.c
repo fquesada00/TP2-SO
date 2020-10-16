@@ -1,52 +1,55 @@
 #include "scheduler.h"
 #include "list.h"
 #include "standardstring.h"
-extern void _hlt();
+extern void _int20();
 
 Header readyHeader = {0};
 Header blockedHeader = {0};
 int currentPIDs = 1;
 int initializing = 1;
-uint64_t stackSize = 0x50000;
-extern file_t * stdin;
-extern file_t * stdout;
+uint64_t stackSize = 0x10000;
+extern file_t *stdin;
+extern file_t *stdout;
 extern void idle();
 extern int idle_pid;
 int schedule(uint64_t rsp)
 {
-    if (!initializing)
+    if (!initializing && readyHeader.current->data.state != Terminated)
     {
         (readyHeader).current->data.rsp = rsp;
     }
     else
         initializing = 0;
-    if (    readyHeader.current->data.state == Terminated)
+    if (readyHeader.current->data.state == Terminated)
     {
         listElem_t l = removeCurrent(&readyHeader);
         pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
     }
-    
     if (readyHeader.ready == 0)
     {
-        listElem_t * iter = readyHeader.first;
+        listElem_t *iter = readyHeader.first;
         while (iter != NULL && iter->data.PID != idle_pid)
         {
             iter = iter->next;
         }
-        if(iter != NULL){
+        if (iter != NULL)
+        {
             iter->data.state = Ready;
             readyHeader.ready++;
         }
     }
-    if (readyHeader.current->data.state == Ready &&  readyHeader.current->tickets--)
+    else if (readyHeader.ready < 0)
+        puts("ERROR");
+    if (readyHeader.current->data.state == Ready && readyHeader.current->tickets--)
         return readyHeader.current->data.rsp;
     else
     {
         readyHeader.current->tickets = (MAX_PRIORITY - readyHeader.current->priority);
         elem_t e;
-        do{
-        e = next(&readyHeader);
-        }while(e.state == Blocked);
+        do
+        {
+            e = next(&readyHeader);
+        } while (e.state != Ready);
         return e.rsp;
     }
 }
@@ -62,8 +65,9 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
         int pid = currentPIDs++;
         init_registers(entry_point, argc, argv, rsp);
         init_PCB(rsp, pid, argv[0]);
-        if (initializing)
-            _hlt();
+        // if (initializing)
+        //     _int20();
+        //_hlt();
         return pid;
     }
     return -1;
@@ -103,12 +107,14 @@ void init_PCB(uint64_t rsp, int pid, char *name)
     stdin->reading++;
     e.fds[1] = stdout;
     stdout->writing++;
-    e.fdBlock = -1;
+    e.BlockID = -1;
+    e.reason = NOTHING;
     e.state = Ready;
     readyHeader.ready++;
     strcpy(e.name, name);
-    if (initializing)
+    if (initializing){
         initList(&readyHeader, e, 5, 5);
+    }
     else
         push(&readyHeader, e, 5, 5);
 }
@@ -126,16 +132,3 @@ void init_PCB(uint64_t rsp, int pid, char *name)
 //         push(&blockedHeader,removed.data,removed.priority,removed.tickets);
 
 // }
-
-void readyProcess(int pid)
-{
-    elem_t e;
-    e.PID = pid;
-    listElem_t removed = removeElement(&readyHeader, e);
-    removed.data.fdBlock = -1;
-    if (readyHeader.current == NULL)
-        initList(&readyHeader, removed.data, removed.priority, removed.tickets);
-    else
-        push(&readyHeader, removed.data, removed.priority, removed.tickets);
-    _hlt();
-}
