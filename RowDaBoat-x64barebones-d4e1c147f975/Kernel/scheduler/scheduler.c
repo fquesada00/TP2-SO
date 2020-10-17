@@ -12,6 +12,7 @@ extern file_t *stdin;
 extern file_t *stdout;
 extern void idle();
 extern int idle_pid;
+extern int blockProcess(int pid, int block);
 int schedule(uint64_t rsp)
 {
     if (!initializing && readyHeader.current->data.state != Terminated)
@@ -22,21 +23,31 @@ int schedule(uint64_t rsp)
         initializing = 0;
     if (readyHeader.current->data.state == Terminated)
     {
+        readyHeader.ready--;
+        if(readyHeader.current->data.PID == idle_pid)
+            idle_pid = 0;
         listElem_t l = removeCurrent(&readyHeader);
+        for (int i = 0; i < l.data.argc; i++)
+        {
+            pFree(l.data.argv[i]);
+        }
         pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
+        
     }
     if (readyHeader.ready == 0)
     {
-        listElem_t *iter = readyHeader.first;
-        while (iter != NULL && iter->data.PID != idle_pid)
-        {
-            iter = iter->next;
-        }
-        if (iter != NULL)
-        {
-            iter->data.state = Ready;
-            readyHeader.ready++;
-        }
+        if(idle_pid != 0)
+            blockProcess(idle_pid, 0);
+        // listElem_t *iter = readyHeader.first;
+        // while (iter != NULL && iter->data.PID != idle_pid)
+        // {
+        //     iter = iter->next;
+        // }
+        // if (iter != NULL)
+        // {
+        //     iter->data.state = Ready;
+        //     readyHeader.ready++;
+        // }
     }
     else if (readyHeader.ready < 0)
         puts("ERROR");
@@ -49,7 +60,7 @@ int schedule(uint64_t rsp)
         do
         {
             e = next(&readyHeader);
-        } while (e.state != Ready);
+        } while (e.state == Blocked);
         return e.rsp;
     }
 }
@@ -63,8 +74,14 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
     {
         rsp += stackSize - (sizeof(uint64_t));
         int pid = currentPIDs++;
-        init_registers(entry_point, argc, argv, rsp);
-        init_PCB(rsp, pid, argv[0]);
+        char **args = pMalloc(argc * sizeof(char *));
+        for (int i = 0; i < argc; i++)
+        {
+            args[i] = pMalloc(strlen(argv[i]) * sizeof(char));
+            strcpy(args[i], argv[i]);
+        }
+        init_registers(entry_point, argc, args, rsp);
+        init_PCB(rsp, pid, args,argc);
         // if (initializing)
         //     _int20();
         //_hlt();
@@ -96,7 +113,7 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->r14 = 14;
     init->r15 = 15;
 }
-void init_PCB(uint64_t rsp, int pid, char *name)
+void init_PCB(uint64_t rsp, int pid, char **args, int argcount)
 {
     elem_t e = {0};
     e.PID = pid;
@@ -111,8 +128,12 @@ void init_PCB(uint64_t rsp, int pid, char *name)
     e.reason = NOTHING;
     e.state = Ready;
     readyHeader.ready++;
-    strcpy(e.name, name);
-    if (initializing){
+    strcpy(e.name, args[0]);
+    e.argv = args;
+    e.argc = argcount;
+    
+    if (initializing)
+    {
         initList(&readyHeader, e, 5, 5);
     }
     else

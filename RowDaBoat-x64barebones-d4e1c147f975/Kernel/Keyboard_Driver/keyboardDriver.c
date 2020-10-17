@@ -3,7 +3,6 @@
 #include "list.h"
 #include "fileDescriptor.h"
 extern char getKeyboardScanCode();
-extern void unblockForeground();
 extern int syscall_read(int fd, char *buffer, int n);
 extern int syscall_write(int fd, char *buffer, int n);
 
@@ -118,18 +117,48 @@ void writeToBuff(char c)
     {
         buff_current--;
         auxi[0] = c;
-        syscall_write(1, auxi, 1);
+        writeStdout(auxi, 1);
     }
     else if (c == '\n')
     {
         buff[buff_current++] = c;
 
-        syscall_write(0, buff, buff_current);
+        writeStdin(buff, buff_current);
         buff_current = 0;
     }
     if (c != '\b')
     {
         auxi[0] = c;
-        syscall_write(1, auxi, 1);
+        writeStdout(auxi, 1);
     }
+}
+void writeStdout(char*buff,size_t n){
+    int i;
+    for (i = 0; i < n; i++)
+    {
+        file_t * f = stdout;
+        if(i != 0 && i % BUF_SIZE == 0)
+            blockCurrent(1,FD_WRITE);
+        f->write[((f->idxW)++) % BUF_SIZE] = buff[i];
+
+        // putChar(buffer[i]);
+    }
+    //f->write[((f->idxW)++)%BUF_SIZE] = 0;
+    unblockProcess(1, FD_READ);
+    return i;
+}
+void writeStdin(char * buff,size_t n){
+    int i;
+    for (i = 0; i < n; i++)
+    {
+        file_t * f = stdout;
+        if(i != 0 && i % BUF_SIZE == 0)
+            blockCurrent(1,FD_WRITE);
+        f->write[((f->idxW)++) % BUF_SIZE] = buff[i];
+
+        // putChar(buffer[i]);
+    }
+    //f->write[((f->idxW)++)%BUF_SIZE] = 0;
+    unblockProcess(1, FD_READ);
+    return i;
 }

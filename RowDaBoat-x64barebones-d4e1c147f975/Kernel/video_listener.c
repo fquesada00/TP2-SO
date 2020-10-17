@@ -22,7 +22,7 @@ void video_listener()
             puts(buff);
             //buff[0] = '\0';
         }else{
-            blockCurrent(1,FD);
+            blockCurrent(1,FD_READ);
         }
     }
 }
