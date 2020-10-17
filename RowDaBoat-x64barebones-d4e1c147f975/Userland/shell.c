@@ -39,8 +39,9 @@ void shell()
                 execv(escribo, 1, argv10);
             else if (strcmp(command, "leo") == 0)
             {
-
-                execv(leo, 1, argv11);
+                
+                int a = execv(leo, 1, argv11);
+                waitPID(a);
             }
 
             else if (strcmp(command, "cpuInfo") == 0)

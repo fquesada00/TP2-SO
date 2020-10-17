@@ -124,6 +124,7 @@ void writeToBuff(char c)
         buff[buff_current++] = c;
 
         writeStdin(buff, buff_current);
+        //syscall_write(0,buff,buff_current);
         buff_current = 0;
     }
     if (c != '\b')
@@ -151,7 +152,7 @@ void writeStdin(char * buff,size_t n){
     int i;
     for (i = 0; i < n; i++)
     {
-        file_t * f = stdout;
+        file_t * f = stdin;
         if(i != 0 && i % BUF_SIZE == 0)
             blockCurrent(1,FD_WRITE);
         f->write[((f->idxW)++) % BUF_SIZE] = buff[i];
@@ -159,6 +160,6 @@ void writeStdin(char * buff,size_t n){
         // putChar(buffer[i]);
     }
     //f->write[((f->idxW)++)%BUF_SIZE] = 0;
-    unblockProcess(1, FD_READ);
-    return i;
+    unblockProcess(0, FD_READ);
+    return;
 }
