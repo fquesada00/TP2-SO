@@ -3,4 +3,5 @@
 int strcmp(const char*, const char*);
 int strlen(char * s);
 int strcpy(char * des, const char * src);
+int strcat(char * des,const char * src);
 #endif

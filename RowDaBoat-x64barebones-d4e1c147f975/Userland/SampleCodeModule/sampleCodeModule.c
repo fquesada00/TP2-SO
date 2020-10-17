@@ -1,7 +1,6 @@
 /* sampleCodeModule.c */
 #include "standardlib.h"
 extern void shell();
-extern void calc();
 typedef void (*function)();
 typedef struct ProgramType
 {
@@ -12,7 +11,7 @@ int main()
 {
 
 	
-	if(programLoader((function)calc) || programLoader((function)shell)) //left screen calc, right screen shell
+	if( programLoader((function)shell)) //left screen calc, right screen shell
 	{
 		printf("Error Loading Program!!\n");
 		return 1;

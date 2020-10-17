@@ -31,9 +31,9 @@ int syscall_read(int fd, char *buffer, int n)
     {
         while (f->idxR == f->idxW)
         {
-            blockCurrent(fd,FD);
+            blockCurrent(fd, FD);
         }
-        buffer[i] = f->read[((f->idxR)++)%BUF_SIZE];
+        buffer[i] = f->read[((f->idxR)++) % BUF_SIZE];
     }
     return i;
 }
@@ -47,13 +47,14 @@ int syscall_write(int fd, const char *buffer, int n)
     file_t *f = readyHeader.current->data.fds[fd];
     if (f == NULL)
         return -1;
-    for(i = 0 ; i < n ; i++){
-        f->write[((f->idxW)++)%BUF_SIZE] = buffer[i];
+    for (i = 0; i < n; i++)
+    {
+        f->write[((f->idxW)++) % BUF_SIZE] = buffer[i];
 
         // putChar(buffer[i]);
     }
     //f->write[((f->idxW)++)%BUF_SIZE] = 0;
-    unblockProcess(fd,FD);
+    unblockProcess(fd, FD);
     return i;
 }
 int syscall_registers(uint64_t *regs)
@@ -96,7 +97,6 @@ int pKill(int pid)
 }
 int processes()
 {
-    puts("Nombre    PID    Priority    RSP    StackBase    State\n");
     printList(&readyHeader);
 }
 int blockProcess(int pid, int block)
@@ -109,7 +109,7 @@ int blockProcess(int pid, int block)
     {
         change = Blocked;
         //if(readyHeader.ready > 0)
-            readyHeader.ready--;
+        readyHeader.ready--;
     }
     else
     {
@@ -153,43 +153,97 @@ int blockProcess(int pid, int block)
 }
 void printList(Header *head)
 {
+    int width = (1024 / 16) / 6; //CAMBIAR POR CTES
+    int widthHeader = width + 5;
+    char buffer[256] = {0};
+    char separation[256] = "                                                              ";
+    int length = 0, auxLength = 0;
+    length = strcpy(buffer, "NOMBRE");
+    //syscall_write(1, buffer, length);
+    //syscall_write(1, separation, width - length);
+    puts(buffer);
+    putsN(separation, widthHeader - length);
+    length = strcpy(buffer, "PID");
+    //syscall_write(1, buffer, length);
+    //syscall_write(1, separation, width - length);
+    puts(buffer);
+    putsN(separation, width - length);
+    length = strcpy(buffer, "PRIO");
+    puts(buffer);
+        putsN(separation, width-length);
+    //syscall_write(1, buffer, length);
+    //syscall_write(1, separation, width - length);
+    length = strcpy(buffer, "RSP");
+    //syscall_write(1, buffer, length);
+    //syscall_write(1, separation, width - length);
+    puts(buffer);
+    putsN(separation, width - length);
+    length = strcpy(buffer, "BP");
+    //syscall_write(1, buffer, length);
+    //syscall_write(1, separation, width - length);
+    puts(buffer);
+    putsN(separation, width - length);
+    length = strcpy(buffer, "STATE");
+    // syscall_write(1, buffer, length);
+    puts(buffer);
+    // syscall_write(1, separation, width - length);
+    putsN(separation, width - length);
     if (head == NULL || head->first == NULL)
         return;
     listElem_t *next = head->first;
+    char auxBuff[256] = {0};
+    putChar('\n');
     while (next != NULL)
     {
-        puts(next->data.name);
-        puts("    ");
-        char buff[255] = {0};
-        uintToBase(next->data.PID, buff, 10);
-        puts(buff);
-        putChar('\t');
-        uintToBase(next->priority, buff, 10);
-        puts(buff);
-        putChar('\t');
-        uintToBase(next->data.rsp, buff, 16);
-        puts("0x");
-        puts(buff);
-        putChar('\t');
-        uintToBase(next->data.StackBase, buff, 16);
-        puts("0x");
-        puts(buff);
-        putChar('\t');
+        length = strcpy(buffer, next->data.name);
+        //syscall_write(1, buffer, length);
+        putsN(buffer,length);
+        putsN(separation, widthHeader - length);
+        //syscall_write(1, separation, width - length);
+        length = uintToBase(next->data.PID, buffer, 10);
+        puts(buffer);
+        putsN(separation, width - length);
+        //syscall_write(1, buffer, length);
+        //syscall_write(1, separation, width - length);
+        length = uintToBase(next->priority, buffer, 10);
+        puts(buffer);
+        putsN(separation, width - length);
+        //syscall_write(1, buffer, length);
+        //syscall_write(1, separation, width - length);
+        length =strcpy(buffer, "0x");
+        length += uintToBase(next->data.rsp, auxBuff, 16);
+        strcat(buffer, auxBuff);
+        puts(buffer);
+        putsN(separation, width - length);
+        //syscall_write(1, buffer, length);
+        //syscall_write(1, separation, width - length);
+        length = strcpy(buffer,"0x");
+        length += uintToBase(next->data.StackBase, auxBuff, 16);
+        strcat(buffer, auxBuff);
+        // syscall_write(1, buffer, length);
+        puts(buffer);
+        //syscall_write(1, separation, width - length);
+        putsN(separation, width - length);
         switch (next->data.state)
         {
         case Ready:
-            puts("Ready");
+            length = strcpy(buffer, "R");
+            // syscall_write(1, buffer, length);
             break;
         case Blocked:
-            puts("Blocked");
+            length = strcpy(buffer, "B");
+            // syscall_write(1, buffer, length);
             break;
         case Terminated:
-            puts("Terminated");
+            length = strcpy(buffer, "T");
+            // syscall_write(1, buffer, length);
             break;
         default:
             break;
         }
-        putChar('\n');
+        puts(buffer);
+        //syscall_write(1, "\n", 1);
+        puts("\n");
         next = next->next;
     }
 }
@@ -216,36 +270,31 @@ int exit(int status)
 {
     readyHeader.current->data.state = Terminated;
     //if(readyHeader.ready > 0)
-        readyHeader.ready--;
+    readyHeader.ready--;
     readyHeader.current->tickets = 0;
     _int20();
     puts("=========================NUNCA LLEGUE========================");
     return 1;
 }
 void unblockProcess(int id, BlockReason reason)
-{   
-    listElem_t * iter = readyHeader.first;
+{
+    listElem_t *iter = readyHeader.first;
     while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id))
     {
-    
-        iter=iter->next;
+
+        iter = iter->next;
     }
-    if(iter == NULL){
-        puts("NULL");
-        blockProcess(idle_pid,0);
+    if (iter == NULL)
+    {
+        //puts("NULL");
+        blockProcess(idle_pid, 0);
         return;
     }
     //puts(iter->data.name);
-    puts("El proceso que se desbloqueo fue: ");
-    char buff[256] = {0};
-    uintToBase(iter->data.PID,buff,10);
-    puts(buff);
-    putChar('\n');
     iter->data.BlockID = -1;
     iter->data.reason = NOTHING;
     readyHeader.ready++;
     iter->data.state = Ready;
-            
 }
 void blockCurrent(int id, BlockReason reason)
 {
@@ -256,13 +305,8 @@ void blockCurrent(int id, BlockReason reason)
     else
         push(&blockedHeader,r.data,r.priority,r.tickets);
     _hlt();*/
-    puts("El proceso que se bloqueo fue: ");
-    char buff[256] = {0};
-    uintToBase(readyHeader.current->data.PID,buff,10);
-    puts(buff);
-    putChar('\n');
     //if(readyHeader.ready > 0)
-        readyHeader.ready--;
+    readyHeader.ready--;
     readyHeader.current->data.state = Blocked;
     readyHeader.current->data.BlockID = id;
     readyHeader.current->data.reason = reason;
@@ -272,28 +316,23 @@ void blockCurrent(int id, BlockReason reason)
 }
 int waitPID(int pid)
 {
-    blockCurrent(pid,PID);
+    blockCurrent(pid, PID);
 }
-void unblockProcessByPCB(PCB * process)
+void unblockProcessByPCB(PCB *process)
 {
-    if(process == NULL)
+    if (process == NULL)
         return;
-    puts("El proceso que se desbloqueo fue: ");
-    char buff[256] = {0};
-    uintToBase(process->PID,buff,10);
-    puts(buff);
-    putChar('\n');
-    blockProcess(idle_pid,1);
+    blockProcess(idle_pid, 1);
     process->BlockID = -1;
     process->reason = NOTHING;
-    process->state =Ready;
+    process->state = Ready;
     readyHeader.ready++;
 }
-PCB * getPCB(size_t pid)
+PCB *getPCB(size_t pid)
 {
     elem_t e;
     e.PID = pid;
-    listElem_t * l = get(&readyHeader,e);
+    listElem_t *l = get(&readyHeader, e);
     return &l->data;
 }
 void yield()

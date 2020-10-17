@@ -1,5 +1,4 @@
 #include "standardlib.h"
-extern int calc();
 extern int syswrite(int fd, const char *buff, int bytes);
 extern test_mm();
 extern void test_processes();
@@ -7,15 +6,21 @@ extern void loop();
 extern void test_prio();
 extern void test_sync();
 extern void test_no_sync();
+extern int philosopherTable();
+extern void waitPID(pid);
 void shell()
 {
     //test_no_sync();
-    test_sync();
+    //test_sync();
     printf("\nInitializing shell\n");
     printf("\nType 'help' to see the shell commands list\n");
     //test_mm();
     //test_processes();
     //test_prio();
+    char * argv[] = {"philosopherTable",NULL};
+    philosopherTable();
+    //int p = execv(philosopherTable,1,argv);
+    //waitPID(p);
     char command[256]={0};
     int argsRead, memoryAddress,arg3;
     do{
@@ -63,7 +68,6 @@ void shell()
             else if (strcmp(command,"calc") == 0)
             {
                 char * argv[] = {'calc',NULL};
-                execv(calc,1,argv);
                 printf("sigo aca!\n");
             }
             else if(strcmp(command,"loop") == 0){ 
@@ -73,8 +77,6 @@ void shell()
                 ps();
             }
             else if(strcmp(command,"sem") == 0){
-                syscallSemOpen("mi_sem",1,0);
-                syscallSemOpen("mi_sem",2,1);
                 syscallSemPrint();
             }
             else printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n",command);

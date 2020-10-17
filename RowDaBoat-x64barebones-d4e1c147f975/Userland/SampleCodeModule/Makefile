@@ -16,7 +16,7 @@ $(MODULE): $(SOURCES)
 	$(GCC) $(GCCFLAGS) -T sampleCodeModule.ld _loader.c $(SOURCES) $(SOURCES_LIB) $(OBJECTS_LIB_ASM) -I ../include -o ../$(MODULE)
 
 $(MODULE_GDB): $(SOURCES)
-	$(GCC) $(GCCFLAGS) -g -T sampleCodeModule_gdb.ld _loader.c $(SOURCES) $(SOURCES_LIB) $(OBJECTS_LIB_ASM) -I ../include -o ../$(MODULE_GDB)
+	$(GCC) -g $(GCCFLAGS) -T sampleCodeModule_gdb.ld _loader.c $(SOURCES) $(SOURCES_LIB) $(OBJECTS_LIB_ASM) -I ../include -o ../$(MODULE_GDB)
 
 clean:
 	rm -rf *.o

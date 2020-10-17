@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include "standardlib.h"
-#define TOTAL_PAIR_PROCESSES 2
+#define TOTAL_PAIR_PROCESSES 4
 #define SEM_ID "sem"
 
-int64_t global; //shared memory
+int64_t globalVar; //shared memory
 extern int _exit(int d);
 extern void yield();//VER YIELD
 
@@ -16,12 +16,12 @@ void slowInc(int64_t *p, int64_t inc)
 }
 
 void incWrapper1(){
-    inc(1,1,10);
+    inc(1,1,500);
     _exit(0);
 
 }
 void incWrapper2(){
-    inc(1,-1,10);
+    inc(1,-1,500);
     _exit(0);
 
 }
@@ -40,7 +40,7 @@ void inc(int sem, int value, int N)
     {
         if (sem)
             syscallSemWait(SEM_ID);
-        slowInc(&global, value);
+        slowInc(&globalVar, value);
         if (sem)
             syscallSemPost(SEM_ID);
     }
@@ -48,14 +48,14 @@ void inc(int sem, int value, int N)
     if (sem)
         syscallSemClose(SEM_ID);
 
-    printf("\n========Final value: %d========\n", global);
+    printf("\n========Final value: %d========\n", globalVar);
 }
 
 void test_sync()
 {
     uint64_t i;
 
-    global = 0;
+    globalVar = 0;
 
     printf("CREATING PROCESSES...(WITH SEM)\n");
     char *argv1[] = {"incWrapper1",NULL};
@@ -72,15 +72,15 @@ void test_no_sync()
 {
     uint64_t i;
 
-    global = 0;
+    globalVar = 0;
 
     printf("CREATING PROCESSES...(WITHOUT SEM)\n");
-    char *argv1[] = {"inc","0", "1", "5",NULL};
-    char *argv2[] = {"inc","0", "-1", "5",NULL};
+    char *argv1[] = {"incWrapper1",NULL};
+    char *argv2[] = {"incWrapper2",NULL};
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
     {
-        execv(inc, 4, argv1);
-        execv(inc, 4, argv2);
+        execv(incWrapper1, 1, argv1);
+        execv(incWrapper2, 1, argv2);
     }
     return;
 }
