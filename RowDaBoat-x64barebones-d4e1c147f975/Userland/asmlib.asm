@@ -364,7 +364,7 @@ syscallPipeClose:
 syscallInitProcessWithPipe:
     push rbp
     mov rbp,rsp
-    mov rax,23
+    mov rax,22
     int 80h
     mov rsp,rbp
     pop rbp
@@ -373,7 +373,7 @@ syscallInitProcessWithPipe:
 waitPID:
     push rbp
     mov rbp,rsp
-    mov rax,22
+    mov rax,23
     int 80h
     mov rsp,rbp
     pop rbp

@@ -36,7 +36,7 @@ int syscall_read(int fd, char *buffer, int n)
         }
         buffer[i] = f->read[((f->idxR)++) % BUF_SIZE];
     }
-    unblockProcess(fd,FD_WRITE);
+    unblockProcess(fd, FD_WRITE);
     return i;
 }
 int syscall_write(int fd, const char *buffer, int n)
@@ -51,8 +51,8 @@ int syscall_write(int fd, const char *buffer, int n)
         return -1;
     for (i = 0; i < n; i++)
     {
-        if(i != 0 && i % BUF_SIZE == 0)
-            blockCurrent(fd,FD_WRITE);
+        if (i != 0 && i % BUF_SIZE == 0)
+            blockCurrent(fd, FD_WRITE);
         f->write[((f->idxW)++) % BUF_SIZE] = buffer[i];
 
         // putChar(buffer[i]);
@@ -93,11 +93,12 @@ int pKill(int pid)
         l->data.PID = 0;
         l->data.state = Terminated;
         l->tickets = 0;
+        close(0);
+        close(1);
         realeaseWaiting(l->data.PID);
         return 0;
     }
-    close(0);
-    close(1);
+
     return -1;
 }
 int processes()
@@ -115,14 +116,14 @@ int blockProcess(int pid, int block)
     {
         change = Blocked;
         //if(readyHeader.ready > 0)
-        if(le->data.state != Blocked)
+        if (le->data.state != Blocked)
             readyHeader.ready--;
     }
     else
     {
         change = Ready;
-        if(le->data.state != Ready)
-        readyHeader.ready++;
+        if (le->data.state != Ready)
+            readyHeader.ready++;
     }
     /*Header *toRemove;
     Header *toInsert;
@@ -204,7 +205,7 @@ void printList(Header *head)
     listElem_t *next = head->first;
     char auxBuff[256] = {0};
     // putChar('\n');
-    syscall_write(1,"\n",1);
+    syscall_write(1, "\n", 1);
     while (next != NULL)
     {
         length = strcpy(buffer, next->data.name);
@@ -255,8 +256,8 @@ void printList(Header *head)
         }
         // puts(buffer);
         //syscall_write(1, "\n", 1);
-        length=strcat(buffer,"\n");
-        syscall_write(1,buffer,length);
+        length = strcat(buffer, "\n");
+        syscall_write(1, buffer, length);
         next = next->next;
     }
 }
@@ -362,29 +363,31 @@ void yield()
     readyHeader.current->tickets = 0;
     _int20();
 }
-void realeaseWaiting(int pid){
-    listElem_t * iter = readyHeader.first;
-    while (iter != NULL && (iter->data.BlockID != pid || iter ->data.reason != PID))
+void realeaseWaiting(int pid)
+{
+    listElem_t *iter = readyHeader.first;
+    while (iter != NULL && (iter->data.BlockID != pid || iter->data.reason != PID))
     {
         iter = iter->next;
     }
-    if(iter == NULL)
+    if (iter == NULL)
         return;
     iter->data.state = Ready;
     readyHeader.ready++;
     iter->data.BlockID = -1;
     iter->data.reason = NOTHING;
-    
 }
-int close(int fd){
+int close(int fd)
+{
     PCB *pcb = &readyHeader.current->data;
-    switch(pcb->fds[fd]->type){
-        case PIPE:
-            removeFromPipe(pcb->fds[fd]->id, pcb);
-            break;
-        case STDINOUT:
-            pcb->fds[0] = NULL;
-            pcb->fds[1] = NULL;
-            break;
+    switch (pcb->fds[fd]->type)
+    {
+    case PIPE:
+        removeFromPipe(pcb->fds[fd]->id, pcb);
+        break;
+    case STDINOUT:
+        pcb->fds[0] = NULL;
+        pcb->fds[1] = NULL;
+        break;
     }
 }
