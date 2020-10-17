@@ -1,25 +1,26 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "standardlib.h"
+#include "standardstring.h"
 
 // asumimos fd=1 STDOUT
 extern int syswrite(int fd, const char *buff, int bytes);
 // asumimos fd=0 STDIN
 extern int sysread(int fd, char *buff, int bytes);
-extern void inforeg(uint64_t * regs);
-extern char *processorName(char*);
+extern void inforeg(uint64_t *regs);
+extern char *processorName(char *);
 extern char *processorExtendedName(char *);
 extern int processorModel(void);
 extern int processorFamily(void);
 extern int divExc();
-extern int loadPrgrm(void(*programa)(void));
+extern int loadPrgrm(void (*programa)(void));
 extern int processorTemperature();
 extern unsigned char sysrtc(int);
 extern void invalidOpCode();
-extern int read_mem(uint64_t address, char * buff);
+extern int read_mem(uint64_t address, char *buff);
 extern int sys_execv(void *entry_point, int argc, char *argv[]);
 extern syscallMalloc(size_t size);
-extern syscallFree(void * block);
+extern syscallFree(void *block);
 extern syscallKill(int pid);
 extern void syscallProcesses();
 extern int syscallBlock(int pid, int block);
@@ -32,38 +33,49 @@ extern int syscallSemClose(const char *name);
 extern void syscallSemPrint();
 extern int syscallPipeClose(int fd, const char *name);
 extern int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);
-extern int syscallPipeOpen(int fd[2], const char * name);
-
-void puts(char * c){
+extern int syscallPipeOpen(int fd[2], const char *name);
+extern int wc();
+extern int filter();
+extern int leo();
+extern int escribo();
+extern int _exit(int a);
+void puts(char *c)
+{
     int i = 0;
-    while(c[i]){
+    while (c[i])
+    {
         putchar(c[i++]);
     }
     putchar('\n');
 }
 
-int printf(const char * fmt, ...){
+int printf(const char *fmt, ...)
+{
     va_list arg_param;
     va_start(arg_param, fmt);
     int idxFmt = 0, idxBuffer = 0;
     char buffer[256] = {0};
-    char * sAtFmt;
+    char *sAtFmt;
     int nAtFmt, nAtFmtLenght, idxsAtFmt, fAtFmtLenght;
     double fAtFmt;
-    while(fmt[idxFmt]){
-        if(fmt[idxFmt] != '%'){
+    while (fmt[idxFmt])
+    {
+        if (fmt[idxFmt] != '%')
+        {
             buffer[idxBuffer++] = fmt[idxFmt++];
         }
-        else{
+        else
+        {
             switch (fmt[idxFmt + 1])
             {
             case 'c':
-                buffer[idxBuffer++] = (char) va_arg(arg_param, int);
+                buffer[idxBuffer++] = (char)va_arg(arg_param, int);
                 idxFmt += 2;
                 break;
             case 'd':
                 nAtFmt = va_arg(arg_param, int);
-                if(nAtFmt < 0){
+                if (nAtFmt < 0)
+                {
                     nAtFmt *= -1;
                     buffer[idxBuffer++] = '-';
                 }
@@ -74,9 +86,10 @@ int printf(const char * fmt, ...){
             case 's':
                 sAtFmt = va_arg(arg_param, char *);
                 idxsAtFmt = 0;
-                while(sAtFmt[idxsAtFmt]){
+                while (sAtFmt[idxsAtFmt])
+                {
                     buffer[idxBuffer++] = sAtFmt[idxsAtFmt++];
-                }                
+                }
                 idxFmt += 2;
                 break;
             case 'f':
@@ -91,7 +104,8 @@ int printf(const char * fmt, ...){
             }
         }
     }
-    if(idxBuffer > 0){
+    if (idxBuffer > 0)
+    {
         syswrite(1, buffer, idxBuffer);
     }
     va_end(arg_param);
@@ -106,13 +120,13 @@ int scanf(const char *fmt, ...)
     int c, idxBuffer = 0, argsRead = 0, idxAuxPointer = 0, idxFmt = 0;
     int negative, number, idxNumber, idxFloat, decimal;
     double floatNumber;
-    char * auxPointer;
-    double * doublePointer;
+    char *auxPointer;
+    double *doublePointer;
     while ((c = getchar()) != '\n')
     {
         if (c != '\b')
         {
-            buffer[idxBuffer++] = (char) c;
+            buffer[idxBuffer++] = (char)c;
             //putchar(c);
         }
         else if (idxBuffer > 0)
@@ -127,7 +141,8 @@ int scanf(const char *fmt, ...)
     idxBuffer = 0;
     while (fmt[idxFmt])
     {
-        if(buffer[idxBuffer] == 0) return argsRead;
+        if (buffer[idxBuffer] == 0)
+            return argsRead;
         if (fmt[idxFmt] != '%')
         {
             if (buffer[idxBuffer] != fmt[idxFmt])
@@ -173,11 +188,14 @@ int scanf(const char *fmt, ...)
                     number += nAtBuffer - '0';
                     nAtBuffer = buffer[idxBuffer++];
                 }
-                if(idxNumber == 0) return argsRead;
-                if(negative) number *= -1;
+                if (idxNumber == 0)
+                    return argsRead;
+                if (negative)
+                    number *= -1;
                 *((int *)va_arg(arg_param, int *)) = number;
                 argsRead++;
-                if(buffer[idxBuffer] == 0 && fmt[idxFmt + 2] == 0) return argsRead;
+                if (buffer[idxBuffer] == 0 && fmt[idxFmt + 2] == 0)
+                    return argsRead;
                 idxFmt += 2;
                 idxBuffer--;
                 break;
@@ -185,13 +203,15 @@ int scanf(const char *fmt, ...)
                 auxPointer = va_arg(arg_param, char *);
                 idxAuxPointer = 0;
                 char cAtBuffer = buffer[idxBuffer++];
-                while (cAtBuffer != ' ') 
+                while (cAtBuffer != ' ')
                 {
-                    if(cAtBuffer == 0){
+                    if (cAtBuffer == 0)
+                    {
                         auxPointer[idxAuxPointer] = cAtBuffer;
                         return argsRead + 1;
                     }
-                    else if(cAtBuffer == fmt[idxFmt + 2]){ 
+                    else if (cAtBuffer == fmt[idxFmt + 2])
+                    {
                         break;
                     }
                     auxPointer[idxAuxPointer++] = cAtBuffer;
@@ -208,46 +228,57 @@ int scanf(const char *fmt, ...)
                 floatNumber = 0;
                 decimal = 0;
                 char fAtBuffer = buffer[idxBuffer++];
-                while((fAtBuffer >= '0' && fAtBuffer <= '9') || fAtBuffer == '-' || fAtBuffer == '.'){
-                    if(idxFloat == 0){
+                while ((fAtBuffer >= '0' && fAtBuffer <= '9') || fAtBuffer == '-' || fAtBuffer == '.')
+                {
+                    if (idxFloat == 0)
+                    {
                         idxFloat++;
-                        if(fAtBuffer == '-'){
+                        if (fAtBuffer == '-')
+                        {
                             negative = 1;
                             fAtBuffer = buffer[idxBuffer++];
                             continue;
                         }
                         else
-                            negative = 0;                   
+                            negative = 0;
                     }
-                    if(fAtBuffer == '.'){
+                    if (fAtBuffer == '.')
+                    {
                         decimal = 1;
                         fAtBuffer = buffer[idxBuffer++];
                         continue;
                     }
-                    else if(fAtBuffer == '-' && idxFloat > 0){
+                    else if (fAtBuffer == '-' && idxFloat > 0)
+                    {
                         return argsRead;
                     }
-                    if(!decimal){
+                    if (!decimal)
+                    {
                         floatNumber *= 10;
-                        floatNumber += fAtBuffer -'0';
+                        floatNumber += fAtBuffer - '0';
                     }
-                    else{
+                    else
+                    {
                         decimal *= 10;
-                        floatNumber += ((double) (fAtBuffer - '0')) / ((double) decimal);
+                        floatNumber += ((double)(fAtBuffer - '0')) / ((double)decimal);
                     }
                     fAtBuffer = buffer[idxBuffer++];
                 }
-                if(idxFloat == 0) return argsRead;
-                if(negative) floatNumber *= -1;
+                if (idxFloat == 0)
+                    return argsRead;
+                if (negative)
+                    floatNumber *= -1;
                 doublePointer = va_arg(arg_param, double *);
                 *doublePointer = floatNumber;
                 argsRead++;
-                if(buffer[idxBuffer] == 0 && fmt[idxFmt + 2] == 0) return argsRead;
+                if (buffer[idxBuffer] == 0 && fmt[idxFmt + 2] == 0)
+                    return argsRead;
                 idxFmt += 2;
                 idxBuffer--;
                 break;
             case '%':
-                if(buffer[idxBuffer + 1] == '%'){
+                if (buffer[idxBuffer + 1] == '%')
+                {
                     idxBuffer += 2;
                     idxFmt += 2;
                 }
@@ -354,13 +385,14 @@ void processorInfo()
 
 void printMemoryFromAddress(uint64_t address)
 {
-    char buff[255]={0};
-    if(address < 0){
+    char buff[255] = {0};
+    if (address < 0)
+    {
         printf("\nERROR: %d is not a valid address\n", address);
         return;
     }
     unsigned char *p = (unsigned char *)address;
-    read_mem(address,buff);
+    read_mem(address, buff);
     for (int i = 0; i < 32; i++)
     {
         printf("%d = %d\n", p, buff[i]);
@@ -388,7 +420,7 @@ void printReg()
 {
     uint64_t buffer[20];
     inforeg(buffer);
-    char string[128]={0};
+    char string[128] = {0};
     for (int i = 0; i < 20; i++)
     {
         switch (i)
@@ -456,11 +488,10 @@ void printReg()
         default:
             break;
         }
-        uintToBase(buffer[i],string,16);
+        uintToBase(buffer[i], string, 16);
         printf(string);
         putchar('\n');
     }
-    
 }
 
 void DivZero()
@@ -468,7 +499,7 @@ void DivZero()
     divExc();
 }
 
-int programLoader(void(*program)(void))
+int programLoader(void (*program)(void))
 {
     return loadPrgrm(program);
 }
@@ -479,19 +510,20 @@ void invOpCode()
 }
 void printCoreTemp()
 {
-    printf("\nCore temperature: %d C\n",processorTemperature());
+    printf("\nCore temperature: %d C\n", processorTemperature());
 }
 
-
-void printRtc(){
-    printf("\n%d:%d:%d\n", (sysrtc(4)+21)%24, sysrtc(2), sysrtc(0));
+void printRtc()
+{
+    printf("\n%d:%d:%d\n", (sysrtc(4) + 21) % 24, sysrtc(2), sysrtc(0));
 }
 int execv(void *entry_point, int argc, char *argv[])
 {
-    return sys_execv(entry_point,argc,argv);
+    return sys_execv(entry_point, argc, argv);
 }
 
-void manShell(){
+void manShell()
+{
     printf("\n\n\t\t\t\t\t\t\t\t\t\tSHELL COMMANDS LIST\n\n\n");
     printf("\tinforeg: MUESTRA POR SALIDA ESTANDARD EL VALOR DE LOS\n\tREGISTROS\n\n");
     printf("\t\t");
@@ -510,15 +542,17 @@ void manShell(){
     printf("\n\n\n");
     printf("\tALUMNOS: Quesada, Francisco y Serpe, Octavio\n");
 }
-void * pMalloc(size_t size){
+void *pMalloc(size_t size)
+{
     return syscallMalloc(size);
 }
-void pFree(void * block){
+void pFree(void *block)
+{
     syscallFree(block);
 }
-void * memcpy(void * destination, const void * source, uint64_t length)
+void *memcpy(void *destination, const void *source, uint64_t length)
 {
-	/*
+    /*
 	* memcpy does not support overlapping buffers, so always do it
 	* forwards. (Don't change this without adjusting memmove.)
 	*
@@ -530,54 +564,110 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 	* the compiler to be reasonably intelligent about optimizing
 	* the divides and modulos out. Fortunately, it is.
 	*/
-	uint64_t i;
+    uint64_t i;
 
-	if ((uint64_t)destination % sizeof(uint32_t) == 0 &&
-		(uint64_t)source % sizeof(uint32_t) == 0 &&
-		length % sizeof(uint32_t) == 0)
-	{
-		uint32_t *d = (uint32_t *) destination;
-		const uint32_t *s = (const uint32_t *)source;
+    if ((uint64_t)destination % sizeof(uint32_t) == 0 &&
+        (uint64_t)source % sizeof(uint32_t) == 0 &&
+        length % sizeof(uint32_t) == 0)
+    {
+        uint32_t *d = (uint32_t *)destination;
+        const uint32_t *s = (const uint32_t *)source;
 
-		for (i = 0; i < length / sizeof(uint32_t); i++)
-			d[i] = s[i];
-	}
-	else
-	{
-		uint8_t * d = (uint8_t*)destination;
-		const uint8_t * s = (const uint8_t*)source;
+        for (i = 0; i < length / sizeof(uint32_t); i++)
+            d[i] = s[i];
+    }
+    else
+    {
+        uint8_t *d = (uint8_t *)destination;
+        const uint8_t *s = (const uint8_t *)source;
 
-		for (i = 0; i < length; i++)
-			d[i] = s[i];
-	}
+        for (i = 0; i < length; i++)
+            d[i] = s[i];
+    }
 
-	return destination;
+    return destination;
 }
-int kill(int pid){
+int kill(int pid)
+{
     syscallKill(pid);
 }
 void ps()
 {
     syscallProcesses();
 }
-int block(int pid,int block)
+int block(int pid, int block)
 {
-    if (block >1 || block < 0)
+    if (block > 1 || block < 0)
         return -1;
-    return syscallBlock(pid,block);
+    return syscallBlock(pid, block);
 }
 int myAtoi(char *str)
 {
     puts(str);
     int res = 0;
     int neg = 0;
-    for(int i = 0 ; str[i] != 0 ; i++){
-        if(str[i] == '-'){
+    for (int i = 0; str[i] != 0; i++)
+    {
+        if (str[i] == '-')
+        {
             neg = 1;
             continue;
         }
         res = res * 10 + str[i] - '0';
     }
-    if(neg) res *=-1;
+    if (neg)
+        res *= -1;
     return res;
+}
+
+int initProcessInPipe(const char *p1, const char *pipe, int fd, int mode)
+{
+    if (strcmp(p1, "wc") == 0)
+    {
+        char *argv[2] = {"wc", NULL};
+        syscallInitProcessWithPipe(wc, 1, argv, fd, pipe, mode);
+    }
+    else if (strcmp(p1, "filter") == 0)
+    {
+        char *argv[2] = {"filter", NULL};
+        syscallInitProcessWithPipe(filter, 1, argv, fd, pipe, mode);
+    }
+    else if (strcmp(p1, "escribo") == 0)
+    {
+        char *argv[2] = {"escribo", NULL};
+        printf("escribo process\n");
+        syscallInitProcessWithPipe(escribo, 1, argv, fd, pipe, mode);
+    }
+    else if (strcmp(p1, "leo") == 0)
+    {
+        printf("leo process\n");
+        char *argv[2] = {"leo", NULL};
+        syscallInitProcessWithPipe(filter, 1, argv, fd, pipe, mode);
+    }
+    /*
+    else if(strcmp(p1,"loop") == 0){
+        char *argv[2] = {"loop", NULL};
+        syscallInitProcessWithPipe(loop,1,argv,fd,pipe,mode);
+    }
+    else if(strcmp(p1,"cat") == 0){
+        char *argv[2] = {"cat",NULL};
+        syscallInitProcessWithPipe(cat, 1, argv,fd,pipe,mode);
+    }*/
+    return 1;
+}
+
+int pipe(const char *p1, const char *p2)
+{
+    int fds[2] = {0};
+    syscallPipeOpen(fds, "prueba");//pipe con dos fds 2 lee y 3 escribe
+
+    if (!initProcessInPipe(p1, "prueba", 1, 1))
+    {
+        //aca esta el tema si es built in, devuelve 0 y q hacemos? ejecutamos igual? no hacemos nada?
+    }
+    if (!initProcessInPipe(p2, "prueba", 0, 0))
+    {
+        //idem if superior
+    }
+    return 1;
 }

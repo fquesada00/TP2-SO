@@ -35,4 +35,5 @@ int syscallSemPost(const char *name);
 int syscallSemClose(const char *name);
 int myAtoi(char *str);
 int exit(int a);
+int pipe(const char *p1,const char *p2);
 #endif

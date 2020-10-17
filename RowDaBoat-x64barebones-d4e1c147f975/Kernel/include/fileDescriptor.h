@@ -2,6 +2,10 @@
 #define FD_H
 #define MAX_FD 120
 #define BUF_SIZE 1024
+typedef enum type{
+    STDINOUT,
+    PIPE
+}type;
 typedef struct file{
     char * read;
     char * write;
@@ -9,5 +13,7 @@ typedef struct file{
     int writing;
     int idxR;
     int idxW;
+    type type;
 } file_t;
+
 #endif
