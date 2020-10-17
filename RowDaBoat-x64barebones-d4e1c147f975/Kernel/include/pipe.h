@@ -19,4 +19,5 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char * name,int fd,pipe_t pipe
 int pipeClose(const char *name);
 void pipeCloseFd(int,pipe_t*);
 void printPipe();
+void removeFromPipe(int idx, PCB *element);
 #endif

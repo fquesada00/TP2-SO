@@ -2,7 +2,8 @@
 extern int sysread(int fd, char *buff, int bytes);
 int leo(){
     char buff[256]={0};
+    printf("hola\n");
     sysread(0,buff,15);
-    printf(buff);
+    printf("%s\n",buff);
     _exit(0);
 }

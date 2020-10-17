@@ -39,6 +39,7 @@ extern int filter();
 extern int leo();
 extern int escribo();
 extern int _exit(int a);
+extern void print_pipe();
 void puts(char *c)
 {
     int i = 0;
@@ -635,12 +636,12 @@ int initProcessInPipe(const char *p1, const char *pipe, int fd, int mode)
     else if (strcmp(p1, "escribo") == 0)
     {
         char *argv[2] = {"escribo", NULL};
-        printf("escribo process\n");
+        //printf("escribo process\n");
         syscallInitProcessWithPipe(escribo, 1, argv, fd, pipe, mode);
     }
     else if (strcmp(p1, "leo") == 0)
     {
-        printf("leo process\n");
+        //printf("leo process\n");
         char *argv[2] = {"leo", NULL};
         syscallInitProcessWithPipe(filter, 1, argv, fd, pipe, mode);
     }
@@ -669,5 +670,7 @@ int pipe(const char *p1, const char *p2)
     {
         //idem if superior
     }
+    
     return 1;
 }
+

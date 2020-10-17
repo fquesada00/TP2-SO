@@ -13,6 +13,7 @@ typedef struct file{
     int writing;
     int idxR;
     int idxW;
+    int id;
     type type;
 } file_t;
 

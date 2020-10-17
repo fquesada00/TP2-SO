@@ -7,6 +7,7 @@
 #include "naiveConsole.h"
 #include "standardstring.h"
 #include "fileDescriptor.h"
+#include "pipe.h"
 extern void _hlt();
 extern void _cli();
 extern void _hltAndCli();
@@ -95,6 +96,8 @@ int pKill(int pid)
         realeaseWaiting(l->data.PID);
         return 0;
     }
+    close(0);
+    close(1);
     return -1;
 }
 int processes()
@@ -369,4 +372,16 @@ void realeaseWaiting(int pid){
     iter->data.BlockID = -1;
     iter->data.reason = NOTHING;
     
+}
+int close(int fd){
+    PCB *pcb = &readyHeader.current->data;
+    switch(pcb->fds[fd]->type){
+        case PIPE:
+            removeFromPipe(pcb->fds[fd]->id, pcb);
+            break;
+        case STDINOUT:
+            pcb->fds[0] = NULL;
+            pcb->fds[1] = NULL;
+            break;
+    }
 }

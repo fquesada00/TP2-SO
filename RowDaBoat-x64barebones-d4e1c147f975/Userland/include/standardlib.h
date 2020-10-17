@@ -35,5 +35,14 @@ int syscallSemPost(const char *name);
 int syscallSemClose(const char *name);
 int myAtoi(char *str);
 int exit(int a);
-int pipe(const char *p1,const char *p2);
+int pipe(const char *p1, const char *p2);
+int syscallPipeClose(int fd, const char *name);
+int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);
+int syscallPipeOpen(int fd[2], const char *name);
+int wc();
+int filter();
+int leo();
+int escribo();
+int _exit(int a);
+void print_pipe();
 #endif

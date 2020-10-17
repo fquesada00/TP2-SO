@@ -9,9 +9,13 @@ void init_fds(){
     stdin->write = stdin->read;
     stdin->idxR = 0;
     stdin->idxW = 0;
+    stdin->id = 0;
+    stdin->type = STDINOUT;
     stdout = pMalloc(sizeof(file_t));
     stdout->read = pMalloc(sizeof(char)*BUF_SIZE);
     stdout->write = stdout->read;
     stdout->idxR = 0;
     stdout->idxW = 0;
+    stdout->id = 1;
+    stdout->type = STDINOUT;
 }

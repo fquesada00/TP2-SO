@@ -8,8 +8,6 @@ extern void test_sync();
 extern void test_no_sync();
 extern int philosopherTable();
 extern void waitPID(pid);
-extern int leo();
-extern int escribo();
 extern void waitPID(int PID);
 void shell()
 {
@@ -41,8 +39,8 @@ void shell()
                 execv(escribo, 1, argv10);
             else if (strcmp(command, "leo") == 0)
             {
-                
-                waitPID(execv(leo, 1, argv11));
+
+                execv(leo, 1, argv11);
             }
 
             else if (strcmp(command, "cpuInfo") == 0)
@@ -106,6 +104,10 @@ void shell()
             else if (strcmp(command, "sem") == 0)
             {
                 syscallSemPrint();
+            }
+            else if (strcmp(command, "pipe") == 0)
+            {
+                print_pipe();
             }
             else
                 printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n", command);

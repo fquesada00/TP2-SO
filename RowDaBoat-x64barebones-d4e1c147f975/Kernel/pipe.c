@@ -39,7 +39,7 @@ int pipeOpen(int fds[2], const char *name)
     fd1->writing = 0;
     fd1->idxW = 0;
     fd1->idxR = 0;
-    //fd1->type = PIPE;
+    fd1->type = PIPE;
     readyHeader.current->data.fds[j] = fd1;
     while (j < MAX_FD && readyHeader.current->data.fds[j] != NULL)
     {
@@ -55,11 +55,12 @@ int pipeOpen(int fds[2], const char *name)
     fd2->reading = 0;
     fd2->idxW = 0;
     fd2->idxR = 0;
-    //fd2->type = PIPE;
+    fd2->type = PIPE;
     readyHeader.current->data.fds[j] = fd2;
     p.fd[0] = fd1;
     p.fd[1] = fd2;
     pipes[i] = p;
+    add(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i].openedPID);
     return 0;
 }
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode) //mode en r9
@@ -86,7 +87,7 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t pip
 {
     if (fd > MAX_FD || fd < 0)
         return -1;
-    PCB e = {0};
+    elem_t e = {0};
     e.PID = pid;
     e.rsp = rsp - sizeof(Swapping);
     e.StackBase = rsp;
@@ -114,7 +115,8 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t pip
     e.state = Ready;
     readyHeader.ready++;
     strcpy(e.name, name);
-    add(MAX_BLOCKED_PID, &e, pipe.openedPID);
+    PCB aux = (PCB) e;
+    add(MAX_BLOCKED_PID, &aux, pipe.openedPID);
     push(&readyHeader, e, 5, 5);
 }
 
@@ -155,7 +157,7 @@ int pipeClose(const char *name)
     }
     return 1;
 }
-void printPipes()
+void printPipe()
 {
     int i = 0, auxLength = 0;
     char titles[512] = {0};
@@ -186,6 +188,9 @@ void printPipes()
         i++;
     }
     syscall_write(1, "\n", 1);
+}
+void removeFromPipe(int idx, PCB *element){
+    remove(MAX_BLOCKED_PID,element,pipes[idx].openedPID);
 }
 /*
 int calculateIdx(int idx){

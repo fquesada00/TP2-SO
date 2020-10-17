@@ -47,6 +47,7 @@ EXTERN pipeClose
 EXTERN waitPID
 EXTERN yield
 EXTERN exit
+EXTERN printPipe
 
 SECTION .text
 
@@ -281,6 +282,8 @@ _syscallHandler:
 	je .yield
 	cmp rax,25
 	je .exit
+	cmp rax,26
+	je .print_pipe
 	jmp .end
 .read:
 	push rdi
@@ -374,6 +377,9 @@ _syscallHandler:
 	jmp .end
 .exit:
 	call exit
+	jmp .end
+.print_pipe:
+	call printPipe
 	jmp .end
 .end:
 	popStateNoRAX
