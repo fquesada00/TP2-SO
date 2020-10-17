@@ -25,6 +25,7 @@ typedef struct{
     listElem_t * current;
     int size;
     int ready;
+    int foreground;
 }Header;
 
 void initList(Header * head,elem_t firstNode, int p, int ticket);

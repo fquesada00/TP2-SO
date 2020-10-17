@@ -12,7 +12,8 @@ typedef enum State
 } State;
 typedef enum BlockReason
 {
-    FD,
+    FD_READ,
+    FD_WRITE,
     PID,
     SEM,
     NOTHING
@@ -28,6 +29,8 @@ typedef struct PCB
     BlockReason reason;
     int BlockID;
     State state;
+    char ** argv;
+    int argc;
 } PCB;
 
 typedef struct Swapping
@@ -55,5 +58,5 @@ typedef struct Swapping
 } Swapping;
 int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp);
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp);
-void init_PCB(uint64_t rsp, int pid, char *name);
+void init_PCB(uint64_t rsp, int pid, char **args, int argcount);
 #endif

@@ -7,7 +7,7 @@ extern void test_prio();
 extern void test_sync();
 extern void test_no_sync();
 extern int philosopherTable();
-extern void waitPID(pid);
+extern void waitPID(int pid);
 void shell()
 {
     //test_no_sync();
@@ -18,7 +18,7 @@ void shell()
     //test_processes();
     //test_prio();
     char * argv[] = {"philosopherTable",NULL};
-    philosopherTable();
+    //philosopherTable();
     //int p = execv(philosopherTable,1,argv);
     //waitPID(p);
     char command[256]={0};
