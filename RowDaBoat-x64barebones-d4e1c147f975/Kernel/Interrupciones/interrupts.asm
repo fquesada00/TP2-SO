@@ -273,9 +273,9 @@ _syscallHandler:
 	je .create_pipe
 	cmp rax,21
 	je .close_pipe
-	cmp rax,22
-	je .wait
 	cmp rax,23
+	je .wait
+	cmp rax,22
 	je .create_process_with_pipe
 	cmp rax,24
 	je .yield

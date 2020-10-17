@@ -42,7 +42,8 @@ void shell()
             else if (strcmp(command, "leo") == 0)
             {
                 
-                waitPID(execv(leo, 1, argv11));
+                int a = execv(leo, 1, argv11);
+                waitPID(a);
             }
 
             else if (strcmp(command, "cpuInfo") == 0)

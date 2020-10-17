@@ -106,16 +106,19 @@ int blockProcess(int pid, int block)
     elem_t e;
     e.PID = pid;
     listElem_t *le;
+    le = get(&readyHeader, e);
     State change;
     if (block)
     {
         change = Blocked;
         //if(readyHeader.ready > 0)
-        readyHeader.ready--;
+        if(le->data.state != Blocked)
+            readyHeader.ready--;
     }
     else
     {
         change = Ready;
+        if(le->data.state != Ready)
         readyHeader.ready++;
     }
     /*Header *toRemove;
@@ -146,7 +149,7 @@ int blockProcess(int pid, int block)
         initList(toInsert, le.data, le.priority, le.tickets);
     else
         push(toInsert, le.data, le.priority, le.tickets);*/
-    if ((le = get(&readyHeader, e)) != NULL)
+    if (le != NULL)
     {
         if (le->data.state != Terminated)
         {
@@ -288,7 +291,7 @@ void unblockProcess(int id, BlockReason reason)
     listElem_t *iter = readyHeader.first;
     if (idle_pid != 0)
         blockProcess(idle_pid, 1);
-    while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id) && iter->data.state != Blocked)
+    while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id))
     {
 
         iter = iter->next;
@@ -296,7 +299,7 @@ void unblockProcess(int id, BlockReason reason)
     if (iter == NULL)
     {
         //puts("NULL");
-        // if (idle_pid != 0)
+        // if (idle_pid != 0 && readyHeader.ready == 0)
         //     blockProcess(idle_pid, 0);
         return;
     }
