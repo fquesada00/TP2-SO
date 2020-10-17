@@ -42,15 +42,15 @@ PCB *removePCB(int *startIdx, int dim, PCB *array[])
 int isPresent(int startIdx, int dim, PCB *pcb, PCB *array[])
 {
     if (array[startIdx] == NULL)
-        return 1;
+        return 0;
     for (int i = 0; i < dim; i++)
     {
         if (pcb == array[i])
         {
-            return 0;
+            return 1;
         }
     }
-    return 1;
+    return 0;
 }
 PCB *peekPCB(int startIdx, PCB *array[])
 {

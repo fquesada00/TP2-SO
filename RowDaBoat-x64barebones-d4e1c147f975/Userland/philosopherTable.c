@@ -16,54 +16,103 @@ int filPID[CANT_FILOSOFOS_MAX];
 
 extern void printTableState();
 
+// int philosopherTable()
+// {
+    
+//     syscallSemOpen("mutex", 1,0); 
+//     char * argv[] = {"filosofo",NULL};
+//     int aux;
+//     for(int i = 0; i< INITIAL;i++) {
+//         syscallSemOpen(S[i], 0, 0);
+//     }
+//     for(int i = 0; i< INITIAL;i++) {
+//         filPID[i] = execv(filosofo,1,argv); //uso aux porque no se si num se me aumenta
+//     }
+
+//     while(1) {  
+//         char a = getchar();
+//         if(a == 'a') {
+//             if(num < CANT_FILOSOFOS_MAX){
+//                 aux = num;
+//                 syscallSemOpen(S[num], 0, 0);
+//                 filPID[aux] = execv(filosofo,1,argv); //uso aux porque no se si num se me aumenta
+//             }
+//             else
+//                 printf("Creo que si traes a alguien mas que tiene una crisis existencial nos suicidamos los 20");
+//         }
+//         else if(a == 'r') {
+//             if(num > INITIAL) {
+//                 syscallSemWait("mutex");
+//                 kill(filPID[--num]);
+//                 table[num] = 0;
+//                 syscallSemClose(S[num]);
+//                 syscallSemPost("mutex");    
+//             }
+//             else
+//                 printf("Porfavor no me dejes solo");
+//         }
+//         else if(a == '\n'){
+//             printTableState();
+
+//         }            
+//     }
+//     for(int i = 0; i< num;i++) {
+//         syscallSemClose(S[i]);
+//         syscallSemWait("mutex");
+//         kill(filPID[i]);
+//         table[i] = 0;
+//         syscallSemClose(S[i]);
+//         syscallSemPost("mutex");
+//     }
+//     syscallSemClose("mutex");
+//     return;
+// }
+
 int philosopherTable()
 {
-    
-    syscallSemOpen("mutex", 1,0); 
-    char * argv[] = {"filosofo",NULL};
-    int aux;
-    for(int i = 0; i< INITIAL;i++) {
+    syscallSemOpen("mutex", 1, 0);
+    //sem_open("&mutex", 1,0); //ni idea como va
+
+    for (int i = 0; i < INITIAL; i++)
+    {
         syscallSemOpen(S[i], 0, 0);
     }
-    for(int i = 0; i< INITIAL;i++) {
-        filPID[i] = execv(filosofo,1,argv); //uso aux porque no se si num se me aumenta
-    }
+    //sem_open(&s[i], 0, 0);
+    char * argv[] = {"filosofo",NULL};
+    for (int i = 0; i < INITIAL; i++)
+        filPID[i] = execv(filosofo,1,argv);
 
-    while(1) {  
+    while (1)
+    {
         char a = getchar();
-        if(a == 'a') {
-            if(num < CANT_FILOSOFOS_MAX){
-                aux = num;
-                syscallSemOpen(S[num], 0, 0);
-                filPID[aux] = execv(filosofo,1,argv); //uso aux porque no se si num se me aumenta
+        if (a == 'a')
+        {
+            if (num < CANT_FILOSOFOS_MAX)
+            {
+                int aux = num;
+                syscallSemOpen(S[aux], 0, 0);
+                filPID[num] = execv(filosofo,1,argv);
             }
             else
                 printf("Creo que si traes a alguien mas que tiene una crisis existencial nos suicidamos los 20");
         }
-        else if(a == 'r') {
-            if(num > INITIAL) {
+        else if (a == 'r')
+        {
+            if (num > INITIAL)
+            {
+                syscallSemWait(S[num-1]);
                 syscallSemWait("mutex");
                 kill(filPID[--num]);
                 table[num] = 0;
                 syscallSemClose(S[num]);
-                syscallSemPost("mutex");    
+                syscallSemClose("mutex");
             }
             else
                 printf("Porfavor no me dejes solo");
         }
-        else if(a == '\n'){
+        else if (a == '\n')
+        {
             printTableState();
-
-        }            
-    }
-    for(int i = 0; i< num;i++) {
-        syscallSemClose(S[i]);
-        syscallSemWait("mutex");
-        kill(filPID[i]);
-        table[i] = 0;
-        syscallSemClose(S[i]);
-        syscallSemPost("mutex");
-    }
-    syscallSemClose("mutex");
-    return;
+        }
+    }        
 }

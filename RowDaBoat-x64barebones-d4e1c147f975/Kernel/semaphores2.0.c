@@ -37,6 +37,7 @@ int sem_open(const char *name, size_t value, char created)
                 acquire(&semaphores[i]);
                 if (isPresent(semaphores[i].idxOpenedPID, MAX_BLOCKED_PID, &readyHeader.current->data, semaphores[i].openPID))
                 {
+                    release(&semaphores[i]);
                     return 1;
                 }
                 add(MAX_BLOCKED_PID, &readyHeader.current->data, semaphores[i].openPID);
