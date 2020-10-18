@@ -110,6 +110,12 @@ void shell()
             {
                 print_pipe();
             }
+            else if (strcmp(command, "filter") == 0)
+            {
+                char *argvLoop[] = {"filter", NULL};
+                
+                waitPID(execv(filter, 1, argvLoop,1));
+            }
             else
                 printf("\n'%s' is not a valid command\nType 'help' to see the shell commands list\n", command);
         }

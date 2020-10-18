@@ -37,7 +37,7 @@ int myAtoi(char *str);
 int exit(int a);
 int pipe(const char *p1, const char *p2);
 int syscallPipeClose(int fd[2], const char *name);
-int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);
+int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode, int fg);
 int syscallPipeOpen(int fd[2], const char *name);
 int wc();
 int filter();

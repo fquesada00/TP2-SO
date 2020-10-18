@@ -16,8 +16,8 @@ typedef struct pipe{
     int idxW;
 }pipe_t;
 int pipeOpen(int fd[2], const char *name);
-int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);
-int init_PCBwithPipe(uint64_t rsp, int pid, const char * name,int fd,pipe_t *pipe,int mode);
+int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode, int fg);
+int init_PCBwithPipe(uint64_t rsp, int pid, const char * name,int fd,pipe_t *pipe,int mode, int fg);
 int pipeClose(int fds[2],const char *name);
 void pipeCloseFd(int,pipe_t*);
 void printPipe();

@@ -68,7 +68,7 @@ int pipeOpen(int fds[2], const char *name)
     add(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i].openedPID);
     return 0;
 }
-int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode) //mode en r9
+int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode, int fg) //mode en r9
 {
     uint64_t rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
     if (rsp != NULL)
@@ -86,12 +86,12 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
         }
         if (i == MAX_PIPE)
             return -1;
-        init_PCBwithPipe(rsp, pid, argv[0], fd, &pipes[i], mode);
+        init_PCBwithPipe(rsp, pid, argv[0], fd, &pipes[i], mode, fg);
         return pid;
     }
     return -1;
 }
-int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode)
+int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode, int fg)
 {
     if (fd > MAX_FD || fd < 0)
         return -1;
@@ -100,8 +100,12 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pi
     e.rsp = rsp - sizeof(Swapping);
     e.StackBase = rsp;
     e.privilege = 5;
-    e.fds[0] = stdin;
-    stdin->reading++;
+    e.fg = fg;
+    if (fg)
+    {
+        e.fds[0] = stdin;
+        stdin->reading++;
+    }
     e.fds[1] = stdout;
     stdout->writing++;
     e.BlockID = -1;
@@ -110,7 +114,7 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pi
     {
         if (mode)
             e.fds[fd]->writing--;
-        else
+        else if(fg)
             e.fds[fd]->reading--;
     }
     e.fds[fd] = pipe->fd[mode];

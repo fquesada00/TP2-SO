@@ -32,7 +32,7 @@ extern int syscallSemPost(const char *name);
 extern int syscallSemClose(const char *name);
 extern void syscallSemPrint();
 extern int syscallPipeClose(int fds[2], const char *name);
-extern int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);
+extern int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode, int fg);
 extern int syscallPipeOpen(int fd[2], const char *name);
 extern int wc();
 extern int filter();
@@ -40,6 +40,7 @@ extern int leo();
 extern int escribo();
 extern int _exit(int a);
 extern void print_pipe();
+extern int waitPID(int pid);
 void puts(char *c)
 {
     int i = 0;
@@ -620,33 +621,33 @@ int myAtoi(char *str)
     return res;
 }
 
-int initProcessInPipe(const char *p1, const char *pipe, int fd, int mode)
+int initProcessInPipe(const char *p1, const char *pipe, int fd, int mode, int fg)
 {
     if (strcmp(p1, "wc") == 0)
     {
         char *argv[2] = {"wc", NULL};
-        syscallInitProcessWithPipe(wc, 1, argv, fd, pipe, mode);
+        return syscallInitProcessWithPipe(wc, 1, argv, fd, pipe, mode,fg);
     }
     else if (strcmp(p1, "filter") == 0)
     {
         char *argv[2] = {"filter", NULL};
-        syscallInitProcessWithPipe(filter, 1, argv, fd, pipe, mode);
+        return syscallInitProcessWithPipe(filter, 1, argv, fd, pipe, mode,fg);
     }
     else if (strcmp(p1, "escribo") == 0)
     {
         char *argv[2] = {"escribo", NULL};
         //printf("escribo process\n");
-        syscallInitProcessWithPipe(escribo, 1, argv, fd, pipe, mode);
+        return syscallInitProcessWithPipe(escribo, 1, argv, fd, pipe, mode,fg);
     }
     else if (strcmp(p1, "leo") == 0)
     {
         //printf("leo process\n");
         char *argv[2] = {"leo", NULL};
-        syscallInitProcessWithPipe(leo, 1, argv, fd, pipe, mode);
+        return syscallInitProcessWithPipe(leo, 1, argv, fd, pipe, mode,fg);
     }
     else if(strcmp(p1,"loop") == 0){
         char *argv[2] = {"loop", NULL};
-        syscallInitProcessWithPipe(loop,1,argv,fd,pipe,mode);
+        return syscallInitProcessWithPipe(loop,1,argv,fd,pipe,mode,fg);
     }/*
     else if(strcmp(p1,"cat") == 0){
         char *argv[2] = {"cat",NULL};
@@ -659,15 +660,16 @@ int pipe(const char *p1, const char *p2)
 {
     int fds[2] = {0};
     syscallPipeOpen(fds, "prueba");//pipe con dos fds 2 lee y 3 escribe
-
-    if (!initProcessInPipe(p1, "prueba", 1, 1))
+    int fg;
+    if (!(fg = initProcessInPipe(p1, "prueba", 1, 1,1)))
     {
         //aca esta el tema si es built in, devuelve 0 y q hacemos? ejecutamos igual? no hacemos nada?
     }
-    if (!initProcessInPipe(p2, "prueba", 0, 0))
+    if (!initProcessInPipe(p2, "prueba", 0, 0,0))
     {
         //idem if superior
     }
+    waitPID(fg);
     syscallPipeClose(fds,"prueba");
     return 1;
 }

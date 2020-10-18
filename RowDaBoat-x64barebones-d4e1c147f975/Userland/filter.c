@@ -1,3 +1,4 @@
+#include "standardlib.h"
 #define EOF -1
 extern syswrite(int fd, char * buff, int size);
 int filter(int argc, char **argv)
@@ -7,13 +8,9 @@ int filter(int argc, char **argv)
     char writeB[256] = {0};
     while((c = getchar()) != EOF){
         if(c != 'a' && c != 'e' && c != 'i' && c != 'o' && c != 'u'){
-            writeB[idx++] = c;
-            if(c == '\n'){
-                writeB[idx++] = '\0';
-                syswrite(1,writeB,idx);
-                idx = 0;
-            }
+            writeB[0] = c;
+            syswrite(1,writeB,1);
         }
     }
-    syswrite(1,writeB,idx);
+    _exit(0);
 }
