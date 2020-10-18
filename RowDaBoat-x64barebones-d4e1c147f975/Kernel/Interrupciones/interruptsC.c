@@ -36,6 +36,8 @@ int syscall_read(int fd, char *buffer, int n)
         }
         buffer[i] = f->read[((f->idxR)++) % BUF_SIZE];
     }
+    //if (f->type == PIPE)  puts("LEI EN PIPE");
+
     unblockProcess(fd, FD_WRITE);
     return i;
 }
@@ -58,6 +60,7 @@ int syscall_write(int fd, const char *buffer, int n)
         // putChar(buffer[i]);
     }
     //f->write[((f->idxW)++)%BUF_SIZE] = 0;
+    //if (f->type == PIPE)   puts("ESCRIBI EN PIPE");
     unblockProcess(fd, FD_READ);
     return i;
 }
@@ -93,8 +96,8 @@ int pKill(int pid)
         l->data.PID = 0;
         l->data.state = Terminated;
         l->tickets = 0;
-        close(0);
-        close(1);
+        closePID(pid, 0);
+        closePID(pid, 1);
         realeaseWaiting(l->data.PID);
         return 0;
     }
@@ -285,6 +288,8 @@ int exit(int status)
     readyHeader.current->data.state = Terminated;
     //if(readyHeader.ready > 0)
     readyHeader.current->tickets = 0;
+    closeCurrentProcess(0);
+    closeCurrentProcess(1);
     realeaseWaiting(readyHeader.current->data.PID);
     _int20();
     puts("=========================NUNCA LLEGUE========================");
@@ -377,9 +382,24 @@ void realeaseWaiting(int pid)
     iter->data.BlockID = -1;
     iter->data.reason = NOTHING;
 }
-int close(int fd)
+void closeCurrentProcess(int fd)
 {
     PCB *pcb = &readyHeader.current->data;
+    switch (pcb->fds[fd]->type)
+    {
+    case PIPE:
+        removeFromPipe(pcb->fds[fd]->id, pcb);
+        break;
+    case STDINOUT:
+        pcb->fds[0] = NULL;
+        pcb->fds[1] = NULL;
+        break;
+    }
+}
+
+void closePID(size_t pid, int fd)
+{
+    PCB *pcb = getPCB(pid);
     switch (pcb->fds[fd]->type)
     {
     case PIPE:

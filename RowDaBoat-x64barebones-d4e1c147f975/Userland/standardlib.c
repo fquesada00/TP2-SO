@@ -643,7 +643,7 @@ int initProcessInPipe(const char *p1, const char *pipe, int fd, int mode)
     {
         //printf("leo process\n");
         char *argv[2] = {"leo", NULL};
-        syscallInitProcessWithPipe(filter, 1, argv, fd, pipe, mode);
+        syscallInitProcessWithPipe(leo, 1, argv, fd, pipe, mode);
     }
     /*
     else if(strcmp(p1,"loop") == 0){
@@ -670,7 +670,7 @@ int pipe(const char *p1, const char *p2)
     {
         //idem if superior
     }
-    
+
     return 1;
 }
 

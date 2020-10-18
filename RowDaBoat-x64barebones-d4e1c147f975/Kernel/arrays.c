@@ -8,7 +8,8 @@ void printArray(int dim, PCB *array[])
     {
         if (array[i] != NULL)
         {
-            syscall_write(1, buffer, uintToBase(array[i]->PID, buffer, 10));
+            int length = uintToBase(array[i]->PID, buffer, 10);
+            syscall_write(1, buffer, length);
             if(i == (dim - 1)) continue;
             syscall_write(1,", ", 2);
         }
