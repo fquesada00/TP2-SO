@@ -8,6 +8,7 @@
 #include "standardstring.h"
 #include "fileDescriptor.h"
 #include "pipe.h"
+#define EOF -1
 extern void _hlt();
 extern void _cli();
 extern void _hltAndCli();
@@ -290,6 +291,7 @@ int exit(int status)
     //closeCurrentProcess(0);
     //closeCurrentProcess(1);
     realeaseWaiting(readyHeader.current->data.PID);
+
     _int20();
     puts("=========================NUNCA LLEGUE========================");
     return 1;
@@ -383,6 +385,12 @@ void realeaseWaiting(int pid)
 void closeCurrentProcess(int fd)
 {
     PCB *pcb = &readyHeader.current->data;
+    if(pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL){
+        char buffer[2] = {0};
+        buffer[0] = EOF;
+        buffer[1] = '\0';
+        syscall_write(fd,buffer,1);
+    }
     switch (pcb->fds[fd]->type)
     {
     case PIPE:
