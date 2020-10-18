@@ -6,26 +6,28 @@
 #include "include/arrayCircular.h"
 #include "include/arrayPCBOrdenN.h"
 
-pipe_t *pipes[MAX_PIPE] = {0};
+pipe_t pipes[MAX_PIPE] = {0};
 extern Header readyHeader;
 extern uint64_t stackSize;
 extern int currentPIDs;
 extern file_t *stdin;
 extern file_t *stdout;
 extern int idFds;
+extern PCB *getPCB(size_t pid);
 
 int pipeOpen(int fds[2], const char *name)
 {
     int i = 0;
-    while (i < MAX_PIPE && pipes[i] != NULL && strcmp(pipes[i]->name, "") != 0)
+    while (i < MAX_PIPE && strcmp(pipes[i].name, "") != 0)
     {
         i++;
     }
     if (i == MAX_PIPE)
         return -1;
-    pipes[i] = pMalloc(sizeof(pipe_t));
-    pipes[i]->buff = pMalloc(BUF_SIZE);
-    strcpy(pipes[i]->name, name);
+    pipe_t p = {0};
+    pipes[i] = p;
+    pipes[i].buff = pMalloc(BUF_SIZE);
+    strcpy(pipes[i].name, name);
     int j = 0;
     while (j < MAX_FD && readyHeader.current->data.fds[j] != NULL)
     {
@@ -35,12 +37,12 @@ int pipeOpen(int fds[2], const char *name)
         return -1;
     fds[0] = j;
     file_t *fd1 = pMalloc(sizeof(file_t));
-    fd1->read = pipes[i]->buff;
+    fd1->read = pipes[i].buff;
     fd1->reading = 1;
     fd1->write = NULL;
     fd1->writing = 0;
-    fd1->idxWrite = &pipes[i]->idxW;
-    fd1->idxRead = &pipes[i]->idxR;
+    fd1->idxWrite = &pipes[i].idxW;
+    fd1->idxRead = &pipes[i].idxR;
     fd1->type = PIPE;
     fd1->id = idFds;
     readyHeader.current->data.fds[j] = fd1;
@@ -52,18 +54,21 @@ int pipeOpen(int fds[2], const char *name)
         return -1;
     fds[1] = j;
     file_t *fd2 = pMalloc(sizeof(file_t));
-    fd2->write = pipes[i]->buff;
+    fd2->write = pipes[i].buff;
     fd2->writing = 1;
     fd2->read = NULL;
     fd2->reading = 0;
-    fd2->idxWrite = &pipes[i]->idxW;
-    fd2->idxRead = &pipes[i]->idxR;
+    fd2->idxWrite = &pipes[i].idxW;
+    fd2->idxRead = &pipes[i].idxR;
     fd2->type = PIPE;
     fd2->id = idFds++;
     readyHeader.current->data.fds[j] = fd2;
-    pipes[i]->fd[0] = fd1;
-    pipes[i]->fd[1] = fd2;
-    add(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i]->openedPID);
+    pipes[i].fd[0] = fd1;
+    pipes[i].fd[1] = fd2;
+    add(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i].openedPID);
+    puts("VOY A IMPRIMIR = ");
+    printArray(MAX_BLOCKED_PID, pipes[i].openedPID);
+    putChar('\n');
     return 0;
 }
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode) //mode en r9
@@ -77,14 +82,14 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
         int i = 0;
         for (; i < MAX_PIPE; i++)
         {
-            if (pipes[i] != NULL && strcmp(pipes[i]->name, pipe) == 0)
+            if (strcmp(pipes[i].name, pipe) == 0)
             {
                 break;
             }
         }
         if (i == MAX_PIPE)
             return -1;
-        init_PCBwithPipe(rsp, pid, argv[0], fd, pipes[i], mode);
+        init_PCBwithPipe(rsp, pid, argv[0], fd, &pipes[i], mode);
         return pid;
     }
     return -1;
@@ -121,10 +126,11 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pi
     e.state = Ready;
     readyHeader.ready++;
     strcpy(e.name, name);
-    PCB aux = (PCB)e;
-    add(MAX_BLOCKED_PID, &aux, pipe->openedPID);
-    //printArray(MAX_BLOCKED_PID,pipe->openedPID);
+    // puts("IMPRIMO = ");
+    // printArray(MAX_BLOCKED_PID,pipe.openedPID);
     push(&readyHeader, e, 5, 5);
+    PCB *insert = getPCB(e.PID);
+    add(MAX_BLOCKED_PID, insert, pipe->openedPID);
 }
 
 void pipeCloseFd(int fdNum, pipe_t *pipe)
@@ -134,22 +140,27 @@ void pipeCloseFd(int fdNum, pipe_t *pipe)
         if (fdNum && !(--(pipe->fd[fdNum]->writing)))
         {
             pFree(pipe->fd[fdNum]);
-            pipe->fd[fdNum] = NULL;
+            //pipe->fd[fdNum] = NULL;
         }
         else if (!fdNum && !(--(pipe->fd[fdNum]->reading)))
         {
             pFree(pipe->fd[fdNum]);
-            pipe->fd[fdNum] = NULL;
+            //pipe->fd[fdNum] = NULL;
         }
+    }
+    if (pipe->fd[0]->reading == 0 && pipe->fd[1]->writing == 0)
+    {
+        pipe_t p = {0};
+        *pipe = p;
     }
 }
 
-int pipeClose(const char *name)
+int pipeClose(int fds[2], const char *name)
 {
     int i = 0;
     for (; i < MAX_PIPE; i++)
     {
-        if (pipes[i] != NULL && strcmp(pipes[i]->name, name) == 0)
+        if (strcmp(pipes[i].name, name) == 0)
         {
             break;
         }
@@ -160,17 +171,18 @@ int pipeClose(const char *name)
     }
     pipeCloseFd(0, &pipes[i]);
     pipeCloseFd(1, &pipes[i]);
-    remove(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i]->openedPID);
-    if (pipes[i]->fd[1] == NULL && pipes[i]->fd[0] == NULL && isEmptyArray(MAX_BLOCKED_PID, pipes[i]->openedPID))
+    remove(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i].openedPID);
+    if (pipes[i].fd[1] == NULL && pipes[i].fd[0] == NULL && isEmptyArray(MAX_BLOCKED_PID, pipes[i].openedPID))
     {
-        strcpy(pipes[i]->name, "");
-        pFree(pipes[i]->buff);
-        pipes[i]->buff = NULL;
-        pFree(pipes[i]);
-        pipes[i] = NULL;
+        strcpy(pipes[i].name, "");
+        pFree(pipes[i].buff);
+        pipes[i].buff = NULL;
     }
+    readyHeader.current->data.fds[fds[0]] = NULL;
+    readyHeader.current->data.fds[fds[1]] = NULL;
     return 1;
 }
+
 void printPipe()
 {
     int i = 0, auxLength = 0;
@@ -178,34 +190,61 @@ void printPipe()
     char auxBuff[256] = {0};
     while (i < MAX_PIPE)
     {
-        if (pipes[i] != NULL && strcmp(pipes[i]->name, "") != 0)
+        if (strcmp(pipes[i].name, "") != 0)
         {
             strcpy(titles, "NAME = ");
-            auxLength = strcat(titles, pipes[i]->name);
+            auxLength = strcat(titles, pipes[i].name);
             syscall_write(1, titles, auxLength);
             syscall_write(1, " ; ", 3);
             strcpy(titles, "READING = ");
-            uintToBase(pipes[i]->fd[0]->reading, auxBuff, 10);
+            uintToBase(pipes[i].fd[0]->reading, auxBuff, 10);
             auxLength = strcat(titles, auxBuff);
             syscall_write(1, titles, auxLength);
             syscall_write(1, " ; ", 3);
             strcpy(titles, "WRITING = ");
-            uintToBase(pipes[i]->fd[1]->writing, auxBuff, 10);
+            uintToBase(pipes[i].fd[1]->writing, auxBuff, 10);
             auxLength = strcat(titles, auxBuff);
             syscall_write(1, titles, auxLength);
             syscall_write(1, " ; ", 3);
             auxLength = strcpy(titles, "OPENED PIDs = ");
             syscall_write(1, titles, auxLength);
-            printArray(MAX_BLOCKED_PID, pipes[i]->openedPID);
+            printArray(MAX_BLOCKED_PID, pipes[i].openedPID);
             syscall_write(1, " ; ", 3);
         }
         i++;
     }
     syscall_write(1, "\n", 1);
 }
-void removeFromPipe(int idx, PCB *element)
+void removeFromPipe(int idx, PCB *element, int fd)
 {
-    remove(MAX_BLOCKED_PID, element, pipes[idx]->openedPID);
+    if (element->fds[fd] != NULL)
+    {
+        remove(MAX_BLOCKED_PID, element, pipes[idx].openedPID);
+        pipeCloseFd(element->fds[fd]->read == NULL, &pipes[idx]);
+    }
+}
+
+int pipeIdx(int id)
+{
+    int i;
+    for (i = 0; i < MAX_PIPE; i++)
+    {
+        if (pipes[i].fd[0] != NULL)
+        {
+            if (pipes[i].fd[0]->id == id)
+            {
+                return i;
+            }
+        }
+        else if (pipes[i].fd[1] != NULL)
+        {
+            if (pipes[i].fd[0]->id == id)
+            {
+                return i;
+            }
+        }
+    }
+    return -1;
 }
 /*
 int calculateIdx(int idx){

@@ -13,6 +13,7 @@ extern file_t *stdout;
 extern void idle();
 extern int idle_pid;
 extern int blockProcess(int pid, int block);
+void closeCurrentProcess(int fd);
 int schedule(uint64_t rsp)
 {
     if (!initializing && readyHeader.current->data.state != Terminated)
@@ -26,6 +27,8 @@ int schedule(uint64_t rsp)
         readyHeader.ready--;
         if(readyHeader.current->data.PID == idle_pid)
             idle_pid = 0;
+        closeCurrentProcess(0);
+        closeCurrentProcess(1);
         listElem_t l = removeCurrent(&readyHeader);
         for (int i = 0; i < l.data.argc; i++)
         {

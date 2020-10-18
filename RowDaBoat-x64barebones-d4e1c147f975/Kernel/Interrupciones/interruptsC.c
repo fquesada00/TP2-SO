@@ -386,13 +386,12 @@ void closeCurrentProcess(int fd)
     switch (pcb->fds[fd]->type)
     {
     case PIPE:
-        removeFromPipe(pcb->fds[fd]->id, pcb);
+        removeFromPipe(pipeIdx(pcb->fds[fd]->id), pcb,fd);
         break;
     case STDINOUT:
-        pcb->fds[0] = NULL;
-        pcb->fds[1] = NULL;
         break;
     }
+    pcb->fds[fd] = NULL;
 }
 
 void closePID(size_t pid, int fd)
@@ -401,11 +400,10 @@ void closePID(size_t pid, int fd)
     switch (pcb->fds[fd]->type)
     {
     case PIPE:
-        removeFromPipe(pcb->fds[fd]->id, pcb);
+        removeFromPipe(pipeIdx(pcb->fds[fd]->id), pcb,fd);
         break;
     case STDINOUT:
-        pcb->fds[0] = NULL;
-        pcb->fds[1] = NULL;
         break;
     }
+    pcb->fds[fd] = NULL;
 }

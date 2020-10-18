@@ -31,7 +31,7 @@ extern int syscallSemWait(const char *name);
 extern int syscallSemPost(const char *name);
 extern int syscallSemClose(const char *name);
 extern void syscallSemPrint();
-extern int syscallPipeClose(int fd, const char *name);
+extern int syscallPipeClose(int fds[2], const char *name);
 extern int syscallInitProcessWithPipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);
 extern int syscallPipeOpen(int fd[2], const char *name);
 extern int wc();
@@ -644,11 +644,10 @@ int initProcessInPipe(const char *p1, const char *pipe, int fd, int mode)
         char *argv[2] = {"leo", NULL};
         syscallInitProcessWithPipe(leo, 1, argv, fd, pipe, mode);
     }
-    /*
     else if(strcmp(p1,"loop") == 0){
         char *argv[2] = {"loop", NULL};
         syscallInitProcessWithPipe(loop,1,argv,fd,pipe,mode);
-    }
+    }/*
     else if(strcmp(p1,"cat") == 0){
         char *argv[2] = {"cat",NULL};
         syscallInitProcessWithPipe(cat, 1, argv,fd,pipe,mode);
@@ -669,7 +668,7 @@ int pipe(const char *p1, const char *p2)
     {
         //idem if superior
     }
-
+    syscallPipeClose(fds,"prueba");
     return 1;
 }
 
