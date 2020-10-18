@@ -10,8 +10,9 @@ pipe_t *pipes[MAX_PIPE] = {0};
 extern Header readyHeader;
 extern uint64_t stackSize;
 extern int currentPIDs;
-extern file_t stdin;
-extern file_t stdout;
+extern file_t *stdin;
+extern file_t *stdout;
+extern int idFds;
 
 int pipeOpen(int fds[2], const char *name)
 {
@@ -38,9 +39,10 @@ int pipeOpen(int fds[2], const char *name)
     fd1->reading = 1;
     fd1->write = NULL;
     fd1->writing = 0;
-    fd1->idxW = 0;
-    fd1->idxR = 0;
+    fd1->idxWrite = &pipes[i]->idxW;
+    fd1->idxRead = &pipes[i]->idxR;
     fd1->type = PIPE;
+    fd1->id = idFds;
     readyHeader.current->data.fds[j] = fd1;
     while (j < MAX_FD && readyHeader.current->data.fds[j] != NULL)
     {
@@ -54,9 +56,10 @@ int pipeOpen(int fds[2], const char *name)
     fd2->writing = 1;
     fd2->read = NULL;
     fd2->reading = 0;
-    fd2->idxW = 0;
-    fd2->idxR = 0;
+    fd2->idxWrite = &pipes[i]->idxW;
+    fd2->idxRead = &pipes[i]->idxR;
     fd2->type = PIPE;
+    fd2->id = idFds++;
     readyHeader.current->data.fds[j] = fd2;
     pipes[i]->fd[0] = fd1;
     pipes[i]->fd[1] = fd2;
@@ -95,10 +98,10 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pi
     e.rsp = rsp - sizeof(Swapping);
     e.StackBase = rsp;
     e.privilege = 5;
-    e.fds[0] = &stdin;
-    stdin.reading++;
-    e.fds[1] = &stdout;
-    stdout.writing++;
+    e.fds[0] = stdin;
+    stdin->reading++;
+    e.fds[1] = stdout;
+    stdout->writing++;
     e.BlockID = -1;
     e.reason = NOTHING;
     if (e.fds[fd] != NULL)
@@ -109,8 +112,8 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pi
             e.fds[fd]->reading--;
     }
     e.fds[fd] = pipe->fd[mode];
-    e.fds[fd]->idxR = 0;
-    e.fds[fd]->idxW = 0;
+    e.fds[fd]->idxRead = &pipe->idxR;
+    e.fds[fd]->idxWrite = &pipe->idxW;
     if (mode)
         e.fds[fd]->writing++;
     else

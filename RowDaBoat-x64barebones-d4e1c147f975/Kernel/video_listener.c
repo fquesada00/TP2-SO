@@ -14,7 +14,7 @@ void video_listener()
     int aux;
     while (1)
     {
-        aux = (stdout->idxW) - (stdout->idxR);
+        aux = *(stdout->idxWrite) - *(stdout->idxRead);
         if (aux != 0)
         {
             n = syscall_read(1, buff,aux );
@@ -22,7 +22,7 @@ void video_listener()
             puts(buff);
             //buff[0] = '\0';
         }else{
-            blockCurrent(1,FD_READ);
+            blockCurrent(stdout->id,FD_READ);
         }
     }
 }

@@ -12,6 +12,8 @@ typedef struct pipe{
     PCB * blockedPID[MAX_BLOCKED_PID];
     PCB * openedPID[MAX_BLOCKED_PID];
     int idxBlocked;
+    int idxR;
+    int idxW;
 }pipe_t;
 int pipeOpen(int fd[2], const char *name);
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode);

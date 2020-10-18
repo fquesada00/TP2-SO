@@ -11,8 +11,8 @@ typedef struct file{
     char * write;
     int reading;
     int writing;
-    int idxR;
-    int idxW;
+    int *idxRead;
+    int *idxWrite;
     int id;
     type type;
 } file_t;

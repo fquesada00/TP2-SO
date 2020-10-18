@@ -84,8 +84,8 @@ void keyboardHandler(uint64_t rsp)
     }
 
     //Buffer circular
-    if (stdin->idxW >= BUF_SIZE)
-        stdin->idxW = 0;
+    if (*stdin->idxWrite >= BUF_SIZE)
+        *stdin->idxWrite = 0;
 }
 
 /* Si donde se inserto el anterior menos la pos donde recupera el 
@@ -135,31 +135,33 @@ void writeToBuff(char c)
 }
 void writeStdout(char*buff,size_t n){
     int i;
+    file_t * f = stdout;
     for (i = 0; i < n; i++)
     {
-        file_t * f = stdout;
+        
         if(i != 0 && i % BUF_SIZE == 0)
-            blockCurrent(1,FD_WRITE);
-        f->write[((f->idxW)++) % BUF_SIZE] = buff[i];
+            blockCurrent(f->id,FD_WRITE);
+        f->write[((*(f->idxWrite))++) % BUF_SIZE] = buff[i];
 
         // putChar(buffer[i]);
     }
     //f->write[((f->idxW)++)%BUF_SIZE] = 0;
-    unblockProcess(1, FD_READ);
+    unblockProcess(f->id, FD_READ);
     return i;
 }
 void writeStdin(char * buff,size_t n){
     int i;
+    file_t * f = stdin;
     for (i = 0; i < n; i++)
     {
-        file_t * f = stdin;
+        
         if(i != 0 && i % BUF_SIZE == 0)
-            blockCurrent(1,FD_WRITE);
-        f->write[((f->idxW)++) % BUF_SIZE] = buff[i];
+            blockCurrent(f->id,FD_WRITE);
+        f->write[((*(f->idxWrite))++) % BUF_SIZE] = buff[i];
 
         // putChar(buffer[i]);
     }
     //f->write[((f->idxW)++)%BUF_SIZE] = 0;
-    unblockProcess(0, FD_READ);
+    unblockProcess(f->id, FD_READ);
     return;
 }

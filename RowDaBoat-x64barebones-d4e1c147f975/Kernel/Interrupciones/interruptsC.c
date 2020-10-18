@@ -30,15 +30,15 @@ int syscall_read(int fd, char *buffer, int n)
         return -1;
     for (i = 0; i < n; i++)
     {
-        while (f->idxR == f->idxW)
+        while (*(f->idxRead) >= *(f->idxWrite))
         {
-            blockCurrent(fd, FD_READ);
+            blockCurrent(readyHeader.current->data.fds[fd]->id, FD_READ);
         }
-        buffer[i] = f->read[((f->idxR)++) % BUF_SIZE];
+        buffer[i] = f->read[((*(f->idxRead))++) % BUF_SIZE];
     }
     //if (f->type == PIPE)  puts("LEI EN PIPE");
 
-    unblockProcess(fd, FD_WRITE);
+    unblockProcess(readyHeader.current->data.fds[fd]->id, FD_WRITE);
     return i;
 }
 int syscall_write(int fd, const char *buffer, int n)
@@ -54,14 +54,13 @@ int syscall_write(int fd, const char *buffer, int n)
     for (i = 0; i < n; i++)
     {
         if (i != 0 && i % BUF_SIZE == 0)
-            blockCurrent(fd, FD_WRITE);
-        f->write[((f->idxW)++) % BUF_SIZE] = buffer[i];
-
+            blockCurrent(readyHeader.current->data.fds[fd]->id, FD_WRITE);
+        f->write[((*(f->idxWrite))++) % BUF_SIZE] = buffer[i];
         // putChar(buffer[i]);
     }
     //f->write[((f->idxW)++)%BUF_SIZE] = 0;
     //if (f->type == PIPE)   puts("ESCRIBI EN PIPE");
-    unblockProcess(fd, FD_READ);
+    unblockProcess(readyHeader.current->data.fds[fd]->id, FD_READ);
     return i;
 }
 int syscall_registers(uint64_t *regs)
@@ -96,8 +95,8 @@ int pKill(int pid)
         l->data.PID = 0;
         l->data.state = Terminated;
         l->tickets = 0;
-        closePID(pid, 0);
-        closePID(pid, 1);
+        //closePID(pid, 0);
+        //closePID(pid, 1);
         realeaseWaiting(l->data.PID);
         return 0;
     }
@@ -288,8 +287,8 @@ int exit(int status)
     readyHeader.current->data.state = Terminated;
     //if(readyHeader.ready > 0)
     readyHeader.current->tickets = 0;
-    closeCurrentProcess(0);
-    closeCurrentProcess(1);
+    //closeCurrentProcess(0);
+    //closeCurrentProcess(1);
     realeaseWaiting(readyHeader.current->data.PID);
     _int20();
     puts("=========================NUNCA LLEGUE========================");
@@ -300,9 +299,8 @@ void unblockProcess(int id, BlockReason reason)
     listElem_t *iter = readyHeader.first;
     if (idle_pid != 0)
         blockProcess(idle_pid, 1);
-    while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id))
+    while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id || iter->data.state != Blocked) )
     {
-
         iter = iter->next;
     }
     if (iter == NULL)

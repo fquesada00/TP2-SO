@@ -604,7 +604,6 @@ int block(int pid, int block)
 }
 int myAtoi(char *str)
 {
-    puts(str);
     int res = 0;
     int neg = 0;
     for (int i = 0; str[i] != 0; i++)
