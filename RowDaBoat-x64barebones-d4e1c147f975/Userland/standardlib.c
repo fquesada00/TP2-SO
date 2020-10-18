@@ -18,7 +18,7 @@ extern int processorTemperature();
 extern unsigned char sysrtc(int);
 extern void invalidOpCode();
 extern int read_mem(uint64_t address, char *buff);
-extern int sys_execv(void *entry_point, int argc, char *argv[]);
+extern int sys_execv(void *entry_point, int argc, char *argv[],int fg);
 extern syscallMalloc(size_t size);
 extern syscallFree(void *block);
 extern syscallKill(int pid);
@@ -518,9 +518,9 @@ void printRtc()
 {
     printf("\n%d:%d:%d\n", (sysrtc(4) + 21) % 24, sysrtc(2), sysrtc(0));
 }
-int execv(void *entry_point, int argc, char *argv[])
+int execv(void *entry_point, int argc, char *argv[],int fg)
 {
-    return sys_execv(entry_point, argc, argv);
+    return sys_execv(entry_point, argc, argv,fg);
 }
 
 void manShell()

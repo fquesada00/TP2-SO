@@ -26,7 +26,7 @@ void test_prio(){
   char * argv[] = {"endless_loop",NULL};
   for(i = 0; i < TOTAL_PROCESSES; i++)
   {
-    pids[i] = execv(endless_loop2,1,argv);
+    pids[i] = execv(endless_loop2,1,argv,0);
   }
 
   bussy_wait(WAIT);

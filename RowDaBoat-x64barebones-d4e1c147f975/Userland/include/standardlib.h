@@ -19,7 +19,7 @@ void printRtc();
 void invOpCode();
 void printCoreTemp();
 void manShell();
-int execv(void *entry_point, int argc, char *argv[]);
+int execv(void *entry_point, int argc, char *argv[],int fg);
 void *pMalloc(size_t size);
 void pFree(void *block);
 void *memcpy(void *destination, const void *source, uint64_t length);

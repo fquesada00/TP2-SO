@@ -66,9 +66,6 @@ int pipeOpen(int fds[2], const char *name)
     pipes[i].fd[0] = fd1;
     pipes[i].fd[1] = fd2;
     add(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i].openedPID);
-    puts("VOY A IMPRIMIR = ");
-    printArray(MAX_BLOCKED_PID, pipes[i].openedPID);
-    putChar('\n');
     return 0;
 }
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode) //mode en r9
@@ -126,8 +123,6 @@ int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pi
     e.state = Ready;
     readyHeader.ready++;
     strcpy(e.name, name);
-    // puts("IMPRIMO = ");
-    // printArray(MAX_BLOCKED_PID,pipe.openedPID);
     push(&readyHeader, e, 5, 5);
     PCB *insert = getPCB(e.PID);
     add(MAX_BLOCKED_PID, insert, pipe->openedPID);
@@ -140,12 +135,10 @@ void pipeCloseFd(int fdNum, pipe_t *pipe)
         if (fdNum && !(--(pipe->fd[fdNum]->writing)))
         {
             pFree(pipe->fd[fdNum]);
-            //pipe->fd[fdNum] = NULL;
         }
         else if (!fdNum && !(--(pipe->fd[fdNum]->reading)))
         {
             pFree(pipe->fd[fdNum]);
-            //pipe->fd[fdNum] = NULL;
         }
     }
     if (pipe->fd[0]->reading == 0 && pipe->fd[1]->writing == 0)
@@ -209,7 +202,6 @@ void printPipe()
             auxLength = strcpy(titles, "OPENED PIDs = ");
             syscall_write(1, titles, auxLength);
             printArray(MAX_BLOCKED_PID, pipes[i].openedPID);
-            syscall_write(1, " ; ", 3);
         }
         i++;
     }
@@ -238,7 +230,7 @@ int pipeIdx(int id)
         }
         else if (pipes[i].fd[1] != NULL)
         {
-            if (pipes[i].fd[0]->id == id)
+            if (pipes[i].fd[1]->id == id)
             {
                 return i;
             }

@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "list.h"
 #include "fileDescriptor.h"
+#define EOF -1
 extern char getKeyboardScanCode();
 extern int syscall_read(int fd, char *buffer, int n);
 extern int syscall_write(int fd, char *buffer, int n);
@@ -47,20 +48,11 @@ void keyboardHandler(uint64_t rsp)
         }
         else if (control)
         {
-            if (scan == 0x02)
+            if (scan == 0x20)
             {
-                //changeScreen(0);
-                //continueProgram(0, rsp);
+                writeToBuff(EOF);
             }
-            else if (scan == 0x03)
-            {
-                //changeScreen(1);
-                //continueProgram(1, rsp);
-            }
-            else if (scan == 0x13)
-            {
-                // save_regs(rsp);
-            }
+        
         }
         else
         {
@@ -109,8 +101,10 @@ void keyboardHandler(uint64_t rsp)
 void writeToBuff(char c)
 {
     char auxi[2] = {0};
-    if (c != '\n' && c != '\b')
+    if (c != '\n' && c != '\b' && c != EOF)
     {
+        auxi[0] = c;
+        writeStdout(auxi, 1);
         buff[buff_current++] = c;
     }
     else if (c == '\b' && buff_current != 0)
@@ -119,18 +113,18 @@ void writeToBuff(char c)
         auxi[0] = c;
         writeStdout(auxi, 1);
     }
-    else if (c == '\n')
+    else if (c == '\n' || c == EOF)
     {
         buff[buff_current++] = c;
-
+        if (c != EOF)
+        {
+            
+            auxi[0] = c;
+            writeStdout(auxi, 1);
+        }
         writeStdin(buff, buff_current);
         //syscall_write(0,buff,buff_current);
         buff_current = 0;
-    }
-    if (c != '\b')
-    {
-        auxi[0] = c;
-        writeStdout(auxi, 1);
     }
 }
 void writeStdout(char*buff,size_t n){

@@ -80,7 +80,7 @@ int philosopherTable()
     //sem_open(&s[i], 0, 0);
     char * argv[] = {"filosofo",NULL};
     for (int i = 0; i < INITIAL; i++)
-        filPID[i] = execv(filosofo,1,argv);
+        filPID[i] = execv(filosofo,1,argv,0);
 
     while (1)
     {
@@ -91,7 +91,7 @@ int philosopherTable()
             {
                 int aux = num;
                 syscallSemOpen(S[aux], 0, 0);
-                filPID[num] = execv(filosofo,1,argv);
+                filPID[num] = execv(filosofo,1,argv,0);
             }
             else
                 printf("Creo que si traes a alguien mas que tiene una crisis existencial nos suicidamos los 20");

@@ -62,8 +62,8 @@ void test_sync()
     char *argv2[] = {"incWrapper2",NULL};
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
     {
-        execv(incWrapper1, 1, argv1);
-        execv(incWrapper2, 1, argv2);
+        execv(incWrapper1, 1, argv1,0);
+        execv(incWrapper2, 1, argv2,0);
     }
     return;
 }
@@ -79,8 +79,8 @@ void test_no_sync()
     char *argv2[] = {"incWrapper2",NULL};
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
     {
-        execv(incWrapper1, 1, argv1);
-        execv(incWrapper2, 1, argv2);
+        execv(incWrapper1, 1, argv1,0);
+        execv(incWrapper2, 1, argv2,0);
     }
     return;
 }

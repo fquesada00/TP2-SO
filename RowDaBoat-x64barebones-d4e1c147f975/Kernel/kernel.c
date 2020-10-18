@@ -5,7 +5,7 @@
 #include "idtLoader.h"
 #include "video_driver.h"
 
-extern int initProcessManager(void *entry_point, int argc, char *argv[], uint64_t rsp);
+extern int initProcessManager(void *entry_point, int argc, char *argv[], int fg);
 extern void init();
 extern void init_fds();
 extern uint8_t text;

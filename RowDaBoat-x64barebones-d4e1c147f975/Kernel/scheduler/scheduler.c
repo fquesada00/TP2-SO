@@ -25,7 +25,7 @@ int schedule(uint64_t rsp)
     if (readyHeader.current->data.state == Terminated)
     {
         readyHeader.ready--;
-        if(readyHeader.current->data.PID == idle_pid)
+        if (readyHeader.current->data.PID == idle_pid)
             idle_pid = 0;
         closeCurrentProcess(0);
         closeCurrentProcess(1);
@@ -35,11 +35,10 @@ int schedule(uint64_t rsp)
             pFree(l.data.argv[i]);
         }
         pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
-        
     }
     if (readyHeader.ready == 0)
     {
-        if(idle_pid != 0)
+        if (idle_pid != 0)
             blockProcess(idle_pid, 0);
         // listElem_t *iter = readyHeader.first;
         // while (iter != NULL && iter->data.PID != idle_pid)
@@ -68,11 +67,11 @@ int schedule(uint64_t rsp)
     }
 }
 
-int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
+int init_process(void *entry_point, int argc, char *argv[], int fg)
 {
-    if (rsp != 0)
-        readyHeader.current->data.rsp = rsp;
-    rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
+    // if (rsp != 0)
+    //     readyHeader.current->data.rsp = rsp;
+    uint64_t rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
     if (rsp != NULL)
     {
         rsp += stackSize - (sizeof(uint64_t));
@@ -84,7 +83,7 @@ int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp)
             strcpy(args[i], argv[i]);
         }
         init_registers(entry_point, argc, args, rsp);
-        init_PCB(rsp, pid, args,argc);
+        init_PCB(rsp, pid, args, argc, fg);
         // if (initializing)
         //     _int20();
         //_hlt();
@@ -116,15 +115,18 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->r14 = 14;
     init->r15 = 15;
 }
-void init_PCB(uint64_t rsp, int pid, char **args, int argcount)
+void init_PCB(uint64_t rsp, int pid, char **args, int argcount, int fg)
 {
     elem_t e = {0};
     e.PID = pid;
     e.rsp = rsp - sizeof(Swapping);
     e.StackBase = rsp;
     e.privilege = 5;
-    e.fds[0] = stdin;
-    stdin->reading++;
+    if (fg)
+    {
+        e.fds[0] = stdin;
+        stdin->reading++;
+    }
     e.fds[1] = stdout;
     stdout->writing++;
     e.BlockID = -1;
@@ -134,7 +136,7 @@ void init_PCB(uint64_t rsp, int pid, char **args, int argcount)
     strcpy(e.name, args[0]);
     e.argv = args;
     e.argc = argcount;
-    
+    e.fg = fg;
     if (initializing)
     {
         initList(&readyHeader, e, 5, 5);

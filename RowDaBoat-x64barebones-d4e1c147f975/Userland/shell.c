@@ -36,11 +36,11 @@ void shell()
         if (argsRead == 1)
         {
             if (strcmp(command, "escribo") == 0)
-                execv(escribo, 1, argv10);
+                execv(escribo, 1, argv10,0);
             else if (strcmp(command, "leo") == 0)
             {
                 
-                int a = execv(leo, 1, argv11);
+                int a = execv(leo, 1, argv11,1);
                 waitPID(a);
             }
 
@@ -96,7 +96,7 @@ void shell()
             else if (strcmp(command, "loop") == 0)
             {
                 char *argvLoop[] = {"loop", NULL};
-                execv(loop, 1, argvLoop);
+                execv(loop, 1, argvLoop,0);
             }
             else if (strcmp(command, "ps") == 0)
             {

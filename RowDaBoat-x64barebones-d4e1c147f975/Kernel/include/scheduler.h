@@ -31,6 +31,7 @@ typedef struct PCB
     State state;
     char ** argv;
     int argc;
+    int fg;
 } PCB;
 
 typedef struct Swapping
@@ -56,7 +57,7 @@ typedef struct Swapping
     uint64_t rsp;
     uint64_t ss;
 } Swapping;
-int init_process(void *entry_point, int argc, char *argv[], uint64_t rsp);
+int init_process(void *entry_point, int argc, char *argv[],int fg);
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp);
-void init_PCB(uint64_t rsp, int pid, char **args, int argcount);
+void init_PCB(uint64_t rsp, int pid, char **args, int argcount,int fg);
 #endif

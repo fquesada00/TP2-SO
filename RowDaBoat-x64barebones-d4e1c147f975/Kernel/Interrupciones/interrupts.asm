@@ -320,7 +320,6 @@ _syscallHandler:
 	call syscall_read_mem
 	jmp .end
 .execv:
-	mov rcx,rsp
 	call init_process
 	jmp .end
 .malloc:
