@@ -1,9 +1,9 @@
 #ifndef _SCHEDULER_H_
 #define _SCHEDULER_H_
-#include "memory_manager.h"
-#include "video_driver.h"
-#include "fileDescriptor.h"
-#define MAX_PRIORITY 10
+#include "ctes.h"
+#include "fds.h"
+#include <stdint.h>
+#include <stddef.h>
 typedef enum State
 {
     Ready,
@@ -22,7 +22,7 @@ typedef struct PCB
 {
     char name[255];
     int PID;
-    file_t * fds[MAX_FD];
+    file_t * fds[MAX_FDS];
     uint64_t rsp;
     uint64_t StackBase;
     int privilege;
@@ -57,7 +57,23 @@ typedef struct Swapping
     uint64_t rsp;
     uint64_t ss;
 } Swapping;
+
+int schedule(uint64_t rsp);
 int init_process(void *entry_point, int argc, char *argv[],int fg);
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp);
 void init_PCB(uint64_t rsp, int pid, char **args, int argcount,int fg);
+PCB *getPCB(size_t pid);
+void unblockProcessByPCB(PCB *process);
+int getPID();
+int waitPID(int pid);
+void realeaseWaiting(int pid);
+void nice(int pid, int p);
+int pExit();
+void unblockProcess(int id, BlockReason reason);
+void blockCurrent(int id, BlockReason reason);
+int blockProcess(int pid, int block);
+int pKill(int pid);
+void processStatus();
+void yield();
+
 #endif

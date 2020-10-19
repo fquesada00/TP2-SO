@@ -1,5 +1,6 @@
 #include "list.h"
 #include "memory_manager.h"
+#include "scheduler.h"
 
 extern void printList(Header *head);
 

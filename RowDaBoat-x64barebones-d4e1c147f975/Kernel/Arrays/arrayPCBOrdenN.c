@@ -1,4 +1,6 @@
-#include "include/arrayPCBOrdenN.h"
+#include <stdint.h>
+#include <stddef.h>
+#include "arrayPCBOrdenN.h"
 int remove(int dim, PCB *element,PCB *array[]){
     for(int i = 0 ; i < dim ; i++){
         if(array[i] == element){

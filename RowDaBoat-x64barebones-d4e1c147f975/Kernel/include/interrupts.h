@@ -27,6 +27,10 @@ void _sti(void);
 
 void _hlt(void);
 
+void _hltAndCli();
+
+void _int20();
+
 void picMasterMask(uint8_t mask);
 
 void picSlaveMask(uint8_t mask);

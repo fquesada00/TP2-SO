@@ -1,4 +1,6 @@
-#include "include/arrays.h"
+#include <stdint.h>
+#include <stddef.h>
+#include "arrays.h"
 extern int syscall_write(int, const char *, int);
 extern uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
 void printArray(int dim, PCB *array[])

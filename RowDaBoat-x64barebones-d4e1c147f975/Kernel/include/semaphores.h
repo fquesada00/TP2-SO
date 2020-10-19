@@ -1,9 +1,8 @@
 #ifndef _SEMAPHORES_H_
 #define _SEMAPHORES_H
-#define MAX_SEM 10
-#define MAX_BLOCKED_PID 10
+#include <stdint.h>
 #include <stddef.h>
-#include "scheduler.h"
+#include "ctes.h"
 typedef struct sem
 {
     uint64_t lock;

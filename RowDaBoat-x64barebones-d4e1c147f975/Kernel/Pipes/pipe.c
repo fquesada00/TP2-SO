@@ -1,19 +1,19 @@
-#include "standardstring.h"
-#include "fileDescriptor.h"
 #include "pipe.h"
-#include "list.h"
+#include <stdint.h>
+#include "fds.h"
 #include "scheduler.h"
-#include "include/arrayCircular.h"
-#include "include/arrayPCBOrdenN.h"
-
-pipe_t pipes[MAX_PIPE] = {0};
+#include "list.h"
+#include "ctes.h"
+#include "arrayCircular.h"
+#include "arrayPCBOrdenN.h"
+#include "standardstring.h"
 extern Header readyHeader;
 extern uint64_t stackSize;
 extern int currentPIDs;
 extern file_t *stdin;
 extern file_t *stdout;
 extern int idFds;
-extern PCB *getPCB(size_t pid);
+pipe_t pipes[MAX_PIPE] = {0};
 
 int pipeOpen(int fds[2], const char *name)
 {
@@ -26,14 +26,14 @@ int pipeOpen(int fds[2], const char *name)
         return -1;
     pipe_t p = {0};
     pipes[i] = p;
-    pipes[i].buff = pMalloc(BUF_SIZE);
+    pipes[i].buff = pMalloc(BUFF_SIZE);
     strcpy(pipes[i].name, name);
     int j = 0;
-    while (j < MAX_FD && readyHeader.current->data.fds[j] != NULL)
+    while (j < MAX_FDS && readyHeader.current->data.fds[j] != NULL)
     {
         j++;
     }
-    if (j == MAX_FD)
+    if (j == MAX_FDS)
         return -1;
     fds[0] = j;
     file_t *fd1 = pMalloc(sizeof(file_t));
@@ -46,11 +46,11 @@ int pipeOpen(int fds[2], const char *name)
     fd1->type = PIPE;
     fd1->id = idFds;
     readyHeader.current->data.fds[j] = fd1;
-    while (j < MAX_FD && readyHeader.current->data.fds[j] != NULL)
+    while (j < MAX_FDS && readyHeader.current->data.fds[j] != NULL)
     {
         j++;
     }
-    if (j == MAX_FD)
+    if (j == MAX_FDS)
         return -1;
     fds[1] = j;
     file_t *fd2 = pMalloc(sizeof(file_t));
@@ -93,7 +93,7 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
 }
 int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode)
 {
-    if (fd > MAX_FD || fd < 0)
+    if (fd > MAX_FDS || fd < 0)
         return -1;
     elem_t e = {0};
     e.PID = pid;
@@ -238,16 +238,3 @@ int pipeIdx(int id)
     }
     return -1;
 }
-/*
-int calculateIdx(int idx){
-    return (idx * -1) - 2;
-}
-int pipeAdd(int idx, PCB *pcb)
-{
-    idx = calculateIdx(idx);
-    addPCB(pipes[idx].idxBlocked, MAX_BLOCKED_PID, pcb, pipes[idx].blockedPID);
-}
-int pipeRemove(int idx){
-    idx = calculateIdx(idx);
-    removePCB(pipes[idx].idxBlocked, MAX_BLOCKED_PID, pipes[idx].blockedPID);
-}*/
