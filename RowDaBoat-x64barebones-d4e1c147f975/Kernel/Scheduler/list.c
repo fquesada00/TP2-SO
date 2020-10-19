@@ -109,7 +109,7 @@ int isEmpty(Header *head)
 
 elem_t next(Header *head)
 {
-    elem_t ret = {0};
+    elem_t ret = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     if (isEmpty(head) || head == NULL)
         return ret;
 
@@ -157,7 +157,7 @@ listElem_t removeElement(Header *head, elem_t elem)
 
 listElem_t removeCurrent(Header *head)
 {
-    listElem_t e = {0};
+    listElem_t e = {{{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0, 0};
     if (isEmpty(head) || head->first == NULL)
         return e;
     listElem_t *next = head->current;

@@ -31,6 +31,8 @@ void _hltAndCli();
 
 void _int20();
 
+void irqDispatcher(uint64_t irq/*,uint64_t rsp*/);
+
 void picMasterMask(uint8_t mask);
 
 void picSlaveMask(uint8_t mask);

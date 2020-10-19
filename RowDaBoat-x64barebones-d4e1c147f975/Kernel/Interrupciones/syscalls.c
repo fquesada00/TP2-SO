@@ -1,7 +1,7 @@
 #include "syscalls.h"
 #include "scheduler.h"
 #include <stdint.h>
-#include <lib.h>
+#include <standardLib.h>
 #include "fds.h"
 #include "interrupts.h"
 #include "ctes.h"
@@ -49,12 +49,6 @@ int syscall_write(int fd, const char *buffer, int n)
     unblockProcess(readyHeader.current->data.fds[fd]->id, FD_READ);
     return i;
 }
-int syscall_registers(uint64_t *regs)
-{
-    // State * savedState = getRegs();
-    //memcpy(regs,savedState,sizeof(State));
-    return 0;
-}
 
 int syscall_read_mem(uint64_t address, char *buff)
 {
@@ -63,7 +57,7 @@ int syscall_read_mem(uint64_t address, char *buff)
 }
 
 void writeToStd(char * buff,size_t n, file_t *f){
-    int i;
+    size_t i;
     for (i = 0; i < n; i++)
     {
         if(i != 0 && i % BUFF_SIZE == 0)

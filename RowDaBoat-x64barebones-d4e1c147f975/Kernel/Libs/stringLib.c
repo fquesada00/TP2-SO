@@ -32,7 +32,8 @@ int strcpy(char * des, const char * source){
     int i = 0;
     while(source[i] != 0)
     {
-        des[i] = source[i++];
+        des[i] = source[i];
+        i++;
     }
     des[i] = '\0';
     return i;

@@ -1,6 +1,9 @@
 #ifndef _PIPE_H_
 #define _PIPE_H_
 #include "ctes.h"
+#include "fds.h"
+#include "scheduler.h"
+#include <stdint.h>
 typedef struct pipe{
     char *buff;
     char name[BUFF_SIZE];

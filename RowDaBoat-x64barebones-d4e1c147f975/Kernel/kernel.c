@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <lib.h>
+#include <standardLib.h>
 #include <stddef.h>
 #include <moduleLoader.h>
 #include "kernel.h"

@@ -12,24 +12,24 @@ typedef enum State
 } State;
 typedef enum BlockReason
 {
+    NOTHING,
     FD_READ,
     FD_WRITE,
     PID,
-    SEM,
-    NOTHING
-}BlockReason;
+    SEM
+} BlockReason;
 typedef struct PCB
 {
     char name[255];
+    char **argv;
+    file_t *fds[MAX_FDS];
     int PID;
-    file_t * fds[MAX_FDS];
     uint64_t rsp;
     uint64_t StackBase;
     int privilege;
     BlockReason reason;
     int BlockID;
     State state;
-    char ** argv;
     int argc;
     int fg;
 } PCB;
@@ -59,9 +59,9 @@ typedef struct Swapping
 } Swapping;
 
 int schedule(uint64_t rsp);
-int init_process(void *entry_point, int argc, char *argv[],int fg);
+int init_process(void *entry_point, int argc, char *argv[], int fg);
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp);
-void init_PCB(uint64_t rsp, int pid, char **args, int argcount,int fg);
+void init_PCB(uint64_t rsp, int pid, char **args, int argcount, int fg);
 PCB *getPCB(size_t pid);
 void unblockProcessByPCB(PCB *process);
 int getPID();

@@ -4,6 +4,8 @@
 #include "ctes.h"
 #include "scheduler.h"
 #include "list.h"
+#include "syscalls.h"
+#include "pipe.h"
 int idFds = 0;
 file_t *stdout;
 file_t *stdin;

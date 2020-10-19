@@ -35,7 +35,7 @@
         */
         if (heapEnd == NULL)
         {
-            pInitHeap(BASE_ADDRESS, END_ADDRESS);
+            pInitHeap((void *)BASE_ADDRESS, (void *)END_ADDRESS);
         }
 
         /*

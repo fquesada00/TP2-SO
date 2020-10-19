@@ -6,12 +6,12 @@
 #include "arrayCircular.h"
 #include "arrayPCBOrdenN.h"
 #include "scheduler.h"
-#include "lib.h"
+#include "standardLib.h"
 #include "syscalls.h"
 #include <stdint.h>
 extern size_t _xchg(uint64_t pointer, size_t value);
 extern Header readyHeader;
-sem_t semaphores[MAX_SEM] = {0};
+sem_t semaphores[MAX_SEM] = {{0}};
 void acquire(sem_t *sem)
 {
     while (_xchg(&(sem->lock), 0) != 1)

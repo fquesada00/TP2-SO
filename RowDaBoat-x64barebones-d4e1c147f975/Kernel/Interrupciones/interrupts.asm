@@ -32,7 +32,7 @@ EXTERN init_process
 EXTERN pMalloc
 EXTERN pFree
 EXTERN pKill
-EXTERN processes
+EXTERN processStatus
 EXTERN blockProcess
 EXTERN getPID
 EXTERN nice
@@ -46,7 +46,7 @@ EXTERN init_process_with_pipe
 EXTERN pipeClose
 EXTERN waitPID
 EXTERN yield
-EXTERN exit
+EXTERN pExit
 EXTERN printPipe
 
 SECTION .text
@@ -127,7 +127,7 @@ SECTION .text
 	mov rsi,rsp
 	call irqDispatcher
 
-	; signal pic EOI (End of Interrupt)
+	;signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
 
@@ -139,7 +139,7 @@ SECTION .text
 	pushState
 	mov rdi, %1 ; pasaje de parametro
 	mov rsi,rsp
-	call exceptionDispatcher
+	;call exceptionDispatcher
 	popState
 	iretq
 %endmacro
@@ -304,7 +304,7 @@ _syscallHandler:
 	pop rdx
 	jmp .end
 .register:
-	call syscall_registers
+	;call syscall_registers
 	jmp .end
 .exe:
 	;call loadProgram
@@ -332,7 +332,7 @@ _syscallHandler:
 	call pKill
 	jmp .end
 .ps:
-	call processes
+	call processStatus
 	jmp .end
 .block:
 	mov rdx, rsp
@@ -375,7 +375,7 @@ _syscallHandler:
 	call yield
 	jmp .end
 .exit:
-	call exit
+	call pExit
 	jmp .end
 .print_pipe:
 	call printPipe

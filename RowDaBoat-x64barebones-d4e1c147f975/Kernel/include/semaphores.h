@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "ctes.h"
+#include "scheduler.h"
 typedef struct sem
 {
     uint64_t lock;

@@ -1,12 +1,13 @@
 #include <stdint.h>
-#include <lib.h>
+#include <standardLib.h>
 #include <moduleLoader.h>
+#include <stddef.h>
 static void loadModule(uint8_t ** module, void * targetModuleAddress);
 static uint32_t readUint32(uint8_t ** address);
 
 void loadModules(void * payloadStart, void ** targetModuleAddress)
 {
-	int i;
+	size_t i;
 	uint8_t * currentModule = (uint8_t*)payloadStart;
 	uint32_t moduleCount = readUint32(&currentModule);
 

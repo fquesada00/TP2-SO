@@ -5,6 +5,10 @@
 #include "interrupts.h"
 #include "list.h"
 #include "standardstring.h"
+#include "syscalls.h"
+#include "standardLib.h"
+#include "standardstring.h"
+#include <stddef.h>
 extern file_t *stdin;
 extern file_t *stdout;
 extern int idle_pid;
@@ -33,7 +37,7 @@ int schedule(uint64_t rsp)
         {
             pFree(l.data.argv[i]);
         }
-        pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
+        pFree((void *)(l.data.StackBase - stackSize + sizeof(uint64_t)));
     }
     if (readyHeader.ready == 0)
     {
@@ -59,7 +63,7 @@ int schedule(uint64_t rsp)
 int init_process(void *entry_point, int argc, char *argv[], int fg)
 {
     uint64_t rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
-    if (rsp != NULL)
+    if ((size_t *)rsp != NULL)
     {
         rsp += stackSize - (sizeof(uint64_t));
         int pid = currentPIDs++;
@@ -78,19 +82,19 @@ int init_process(void *entry_point, int argc, char *argv[], int fg)
 
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
 {
-    Swapping *init = rsp - sizeof(Swapping);
+    Swapping *init = (void *)rsp - sizeof(Swapping);
     init->ss = 0x0;
     init->rsp = rsp;
     init->flags = 0x202;
     init->cs = 0x8;
-    init->rip = entry_point;
+    init->rip = (uint64_t)entry_point;
     init->rax = 1;
     init->rbx = 2;
     init->rcx = 3;
     init->rdx = 4;
     init->rbp = rsp;
     init->rdi = argc;
-    init->rsi = argv;
+    init->rsi = (uint64_t)argv;
     init->r8 = 8;
     init->r9 = 9;
     init->r10 = 10;
@@ -103,7 +107,7 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
 
 void init_PCB(uint64_t rsp, int pid, char **args, int argcount, int fg)
 {
-    elem_t e = {0};
+    elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     e.PID = pid;
     e.rsp = rsp - sizeof(Swapping);
     e.StackBase = rsp;
@@ -205,7 +209,8 @@ void blockCurrent(int id, BlockReason reason)
 {
     if (readyHeader.current->data.state != Terminated)
     {
-        readyHeader.ready--;
+        if (readyHeader.current->data.state == Ready)
+            readyHeader.ready--;
         readyHeader.current->data.state = Blocked;
         readyHeader.current->data.BlockID = id;
         readyHeader.current->data.reason = reason;
@@ -247,23 +252,24 @@ int blockProcess(int pid, int block)
     listElem_t *le;
     le = get(&readyHeader, e);
     State change;
-    if (block)
-    {
-        change = Blocked;
-        if (le->data.state != Blocked)
-            readyHeader.ready--;
-    }
-    else
-    {
-        change = Ready;
-        if (le->data.state != Ready)
-            readyHeader.ready++;
-    }
     if (le != NULL)
     {
+        if (block)
+        {
+            change = Blocked;
+            if (le->data.state != Blocked)
+                readyHeader.ready--;
+        }
+        else
+        {
+            change = Ready;
+            if (le->data.state != Ready)
+                readyHeader.ready++;
+        }
         if (le->data.state != Terminated)
         {
             le->data.state = change;
+
             return 0;
         }
     }
@@ -275,9 +281,10 @@ int pKill(int pid)
     elem_t e;
     e.PID = pid;
     listElem_t *l;
-    listElem_t el;
     if ((l = get(&readyHeader, e)) != NULL)
     {
+        if (l->data.state == Ready)
+            readyHeader.ready--;
         l->data.state = Terminated;
         l->tickets = 0;
         realeaseWaiting(l->data.PID);
@@ -292,7 +299,7 @@ void processStatus()
     int widthHeader = width + 5;
     char buffer[256] = {0};
     char separation[256] = "                                                              ";
-    int length = 0, auxLength = 0;
+    int length = 0;
     length = strcpy(buffer, "NOMBRE");
     syscall_write(1, buffer, length);
     syscall_write(1, separation, widthHeader - length);

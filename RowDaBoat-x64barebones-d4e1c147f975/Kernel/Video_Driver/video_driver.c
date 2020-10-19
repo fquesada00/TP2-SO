@@ -91,8 +91,6 @@ void putChar(char c)
 /*Escribe el caracter a la posicion actual de la pantalla con un color RGB y amenta el current*/
 void putCharColor(char c, char r, char g, char b)
 {
-    if (r > 255 || g > 255 || b > 255)
-        return;
     if (c == '\n')
         newLine();
     else if (c == '\b')
