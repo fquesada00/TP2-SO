@@ -1,7 +1,8 @@
-#include "standardlib.h"
+#include "stdioLib.h"
+#include "processLib.h"
 void loop()
 {
-    int pid =  getPID();
+    int pid =  _getPID();
     while (1)
     {
         printf("loop %d ",pid);

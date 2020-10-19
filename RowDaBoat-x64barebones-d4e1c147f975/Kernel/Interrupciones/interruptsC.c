@@ -15,7 +15,8 @@ extern void _hltAndCli();
 extern Header readyHeader;
 extern Header blockedHeader;
 extern uint64_t stackSize;
-extern file_t stdout;
+extern file_t *stdout;
+extern file_t *stdin;
 extern int schedule(int rsp);
 extern _int20();
 extern int idle_pid;
@@ -81,19 +82,10 @@ int pKill(int pid)
 {
     elem_t e;
     e.PID = pid;
-    /*listElem_t l = removeElement(&readyHeader, e);
-    if(l.priority == -1){
-        l = removeElement(&blockedHeader,e);
-        if(l.priority == -1)
-            return-1;
-    }
-    pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
-    */
     listElem_t *l;
     listElem_t el;
     if ((l = get(&readyHeader, e)) != NULL)
     {
-        l->data.PID = 0;
         l->data.state = Terminated;
         l->tickets = 0;
         //closePID(pid, 0);
@@ -301,7 +293,7 @@ void unblockProcess(int id, BlockReason reason)
     listElem_t *iter = readyHeader.first;
     if (idle_pid != 0)
         blockProcess(idle_pid, 1);
-    while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id || iter->data.state != Blocked) )
+    while (iter != NULL && (iter->data.reason != reason || iter->data.BlockID != id || iter->data.state != Blocked))
     {
         iter = iter->next;
     }
@@ -361,7 +353,7 @@ PCB *getPCB(size_t pid)
     elem_t e;
     e.PID = pid;
     listElem_t *l = get(&readyHeader, e);
-    return &l->data;
+    return &(l->data);
 }
 void yield()
 {
@@ -385,16 +377,17 @@ void realeaseWaiting(int pid)
 void closeCurrentProcess(int fd)
 {
     PCB *pcb = &readyHeader.current->data;
-    if(pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL){
+    if (pcb != NULL && pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL && pcb->fds[fd] != stdin)
+    {
         char buffer[2] = {0};
         buffer[0] = EOF;
         buffer[1] = '\0';
-        syscall_write(fd,buffer,1);
+        syscall_write(fd, buffer, 1);
     }
     switch (pcb->fds[fd]->type)
     {
     case PIPE:
-        removeFromPipe(pipeIdx(pcb->fds[fd]->id), pcb,fd);
+        removeFromPipe(pipeIdx(pcb->fds[fd]->id), pcb, fd);
         break;
     case STDINOUT:
         break;
@@ -405,13 +398,23 @@ void closeCurrentProcess(int fd)
 void closePID(size_t pid, int fd)
 {
     PCB *pcb = getPCB(pid);
-    switch (pcb->fds[fd]->type)
+    if (pcb != NULL && pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL && pcb->fds[fd] != stdin)
     {
-    case PIPE:
-        removeFromPipe(pipeIdx(pcb->fds[fd]->id), pcb,fd);
-        break;
-    case STDINOUT:
-        break;
+        char buffer[2] = {0};
+        buffer[0] = EOF;
+        buffer[1] = '\0';
+        syscall_write(fd, buffer, 1);
     }
-    pcb->fds[fd] = NULL;
+    if (pcb != NULL && pcb->fds[fd] != NULL)
+    {
+        switch (pcb->fds[fd]->type)
+        {
+        case PIPE:
+            removeFromPipe(pipeIdx(pcb->fds[fd]->id), pcb, fd);
+            break;
+        case STDINOUT:
+            break;
+        }
+        pcb->fds[fd] = NULL;
+    }
 }

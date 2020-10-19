@@ -1,28 +1,29 @@
 #include <stdint.h>
-#include "standardlib.h"
+#include "semLib.h"
+#include "stdioLib.h"
+#include "processLib.h"
 #define TOTAL_PAIR_PROCESSES 4
 #define SEM_ID "sem"
 
 int64_t globalVar; //shared memory
-extern int _exit(int d);
-extern void yield();//VER YIELD
+
 
 void slowInc(int64_t *p, int64_t inc)
 {
     int64_t aux = *p;
     aux += inc;
-    yield();
+    _yield();
     *p = aux;
 }
 
 void incWrapper1(){
     inc(1,1,500);
-    _exit(0);
+    _exit();
 
 }
 void incWrapper2(){
     inc(1,-1,500);
-    _exit(0);
+    _exit();
 
 }
 
@@ -30,28 +31,28 @@ void incWrapper2(){
 void inc(int sem, int value, int N)
 {
     uint64_t i;
-    if (sem && syscallSemOpen(SEM_ID, 1, 0))
+    if (sem && semOpen(SEM_ID, 1, 0))
     {
         printf("ERROR OPENING SEM\n");
-        _exit(1);
+        _exit();
     }
 
     for (i = 0; i < N; i++)
     {
         if (sem)
-            syscallSemWait(SEM_ID);
+            semWait(SEM_ID);
         slowInc(&globalVar, value);
         if (sem)
-            syscallSemPost(SEM_ID);
+            semPost(SEM_ID);
     }
 
     if (sem)
-        syscallSemClose(SEM_ID);
+        semClose(SEM_ID);
 
     printf("\n========Final value: %d========\n", globalVar);
 }
 
-void test_sync()
+void test_sync(int argc, char * argv[])
 {
     uint64_t i;
 
@@ -62,13 +63,13 @@ void test_sync()
     char *argv2[] = {"incWrapper2",NULL};
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
     {
-        execv(incWrapper1, 1, argv1,0);
-        execv(incWrapper2, 1, argv2,0);
+        _execv(incWrapper1, 1, argv1,0);
+        _execv(incWrapper2, 1, argv2,0);
     }
     return;
 }
 
-void test_no_sync()
+void test_no_sync(int argc, char * argv[])
 {
     uint64_t i;
 
@@ -79,8 +80,8 @@ void test_no_sync()
     char *argv2[] = {"incWrapper2",NULL};
     for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
     {
-        execv(incWrapper1, 1, argv1,0);
-        execv(incWrapper2, 1, argv2,0);
+        _execv(incWrapper1, 1, argv1,0);
+        _execv(incWrapper2, 1, argv2,0);
     }
     return;
 }

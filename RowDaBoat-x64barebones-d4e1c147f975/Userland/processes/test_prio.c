@@ -1,5 +1,7 @@
 #include <stdint.h>
-#include "standardlib.h"
+#include "stdioLib.h"
+#include <stddef.h>
+#include "shell.h"
 
 #define MINOR_WAIT 10000000                               // TODO: To prevent a process from flooding the screen
 #define WAIT      100000000                              // TODO: Long enough to see theese processes beeing run at least twice
@@ -10,7 +12,7 @@ void bussy_wait(uint64_t n){
 }
 
 void endless_loop2(){
-  uint64_t pid = getPID();
+  uint64_t pid = _getPID();
 
   while(1){
     printf("%d ",pid);
@@ -20,13 +22,12 @@ void endless_loop2(){
 
 #define TOTAL_PROCESSES 3
 
-void test_prio(){
+void test_prio(int argc, char * argv[]){
   uint64_t pids[TOTAL_PROCESSES];
   uint64_t i;
-  char * argv[] = {"endless_loop",NULL};
   for(i = 0; i < TOTAL_PROCESSES; i++)
   {
-    pids[i] = execv(endless_loop2,1,argv,0);
+    pids[i] = _execv(endless_loop2,1,argv,0);
   }
 
   bussy_wait(WAIT);

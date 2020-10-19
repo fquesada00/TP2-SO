@@ -13,7 +13,24 @@ extern file_t *stdout;
 extern void idle();
 extern int idle_pid;
 extern int blockProcess(int pid, int block);
+void closePID(size_t pid, int fd);
 void closeCurrentProcess(int fd);
+void terminated(PCB *pcb)
+{
+    if (pcb->PID == idle_pid)
+        idle_pid = 0;    
+    closePID(pcb->PID, 0);
+    closePID(pcb->PID, 1);
+    listElem_t l = removeElement(&readyHeader, *pcb);
+    if (l.priority == -1)
+        return;
+    readyHeader.ready--;
+    for (int i = 0; i < l.data.argc; i++)
+    {
+        pFree(l.data.argv[i]);
+    }
+    pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
+}
 int schedule(uint64_t rsp)
 {
     if (!initializing && readyHeader.current->data.state != Terminated)
@@ -40,16 +57,6 @@ int schedule(uint64_t rsp)
     {
         if (idle_pid != 0)
             blockProcess(idle_pid, 0);
-        // listElem_t *iter = readyHeader.first;
-        // while (iter != NULL && iter->data.PID != idle_pid)
-        // {
-        //     iter = iter->next;
-        // }
-        // if (iter != NULL)
-        // {
-        //     iter->data.state = Ready;
-        //     readyHeader.ready++;
-        // }
     }
     else if (readyHeader.ready < 0)
         puts("ERROR");
@@ -62,7 +69,9 @@ int schedule(uint64_t rsp)
         do
         {
             e = next(&readyHeader);
-        } while (e.state == Blocked);
+            if (e.state == Terminated)
+                terminated(&e);
+        } while (e.state != Ready);
         return e.rsp;
     }
 }

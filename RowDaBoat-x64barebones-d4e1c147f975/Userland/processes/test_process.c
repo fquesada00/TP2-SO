@@ -1,6 +1,7 @@
-#include "standardlib.h"
+#include "stdioLib.h"
 #include "test_util.h"
-
+#include <stddef.h>
+#include "shell.h"
 //TO BE INCLUDED
 void endless_loop(){
   while(1);
@@ -15,7 +16,7 @@ typedef struct P_rq{
   enum State state;
 }p_rq;
 
-void test_processes(){
+void test_processes(int argc, char * argv[]){
   p_rq p_rqs[MAX_PROCESSES];
   uint8_t rq;
   uint8_t alive = 0;
@@ -27,7 +28,7 @@ void test_processes(){
     // Create MAX_PROCESSES processes
     for(rq = 0; rq < MAX_PROCESSES; rq++){
         char * argv[] = {"endless_loop",NULL};
-      p_rqs[rq].pid = execv(endless_loop,1,argv,0);  // TODO: Port this call as required
+      p_rqs[rq].pid = _execv(endless_loop,1,argv,0);  // TODO: Port this call as required
 
       if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
         printf("Error creating process\n");               // TODO: Port this as required

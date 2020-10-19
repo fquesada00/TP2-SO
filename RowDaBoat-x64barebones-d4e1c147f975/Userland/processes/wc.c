@@ -1,4 +1,6 @@
-#include "standardlib.h"
+#include "stdioLib.h"
+#include "sysLib.h"
+#include "processLib.h"
 #include <stddef.h>
 #define EOF -1
 int wc(){
@@ -11,5 +13,5 @@ int wc(){
         bytes++;
     }
     printf("Lineas: %d\nBytes: %d\n",lines,bytes);
-    _exit(0);
+    _exit();
 }

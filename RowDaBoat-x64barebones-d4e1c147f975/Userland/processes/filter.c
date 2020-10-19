@@ -1,6 +1,7 @@
-#include "standardlib.h"
+#include "stdioLib.h"
+#include "sysLib.h"
+#include "processLib.h"
 #define EOF -1
-extern syswrite(int fd, char * buff, int size);
 int filter(int argc, char **argv)
 {
     int idx = 0;
@@ -12,5 +13,5 @@ int filter(int argc, char **argv)
             syswrite(1,writeB,1);
         }
     }
-    _exit(0);
+    _exit();
 }

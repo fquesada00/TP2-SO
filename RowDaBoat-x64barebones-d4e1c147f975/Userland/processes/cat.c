@@ -1,4 +1,5 @@
-#include "standardlib.h"
+#include "stdioLib.h"
+#include "processLib.h"
 #define EOF -1
 void cat(){
     char c;
@@ -6,5 +7,5 @@ void cat(){
     {
         putchar(c);
     } 
-    _exit(0);
+    _exit();
 }
