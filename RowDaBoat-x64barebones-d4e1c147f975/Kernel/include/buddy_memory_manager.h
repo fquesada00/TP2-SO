@@ -26,7 +26,8 @@
 
 typedef struct A_BLOCK
 {
-    struct A_BLOCK *nextBlock;
+    struct A_BLOCK *pNextFreeBlock;
+    struct A_BLOCK *pNextBlocked;
     size_t level;
 } a_block;
 
@@ -73,4 +74,20 @@ size_t getBlockNumber(a_block *header);
 */
 void initialize();
 
+// /*
+//     Receive a block and insert it into the blocked list
+// */
+// void insertBlock(a_block *insert);
+
+// /*
+//     Receive a block and try to remove it from the blocked list.
+//     Return value on success is 1, if not, 0
+// */
+// int removeBlock(a_block *remove);
+
+// /*
+//     Receive a block and check if its present into the blocked list.
+//     Return value on success is 1, if not, 0
+// */
+// int isBlocked(a_block *block);
 #endif
