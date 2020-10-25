@@ -3,13 +3,11 @@
     /*
         This buddy memory manager works with lists of blocks
         of different size.
-
         When setting the minimum and maximum size, its set of
         powers of 2, e.g.: minimum size 2^5 -> 32 bytes and
         maximum size 2^7 -> 128 bytes, then level 0 block is one block
         of 128 bytes and level 2 blocks are 128/32=4 blocks of 32 bytes.
         Obviously, neither minimum nor maximum size can exceed the HEAP_SIZE.
-
         Continuing with the example, if 32 bytes are requested with pMalloc(32), 
         level 2 list its NOT going to be initialized or even try to search for a 
         free block as every request has one header size (mentioned bellow) before 
@@ -22,7 +20,7 @@
         LINKS DE INTERES
         http://brokenthorn.com/Resources/OSDev26.html
     */
-    static a_block *headers[LEVELS + 1];
+    static a_block *headers[LEVELS];
     static char initialized = 0;
     static size_t remainingBytes = MAXIMUM_BLOCK_SIZE; 
 
@@ -50,6 +48,7 @@
         */
         void *returnPointer = recursiveMalloc(level) + HEADER_SIZE;
         remainingBytes -= requestedSize;
+        insertBlock((a_block *)(returnPointer - HEADER_SIZE));
         return returnPointer;
     }
 
@@ -83,6 +82,10 @@
     {
         void *toFree = pointer - HEADER_SIZE;
         a_block *blockToFree = (a_block *)toFree;
+        if (removeBlock(blockToFree) == -1)
+        {
+            return;
+        }
         recursiveFree(toFree, blockToFree->level);
         remainingBytes += BLOCK_SIZE(blockToFree->level);
     }
@@ -150,8 +153,17 @@
             toInsert->nextBlock = NULL;
             return;
         } 
+        if (block > toInsert)
+        {
+            toInsert->nextBlock = block;
+            headers[level] = toInsert;
+            toInsert->level = level;
+            return;
+        }
+        a_block *aux;
         while (block->nextBlock != NULL && block->nextBlock < toInsert)
         {
+            aux = block;
             block = block->nextBlock;
         }
         /*
@@ -165,16 +177,16 @@
         else
         {
             toInsert->nextBlock = block->nextBlock;
-            block->nextBlock = toInsert;
+            aux->nextBlock = toInsert;
         }
-        block->nextBlock->level = level;
+        toInsert->level = level;
     }
 
     void removeSpecificHeaderFromList(void *header, size_t level)
     {
         a_block *block = headers[level];
         a_block *toRemove = (a_block *)header;
-        a_block *aux;
+        
         /*
             Maybe toRemove is the first block
         */
@@ -186,6 +198,7 @@
         /*
             Lookup to obtain the block to remove from the level
         */
+        a_block *aux;
         while (block->nextBlock != NULL)
         {
             if (block->nextBlock == toRemove)
@@ -243,7 +256,7 @@
 
     size_t getBlockNumber(a_block *header)
     {
-        size_t relativeStart = (uint8_t *)kernelStart - (uint8_t *)BASE_ADDRESS;
+        size_t relativeStart = (uint8_t *)header - (uint8_t *)BASE_ADDRESS;
         size_t relativeBlockNumber = relativeStart / BLOCK_SIZE(header->level);
         /*
             Add one so blocks are numbered: 1, 2, 3, 4 ...

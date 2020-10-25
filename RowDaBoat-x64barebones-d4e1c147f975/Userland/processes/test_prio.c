@@ -2,7 +2,7 @@
 #include "stdioLib.h"
 #include <stddef.h>
 #include "shell.h"
-
+#include "processLib.h"
 #define MINOR_WAIT 10000000                               // TODO: To prevent a process from flooding the screen
 #define WAIT      100000000                              // TODO: Long enough to see theese processes beeing run at least twice
 
@@ -49,13 +49,11 @@ void test_prio(int argc, char * argv[]){
         break;
     }
   }
-
   bussy_wait(WAIT);
   printf("\nBLOCKING...\n");
 
   for(i = 0; i < TOTAL_PROCESSES; i++)
     block(pids[i],1);
-
   printf("CHANGING PRIORITIES WHILE BLOCKED...\n");
   for(i = 0; i < TOTAL_PROCESSES; i++){
     switch (i % 3){
@@ -73,15 +71,15 @@ void test_prio(int argc, char * argv[]){
         break;
     }
   }
-
   printf("UNBLOCKING...\n");
 
   for(i = 0; i < TOTAL_PROCESSES; i++)
     block(pids[i],0);
-
   bussy_wait(WAIT);
   printf("\nKILLING...\n");
 
   for(i = 0; i < TOTAL_PROCESSES; i++)
     kill(pids[i]);
+
+  _exit();
 }

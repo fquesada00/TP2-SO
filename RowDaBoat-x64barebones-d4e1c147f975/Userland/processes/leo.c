@@ -1,7 +1,7 @@
 #include "stdioLib.h"
 #include "sysLib.h"
-#include "processLib.h"extern int sysread(int fd, char *buff, int bytes);
-int leo(){
+#include "processLib.h"
+void leo(){
     char buff[256]={0};
     sysread(0,buff,15);
     printf("%s\n",buff);

@@ -1,6 +1,7 @@
 #include "stdioLib.h"
 #include <stdarg.h>
 #include "stringLib.h"
+#include "sysLib.h"
 void puts(char *c)
 {
     int i = 0;

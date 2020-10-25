@@ -2,6 +2,7 @@
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
 ** -1 if s is lower than v */
+int isNum(int a);
 int strcmp(const char *s, const char *v)
 {
     int i = 0;
@@ -32,9 +33,11 @@ int strcpy(char * des, const char * source){
     int i = 0;
     while(source[i] != 0)
     {
-        des[i] = source[i++];
+        des[i] = source[i];
+        i++;
     }
     des[i] = '\0';
+    return i;
 }
 
 int doubleToString(double num, char *buffer)

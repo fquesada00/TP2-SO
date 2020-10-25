@@ -2,7 +2,7 @@
 #include "list.h"
 #include "standardstring.h"
 extern void _int20();
-
+extern uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 Header readyHeader = {0};
 Header blockedHeader = {0};
 int currentPIDs = 1;
@@ -18,17 +18,17 @@ void closeCurrentProcess(int fd);
 void terminated(PCB *pcb)
 {
     if (pcb->PID == idle_pid)
-        idle_pid = 0;    
+        idle_pid = 0;
     closePID(pcb->PID, 0);
     closePID(pcb->PID, 1);
     listElem_t l = removeElement(&readyHeader, *pcb);
     if (l.priority == -1)
         return;
-    readyHeader.ready--;
     for (int i = 0; i < l.data.argc; i++)
     {
         pFree(l.data.argv[i]);
     }
+    puts("Hago free");
     pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
 }
 int schedule(uint64_t rsp)
@@ -41,7 +41,6 @@ int schedule(uint64_t rsp)
         initializing = 0;
     if (readyHeader.current->data.state == Terminated)
     {
-        readyHeader.ready--;
         if (readyHeader.current->data.PID == idle_pid)
             idle_pid = 0;
         closeCurrentProcess(0);
@@ -65,14 +64,14 @@ int schedule(uint64_t rsp)
     else
     {
         readyHeader.current->tickets = (MAX_PRIORITY - readyHeader.current->priority);
-        elem_t e;
+        elem_t *e;
         do
         {
             e = next(&readyHeader);
-            if (e.state == Terminated)
-                terminated(&e);
-        } while (e.state != Ready);
-        return e.rsp;
+            if (e->state == Terminated)
+                terminated(e);
+        } while (e->state != Ready);
+        return e->rsp;
     }
 }
 
@@ -98,6 +97,13 @@ int init_process(void *entry_point, int argc, char *argv[], int fg)
         //_hlt();
         return pid;
     }
+    char buff[256] = {0};
+    puts("ERROR VALE -1 MALLOC");
+    putChar(currentPIDs);
+    uintToBase(currentPIDs,buff,10);
+    puts(buff);
+    if(pMalloc(stackSize * sizeof(uint64_t)) == NULL)
+        puts("DE NUEVO");
     return -1;
 }
 void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)

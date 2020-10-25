@@ -2,13 +2,7 @@
 #define _MEMORY_MANAGER_H_
 
 #include "memory.h"
-
-typedef struct a_block
-{
-    struct a_block *pNextBlock;
-    size_t blockSize;
-} a_block;
-
+#include "occupiedBlocks.h"
 /*
     Here baseAddress & endAddress must be word aligned
 */

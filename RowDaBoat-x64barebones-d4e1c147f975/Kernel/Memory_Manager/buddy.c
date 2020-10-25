@@ -1,15 +1,14 @@
 #ifdef MM_BUDDY
     #include "buddy_memory_manager.h"
+    #include "memory.h"
     /*
         This buddy memory manager works with lists of blocks
         of different size.
-
         When setting the minimum and maximum size, its set of
         powers of 2, e.g.: minimum size 2^5 -> 32 bytes and
         maximum size 2^7 -> 128 bytes, then level 0 block is one block
         of 128 bytes and level 2 blocks are 128/32=4 blocks of 32 bytes.
         Obviously, neither minimum nor maximum size can exceed the HEAP_SIZE.
-
         Continuing with the example, if 32 bytes are requested with pMalloc(32), 
         level 2 list its NOT going to be initialized or even try to search for a 
         free block as every request has one header size (mentioned bellow) before 

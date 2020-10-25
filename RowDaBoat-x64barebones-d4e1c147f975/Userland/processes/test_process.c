@@ -2,12 +2,13 @@
 #include "test_util.h"
 #include <stddef.h>
 #include "shell.h"
+#include "processLib.h"
 //TO BE INCLUDED
 void endless_loop(){
   while(1);
 }
 
-#define MAX_PROCESSES 10 //Should be around 80% of the the processes handled by the kernel
+#define MAX_PROCESSES 6 //Should be around 80% of the the processes handled by the kernel
 
 enum State {ERROR, RUNNING, BLOCKED, KILLED};
 
@@ -21,25 +22,23 @@ void test_processes(int argc, char * argv[]){
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
+  printf("Starting process test\n");
   int i = 0;
-  printf("Entrando \n");
-  while (i++ < 10){
-
+  while (1){
     // Create MAX_PROCESSES processes
     for(rq = 0; rq < MAX_PROCESSES; rq++){
         char * argv[] = {"endless_loop",NULL};
       p_rqs[rq].pid = _execv(endless_loop,1,argv,0);  // TODO: Port this call as required
-
+      printf("execv of process %d return\n",p_rqs[rq].pid);
       if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
         printf("Error creating process\n");               // TODO: Port this as required
-        return;
+        _exit();;
       }else{
         p_rqs[rq].state = RUNNING;
         alive++;
       }
     }
-    ps();
-
+  //printf("%d\n",i++);
     // Randomly kills, blocks or unblocks processes until every one has been killed
     while (alive > 0){
 
@@ -51,7 +50,7 @@ void test_processes(int argc, char * argv[]){
             if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED){
               if (kill(p_rqs[rq].pid) == -1){          // TODO: Port this as required
                 printf("Error killing process\n");        // TODO: Port this as required
-                return;
+                _exit();
               }
               p_rqs[rq].state = KILLED; 
               alive--;
@@ -62,7 +61,7 @@ void test_processes(int argc, char * argv[]){
             if (p_rqs[rq].state == RUNNING){
               if(block(p_rqs[rq].pid,1) == -1){          // TODO: Port this as required
                 printf("Error blocking process\n");       // TODO: Port this as required
-                return;
+                _exit();
               }
               p_rqs[rq].state = BLOCKED; 
             }
@@ -75,11 +74,11 @@ void test_processes(int argc, char * argv[]){
         if (p_rqs[rq].state == BLOCKED && GetUniform(2) % 2){
           if(block(p_rqs[rq].pid,0) == -1){            // TODO: Port this as required
             printf("Error unblocking process\n");         // TODO: Port this as required
-            return;
+            _exit();
           }
           p_rqs[rq].state = RUNNING; 
         }
     } 
   }
-  printf("Termine\n");
+  _exit();
 }

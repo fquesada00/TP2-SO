@@ -86,6 +86,8 @@ int pKill(int pid)
     listElem_t el;
     if ((l = get(&readyHeader, e)) != NULL)
     {
+        if (l->data.state == Ready)
+            readyHeader.ready--;
         l->data.state = Terminated;
         l->tickets = 0;
         //closePID(pid, 0);
@@ -107,49 +109,20 @@ int blockProcess(int pid, int block)
     listElem_t *le;
     le = get(&readyHeader, e);
     State change;
-    if (block)
-    {
-        change = Blocked;
-        //if(readyHeader.ready > 0)
-        if (le->data.state != Blocked)
-            readyHeader.ready--;
-    }
-    else
-    {
-        change = Ready;
-        if (le->data.state != Ready)
-            readyHeader.ready++;
-    }
-    /*Header *toRemove;
-    Header *toInsert;
-    State change;
-    e.PID = pid;
-    if (block)
-    {
-        toRemove = &readyHeader;
-        toInsert = &blockedHeader;
-        change = Blocked;
-    }
-    else
-    {
-        toRemove = &blockedHeader;
-        toInsert = &readyHeader;
-        change = Ready;
-    }
-    if(pid == readyHeader.current->data.PID)
-    {
-        return -1;
-    }
-    le = removeElement(toRemove, e);
-    le.data.state = change;
-    if (le.priority == -1)
-        return -1;
-    if (toInsert->first == NULL)
-        initList(toInsert, le.data, le.priority, le.tickets);
-    else
-        push(toInsert, le.data, le.priority, le.tickets);*/
     if (le != NULL)
     {
+        if (block)
+        {
+            change = Blocked;
+            if (le->data.state != Blocked)
+                readyHeader.ready--;
+        }
+        else
+        {
+            change = Ready;
+            if (le->data.state != Ready)
+                readyHeader.ready++;
+        }
         if (le->data.state != Terminated)
         {
             le->data.state = change;
@@ -273,10 +246,10 @@ void nice(int pid, int p)
     }
     process->priority = p;
     process->data.privilege = p;
-    process->tickets = 0;
 }
 int exit(int status)
 {
+    readyHeader.ready--;
     readyHeader.current->data.state = Terminated;
     //if(readyHeader.ready > 0)
     readyHeader.current->tickets = 0;
@@ -322,7 +295,8 @@ void blockCurrent(int id, BlockReason reason)
     //if(readyHeader.ready > 0)
     if (readyHeader.current->data.state != Terminated)
     {
-        readyHeader.ready--;
+        if(readyHeader.current->data.state == Ready)
+            readyHeader.ready--;
         readyHeader.current->data.state = Blocked;
         readyHeader.current->data.BlockID = id;
         readyHeader.current->data.reason = reason;

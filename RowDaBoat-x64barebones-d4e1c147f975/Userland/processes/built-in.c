@@ -4,6 +4,7 @@
 #include "pipeLib.h"
 #include "sysLib.h"
 #include <stdint.h>
+#include "stdioLib.h"
 void help()
 {
     printf("\n\n\t\t\t\t\t\t\t\t\t\tSHELL COMMANDS LIST\n\n\n");
@@ -28,9 +29,17 @@ void help()
 void ps(void)
 {
     printProcesses();
-    _exit();
+    return;
 }
 
+
+
+int kill(int pid){
+    if(pid <= 0)
+        return -1;
+    return pKill(pid);
+
+}
 int block(int pid, int block)
 {
     if (block > 1 || block < 0 || pid <= 0)
@@ -38,17 +47,10 @@ int block(int pid, int block)
     return pBlock(pid, block);
 }
 
-int kill(int pid){
-    if(pid <= 0)
-        return -1;
-    pKill(pid);
-
-}
-
-
-int nice(int pid, int p){
+void nice(int pid, int p){
     if(pid <= 0 || p < 0 || p > MAXPRIVILAGE)
-        return -1;
+        return;
+    _nice(pid,p);
 }
 
 void sem(){

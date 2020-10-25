@@ -2,9 +2,8 @@
 #include "sysLib.h"
 #include "processLib.h"
 #define EOF -1
-int filter(int argc, char **argv)
+void filter(int argc, char **argv)
 {
-    int idx = 0;
     char c;
     char writeB[256] = {0};
     while((c = getchar()) != EOF){

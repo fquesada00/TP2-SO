@@ -106,11 +106,11 @@ int isEmpty(Header *head)
     return head->first == NULL;
 }
 
-elem_t next(Header *head)
+elem_t * next(Header *head)
 {
     elem_t ret = {0};
     if (isEmpty(head) || head == NULL)
-        return ret;
+        return NULL;
 
     listElem_t *start = head->first;
 
@@ -119,7 +119,7 @@ elem_t next(Header *head)
     else
         head->current = head->current->next;
     elem_t e = (head->current->data);
-    return e;
+    return &e;
 }
 
 //gets element and removes the node from the list

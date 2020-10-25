@@ -40,7 +40,7 @@ void push(Header * head, elem_t d, int p, int tickets); //Este anda bien!
 
 int isEmpty(Header * head); //Esta anda bien
 
-elem_t next(Header * head); //Este anda bien
+elem_t * next(Header * head); //Este anda bien
 
 listElem_t removeCurrent(Header * head);
 

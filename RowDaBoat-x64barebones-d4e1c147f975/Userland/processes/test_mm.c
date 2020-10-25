@@ -1,7 +1,9 @@
 #include "test_util.h"
 #include "stdioLib.h"
 #include <stddef.h>
-
+#include "processLib.h"
+#include "memoryLib.h"
+#include "standardlib.h"
 #define MAX_BLOCKS 128
 #define MAX_MEMORY 3355444 //Should be around 80% of memory managed by the MM
 
@@ -11,12 +13,10 @@ typedef struct MM_rq{
 }mm_rq;
 
 void test_mm(int argc, char * argv[]){
-    printf("Arranco el check\n");
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
   uint32_t total;
-  int i = 0;
-  while (i++ < 1000){
+  while (1){
     rq = 0;
     total = 0;
 
@@ -48,5 +48,5 @@ void test_mm(int argc, char * argv[]){
       if (mm_rqs[i].address != NULL)
         pFree(mm_rqs[i].address);  // TODO: Port this call as required
   }
-  printf("OUT");
+  _exit();
 }
