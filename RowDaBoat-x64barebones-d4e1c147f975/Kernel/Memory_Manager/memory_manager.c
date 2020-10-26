@@ -1,4 +1,4 @@
-#if !defined MM_BUDDY && !defined MM_BUDDY2
+#if !defined MM_BUDDY
 #include "memory_manager.h"
 #include "memory_manager_lib.h"
 #include "standardLib.h"

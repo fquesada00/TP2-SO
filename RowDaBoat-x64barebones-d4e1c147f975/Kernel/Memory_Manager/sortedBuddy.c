@@ -1,4 +1,4 @@
-#ifdef MM_BUDDY2
+#ifdef MM_BUDDY
 #include "buddy_memory_manager.h"
 #include "memory_manager_lib.h"
 #include "standardLib.h"

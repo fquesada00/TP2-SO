@@ -300,7 +300,7 @@ int pKill(int pid)
 
 void processStatus()
 {
-    int width = (SCREEN_WIDTH / CHARSIZE) / 6; // Here 6 its the number of words we want to print. If wanted more or less word per line, change it
+    int width = (SCREEN_WIDTH / CHARSIZE) / 7; // Here 6 its the number of words we want to print. If wanted more or less word per line, change it
     int widthHeader = width + 5;
     char buffer[256] = {0};
     char separation[256] = "                                                              ";
@@ -318,6 +318,9 @@ void processStatus()
     syscall_write(1, buffer, length);
     syscall_write(1, separation, width - length);
     length = strcpy(buffer, "BP");
+    syscall_write(1, buffer, length);
+    syscall_write(1, separation, width - length);
+    length = strcpy(buffer, "FG");
     syscall_write(1, buffer, length);
     syscall_write(1, separation, width - length);
     length = strcpy(buffer, "STATE");
@@ -338,15 +341,18 @@ void processStatus()
         syscall_write(1, separation, width - length);
         length = uintToBase(next->priority, buffer, 10);
         syscall_write(1, buffer, length);
-        syscall_write(1, separation, width - length);
+        syscall_write(1, separation, width - length-1);
         length = strcpy(buffer, "0x");
         length += uintToBase(next->data.rsp, auxBuff, 16);
         strcat(buffer, auxBuff);
         syscall_write(1, buffer, length);
-        syscall_write(1, separation, width - length);
+        syscall_write(1, separation, width - length+1);
         length = strcpy(buffer, "0x");
         length += uintToBase(next->data.StackBase, auxBuff, 16);
         strcat(buffer, auxBuff);
+        syscall_write(1, buffer, length);
+        syscall_write(1, separation, width - length+1);
+        length = uintToBase(next->data.fg, buffer, 10);
         syscall_write(1, buffer, length);
         syscall_write(1, separation, width - length);
         switch (next->data.state)
