@@ -48,6 +48,7 @@ EXTERN waitPID
 EXTERN yield
 EXTERN pExit
 EXTERN printPipe
+EXTERN flushFD
 
 SECTION .text
 
@@ -284,6 +285,8 @@ _syscallHandler:
 	je .exit
 	cmp rax,26
 	je .print_pipe
+	cmp rax,27
+	je .flushFD
 	jmp .end
 .read:
 	push rdi
@@ -379,6 +382,9 @@ _syscallHandler:
 	jmp .end
 .print_pipe:
 	call printPipe
+	jmp .end
+.flushFD:
+	call flushFD
 	jmp .end
 .end:
 	popStateNoRAX

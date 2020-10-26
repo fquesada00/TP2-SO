@@ -8,4 +8,5 @@ int printf(const char *fmt, ...);
 int scanf(const char *fmt, ...);
 int getchar();
 void putchar(char c);
+extern void flushFD(int fd);
 #endif

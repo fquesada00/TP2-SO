@@ -23,6 +23,7 @@ GLOBAL _waitPID
 GLOBAL _yield
 GLOBAL _exit
 GLOBAL pipePrint
+GLOBAL flushFD
 
 SECTION .text
 
@@ -249,5 +250,13 @@ pipePrint:
     int 80h
     mov rsp,rbp
     pop rbp
-    mov rax,0
-    call _exit
+    ret
+
+flushFD:
+    push rbp
+    mov rbp,rsp
+    mov rax,27
+    int 80h
+    mov rsp,rbp
+    pop rbp
+    ret

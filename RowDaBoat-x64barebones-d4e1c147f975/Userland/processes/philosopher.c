@@ -6,7 +6,7 @@
 #define ME_COMO_LA_VIDA 2
 #define ME_VOY_DE_LA_MESA 3
 
-#define CANT_FILOSOFOS_MAX 7
+#define CANT_FILOSOFOS_MAX 20
 extern int table[CANT_FILOSOFOS_MAX];
 extern int num;   //var global que indica las posiciones de la tabla de cada filosofo
 extern int remover;
@@ -90,6 +90,8 @@ void removerAUnVago(){
         semPost("mutex");
         return;
     }
+
+    //c.c..c. rrr
     for(int i = 0; i < CANT_FILOSOFOS_MAX; i++) 
         if(table[i] == ME_COMO_LA_VIDA){ 
             table[i] = ME_VOY_DE_LA_MESA;

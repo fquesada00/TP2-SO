@@ -49,7 +49,6 @@ void shell()
 {
     printf("\nInitializing shell\n");
     printf("\nType 'help' to see the shell commands list\n");
-    _yield();
     char FirstCommand[256] = {0};
     char SecondCommand[256] = {0};
     char ThirdCommand[256] = {0};
@@ -148,8 +147,6 @@ void shell()
 
                     argv[argsRead] = NULL;
                     waiting = _execv(cmd[cmdIdx1], argsRead, argv, foreground);
-                    printf("Sali");
-                    _yield();
                     if (wait)
                         _waitPID(waiting);
                     break;

@@ -77,11 +77,17 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
 {
     void * toFree = pMalloc(stackSize * sizeof(uint64_t));
     void * rsp = toFree;
-    if ((size_t *)rsp != NULL)
+    if (rsp != NULL)
     {
         rsp += stackSize*sizeof(uint64_t) - (sizeof(uint64_t));
         int pid = currentPIDs++;
         init_registers(entry, argc, argv, rsp);
+        char **args = pMalloc(argc * sizeof(char *));
+        for (int i = 0; i < argc; i++)
+        {
+            args[i] = pMalloc((strlen(argv[i])+1) * sizeof(char));
+            strcpy(args[i], argv[i]);
+        }
         int i = 0;
         for (; i < MAX_PIPE; i++)
         {
@@ -92,12 +98,12 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
         }
         if (i == MAX_PIPE)
             return -1;
-        init_PCBwithPipe(rsp, pid, argv[0], fd, &pipes[i], mode, fg, toFree);
+        init_PCBwithPipe(rsp, pid, fd, &pipes[i], mode,argc,argv, fg, toFree);
         return pid;
     }
     return -1;
 }
-int init_PCBwithPipe(void * rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode, int fg, void * toFree)
+int init_PCBwithPipe(void * rsp, int pid, int fd, pipe_t *pipe, int mode,int argc, char ** argv, int fg, void * toFree)
 {
     if (fd > MAX_FDS || fd < 0)
         return -1;
@@ -106,6 +112,9 @@ int init_PCBwithPipe(void * rsp, int pid, const char *name, int fd, pipe_t *pipe
     e.rsp = (uint64_t)rsp - sizeof(Swapping);
     e.StackBase = (uint64_t)rsp;
     e.privilege = 5;
+    strcpy(e.name, argv[0]);
+    e.argv = argv;
+    e.argc = argc;
     e.fg = fg;
     e.toFree = toFree;
     if (fg)
@@ -133,7 +142,6 @@ int init_PCBwithPipe(void * rsp, int pid, const char *name, int fd, pipe_t *pipe
         e.fds[fd]->reading++;
     e.state = Ready;
     readyHeader.ready++;
-    strcpy(e.name, name);
     push(&readyHeader, e, 5, 5);
     PCB *insert = getPCB(e.PID);
     add(MAX_BLOCKED_PID, insert, pipe->openedPID);

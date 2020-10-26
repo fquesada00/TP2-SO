@@ -148,6 +148,12 @@ listElem_t removeElement(Header *head, elem_t elem)
         pop(head);
         return le;
     }
+    if(head->current == next)
+        if(head->current->next != NULL)
+            head->current=head->current->next;
+        else
+            head->current=head->first;
+            
     current->next = next->next;
     le = *next;
     pFree(next);

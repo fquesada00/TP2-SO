@@ -97,10 +97,8 @@ void putCharColor(char c, char r, char g, char b)
         deleteChar();
     else if (c == '\t')
         puts("    ");
-    else if (c == 1)
-        changeScreen(0);
-    else if (c == 2)
-        changeScreen(1);
+    else if(c == -1)
+        return;
     else
     {
         //Accedo al mapa de bits de la fuente y tomo el mapa del caracter deseado

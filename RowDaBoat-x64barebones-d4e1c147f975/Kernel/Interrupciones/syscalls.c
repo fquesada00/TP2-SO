@@ -67,3 +67,11 @@ void writeToStd(char * buff,size_t n, file_t *f){
     unblockProcess(f->id, FD_READ);
     return;
 }
+
+void flushFD(int fd){
+    if(readyHeader.current->data.fds[fd] != NULL)
+    {
+        while(*readyHeader.current->data.fds[fd]->idxRead < ((*readyHeader.current->data.fds[fd]->idxWrite) - 1))
+            (*readyHeader.current->data.fds[fd]->idxRead)++;
+    }
+}
