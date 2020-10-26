@@ -1,13 +1,12 @@
 #ifndef _PIPE_H_
 #define _PIPE_H_
-#include <stdint.h>
-#include "fileDescriptor.h"
-#include "semaphores.h"
+#include "ctes.h"
+#include "fds.h"
 #include "scheduler.h"
-#define MAX_PIPE 10
+#include <stdint.h>
 typedef struct pipe{
     char *buff;
-    char name[BUF_SIZE];
+    char name[BUFF_SIZE];
     file_t * fd[2];
     PCB * blockedPID[MAX_BLOCKED_PID];
     PCB * openedPID[MAX_BLOCKED_PID];

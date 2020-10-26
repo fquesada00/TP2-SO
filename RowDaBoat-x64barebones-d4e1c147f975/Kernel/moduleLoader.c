@@ -1,14 +1,13 @@
 #include <stdint.h>
-#include <lib.h>
+#include <standardLib.h>
 #include <moduleLoader.h>
-#include <naiveConsole.h>
-#include "video_driver.h"
+#include <stddef.h>
 static void loadModule(uint8_t ** module, void * targetModuleAddress);
 static uint32_t readUint32(uint8_t ** address);
 
 void loadModules(void * payloadStart, void ** targetModuleAddress)
 {
-	int i;
+	size_t i;
 	uint8_t * currentModule = (uint8_t*)payloadStart;
 	uint32_t moduleCount = readUint32(&currentModule);
 
@@ -19,20 +18,8 @@ void loadModules(void * payloadStart, void ** targetModuleAddress)
 static void loadModule(uint8_t ** module, void * targetModuleAddress)
 {
 	uint32_t moduleSize = readUint32(module);
-	/*
-	puts("  Will copy module at 0x");
-	ncPrintHex((uint64_t)*module);
-	puts(" to 0x");
-	ncPrintHex((uint64_t)targetModuleAddress);
-	puts(" (");
-	ncPrintDec(moduleSize);
-	puts(" bytes)");
-*/
 	memcpy(targetModuleAddress, *module, moduleSize);
 	*module += moduleSize;
-
-	/*puts(" [Done]");
-	newLine();*/
 }
 
 static uint32_t readUint32(uint8_t ** address)

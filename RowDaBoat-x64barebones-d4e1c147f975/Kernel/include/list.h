@@ -4,7 +4,6 @@
 //Implementacion de listas de prioridad basada en https://www.geeksforgeeks.org/priority-queue-using-linked-list/
 typedef PCB elem_t;
 
-
 typedef struct ListElem { 
     elem_t data; 
   
@@ -32,13 +31,13 @@ void initList(Header * head,elem_t firstNode, int p, int ticket);
 
 listElem_t* newNode(elem_t d, int p, int tickets);
 
-elem_t peek(Header * head); //Esta anda bien
+elem_t peek(Header * head); 
 
-void pop(Header * head); //Este anda bien 
+void pop(Header * head); 
 
-void push(Header * head, elem_t d, int p, int tickets); //Este anda bien!
+void push(Header * head, elem_t d, int p, int tickets); 
 
-int isEmpty(Header * head); //Esta anda bien
+int isEmpty(Header * head); 
 
 elem_t * next(Header * head); //Este anda bien
 

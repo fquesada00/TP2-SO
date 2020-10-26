@@ -8,7 +8,7 @@ void endless_loop(){
   while(1);
 }
 
-#define MAX_PROCESSES 6 //Should be around 80% of the the processes handled by the kernel
+#define MAX_PROCESSES 5 //Should be around 80% of the the processes handled by the kernel
 
 enum State {ERROR, RUNNING, BLOCKED, KILLED};
 
@@ -23,8 +23,8 @@ void test_processes(int argc, char * argv[]){
   uint8_t alive = 0;
   uint8_t action;
   printf("Starting process test\n");
-  int i = 0;
   while (1){
+    printf("hoal");
     // Create MAX_PROCESSES processes
     for(rq = 0; rq < MAX_PROCESSES; rq++){
         char * argv[] = {"endless_loop",NULL};

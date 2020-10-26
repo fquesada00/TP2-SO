@@ -1,22 +1,17 @@
-#include <stdint.h>
-#include <stddef.h>
 #include "semaphores.h"
-#include "scheduler.h"
+#include "ctes.h"
 #include "list.h"
 #include "interrupts.h"
 #include "standardstring.h"
 #include "arrayCircular.h"
 #include "arrayPCBOrdenN.h"
-
-extern uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base);
-extern Header readyHeader;
+#include "scheduler.h"
+#include "standardLib.h"
+#include "syscalls.h"
+#include <stdint.h>
 extern size_t _xchg(uint64_t pointer, size_t value);
-extern int syscall_write(int fd, const char *buff, size_t bytes);
-extern void unblockProcess(int fd, BlockReason reason);
-extern void blockCurrent(int fd, BlockReason reason);
-extern void _int20();
-sem_t semaphores[MAX_SEM] = {0};
-extern int unblockProcessByPCB(PCB *pcb);
+extern Header readyHeader;
+sem_t semaphores[MAX_SEM] = {{0}};
 void acquire(sem_t *sem)
 {
     while (_xchg(&(sem->lock), 0) != 1)

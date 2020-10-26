@@ -1,7 +1,9 @@
-#ifndef KEYBOARDDRIVER_H_
-#define KEYBOARDDRIVER_H_
-#include <stdint.h>
-void keyboardHandler(uint64_t rsp);
-int is_buffer_empty();
-char get_buffer();
+#ifndef _KEYBOARD_DRIVER_H_
+#define _KEYBOARD_DRIVER_H_
+#define EOF -1
+void keyboardHandler();
+void writeToBuff(char c);
+extern char getKeyboardScanCode();
+//static void int_20();
+void int_21();
 #endif

@@ -1,8 +1,5 @@
-#include <stdint.h>
 #include "video_driver.h"
 #include "font8x8_basic.h"
-#include "fileDescriptor.h"
-file_t * stdout;
 struct vbe_mode_info_structure
 {
     uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
@@ -94,8 +91,6 @@ void putChar(char c)
 /*Escribe el caracter a la posicion actual de la pantalla con un color RGB y amenta el current*/
 void putCharColor(char c, char r, char g, char b)
 {
-    if (r > 255 || g > 255 || b > 255)
-        return;
     if (c == '\n')
         newLine();
     else if (c == '\b')
@@ -104,7 +99,7 @@ void putCharColor(char c, char r, char g, char b)
         puts("    ");
     else if (c == 1)
         changeScreen(0);
-   else if (c == 2)
+    else if (c == 2)
         changeScreen(1);
     else
     {

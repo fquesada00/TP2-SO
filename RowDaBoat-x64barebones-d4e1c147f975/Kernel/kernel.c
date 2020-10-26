@@ -1,13 +1,13 @@
 #include <stdint.h>
-#include <string.h>
-#include <lib.h>
+#include <standardLib.h>
+#include <stddef.h>
 #include <moduleLoader.h>
+#include "kernel.h"
+#include <stdint.h>
 #include "idtLoader.h"
 #include "video_driver.h"
-
-extern int initProcessManager(void *entry_point, int argc, char *argv[], int fg);
-extern void init();
-extern void init_fds();
+#include "init.h"
+#include "fds.h"
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -57,6 +57,4 @@ int main(){
 	initProcessManager(init,1,argv,0);
 	puts("Something wrong");
 	return 0;
-	
-	
 }

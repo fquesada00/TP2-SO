@@ -5,18 +5,11 @@
 #include <stddef.h>
 
 #define BASE_ADDRESS (size_t) 0x800000
-#define END_ADDRESS (size_t) 0x10000000
+#define END_ADDRESS (size_t) 0x1000000
 #define HEAP_SIZE (size_t) BASE_ADDRESS - (size_t)END_ADDRESS 
 
 #define WORD_ALIGN 8 
 #define WORD_ALIGN_MASK 7
-
-typedef struct a_block
-{
-    struct a_block *nextBlock;
-    size_t blockSize;
-    int level;
-} a_block;
 
 /*
     Reserve requestedSize bytes in heap

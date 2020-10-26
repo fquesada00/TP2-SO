@@ -124,6 +124,7 @@ void shell()
                 switch (argsRead)
                 {
                 case 1:
+                    printf("%s",FirstCommand);
                     strcpy(argv[0], FirstCommand);
                     argv[argsRead] = NULL;
                     waiting = _execv(cmd[cmdIdx1], argsRead, argv, foreground);
