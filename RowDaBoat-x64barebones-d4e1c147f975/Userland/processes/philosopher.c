@@ -11,9 +11,7 @@ extern int table[CANT_FILOSOFOS_MAX];
 extern int num;   //var global que indica las posiciones de la tabla de cada filosofo
 extern int remover;
 extern char * S[CANT_FILOSOFOS_MAX];
-void sleep(){
-    for (int i = 0; i < 100000; i++);
-}
+
 
 
 void hungry(int myNum);
@@ -47,6 +45,9 @@ void finishEating(int myNum);
 //     syscallSemClose("mutex");
 //     syscallSemClose(S[fil]);
 // }
+void sleep(int j){
+    for(int i = 0; i< j*100000000; i++);
+}
 void filosofo(int argc,char * argv[])
 {
     semOpen("mutex",1,0);
@@ -57,8 +58,10 @@ void filosofo(int argc,char * argv[])
     while (1)
     {
         _yield();
+        sleep(1);
         hungry(myNum);
         _yield();
+        sleep(2);
         finishEating(myNum);
         if (table[filIzquierda(myNum)] == ME_RASCO_EL_BOLERO && table[filDerecha(myNum)] == ME_RASCO_EL_BOLERO)
         {
@@ -120,6 +123,7 @@ void tryToEat(int fil)
 {
     if (table[fil] == ME_PICA_EL_BAGRE && table[filIzquierda(fil)] != ME_COMO_LA_VIDA && table[filDerecha(fil)] != ME_COMO_LA_VIDA)
     {
+        printTableState();
         table[fil] = ME_COMO_LA_VIDA;
         // printf("entre %d\n",fil);
         //printTableState();
