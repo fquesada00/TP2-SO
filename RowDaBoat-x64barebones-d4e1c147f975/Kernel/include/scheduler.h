@@ -32,6 +32,7 @@ typedef struct PCB
     State state;
     int argc;
     int fg;
+    void * toFree;
 } PCB;
 
 typedef struct Swapping
@@ -58,14 +59,15 @@ typedef struct Swapping
     uint64_t ss;
 } Swapping;
 
-int schedule(uint64_t rsp);
+int schedule(void * rsp);
 int init_process(void *entry_point, int argc, char *argv[], int fg);
-void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp);
-void init_PCB(uint64_t rsp, int pid, char **args, int argcount, int fg);
+void init_registers(void *entry_point, int argc, char *argv[], void * rsp);
+void init_registers(void *entry_point, int argc, char *argv[], void * rsp);
+void init_PCB(void * rsp, int pid, char **args, int argcount, int fg, void * free);
 PCB *getPCB(size_t pid);
 void unblockProcessByPCB(PCB *process);
 int getPID();
-int waitPID(int pid);
+void waitPID(int pid);
 void realeaseWaiting(int pid);
 void nice(int pid, int p);
 int pExit();

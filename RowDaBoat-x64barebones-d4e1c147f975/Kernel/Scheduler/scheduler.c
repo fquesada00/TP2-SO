@@ -18,11 +18,11 @@ int initializing = 1;
 uint64_t stackSize = 0x10000;
 void closeCurrentProcess(int fd);
 PCB* terminated(PCB *pcb);
-int schedule(uint64_t rsp)
+int schedule(void * rsp)
 {
     if (!initializing && readyHeader.current->data.state != Terminated)
     {
-        (readyHeader).current->data.rsp = rsp;
+        (readyHeader).current->data.rsp = (uint64_t)rsp;
     }
     else
         initializing = 0;
@@ -37,7 +37,8 @@ int schedule(uint64_t rsp)
         {
             pFree(l.data.argv[i]);
         }
-        pFree((void *)(l.data.StackBase - stackSize + sizeof(uint64_t)));
+        pFree(l.data.argv);
+        pFree(l.data.toFree);
     }
     if (readyHeader.ready == 0)
     {
@@ -64,10 +65,11 @@ int schedule(uint64_t rsp)
 
 int init_process(void *entry_point, int argc, char *argv[], int fg)
 {
-    uint64_t rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
-    if ((size_t *)rsp != NULL)
+    void * toFree = pMalloc(stackSize * sizeof(uint64_t));
+    void * rsp = toFree;
+    if (rsp != NULL)
     {
-        rsp += stackSize - (sizeof(uint64_t));
+        rsp += stackSize * sizeof(uint64_t) - (sizeof(uint64_t));
         int pid = currentPIDs++;
         char **args = pMalloc(argc * sizeof(char *));
         for (int i = 0; i < argc; i++)
@@ -76,17 +78,17 @@ int init_process(void *entry_point, int argc, char *argv[], int fg)
             strcpy(args[i], argv[i]);
         }
         init_registers(entry_point, argc, args, rsp);
-        init_PCB(rsp, pid, args, argc, fg);
+        init_PCB(rsp, pid, args, argc, fg,toFree);
         return pid;
     }
     return -1;
 }
 
-void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
+void init_registers(void *entry_point, int argc, char *argv[], void * rsp)
 {
     Swapping *init = (void *)rsp - sizeof(Swapping);
     init->ss = 0x0;
-    init->rsp = rsp;
+    init->rsp = (uint64_t)rsp;
     init->flags = 0x202;
     init->cs = 0x8;
     init->rip = (uint64_t)entry_point;
@@ -94,7 +96,7 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->rbx = 2;
     init->rcx = 3;
     init->rdx = 4;
-    init->rbp = rsp;
+    init->rbp = (uint64_t)rsp;
     init->rdi = argc;
     init->rsi = (uint64_t)argv;
     init->r8 = 8;
@@ -107,12 +109,12 @@ void init_registers(void *entry_point, int argc, char *argv[], uint64_t rsp)
     init->r15 = 15;
 }
 
-void init_PCB(uint64_t rsp, int pid, char **args, int argcount, int fg)
+void init_PCB(void * rsp, int pid, char **args, int argcount, int fg, void * toFree)
 {
     elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     e.PID = pid;
-    e.rsp = rsp - sizeof(Swapping);
-    e.StackBase = rsp;
+    e.rsp = (uint64_t)rsp - sizeof(Swapping);
+    e.StackBase = (uint64_t)rsp;
     e.privilege = 5;
     if (fg)
     {
@@ -129,6 +131,7 @@ void init_PCB(uint64_t rsp, int pid, char **args, int argcount, int fg)
     e.argv = args;
     e.argc = argcount;
     e.fg = fg;
+    e.toFree = toFree;
     if (initializing)
     {
         initList(&readyHeader, e, 5, 5);
@@ -221,7 +224,7 @@ void blockCurrent(int id, BlockReason reason)
     _int20();
     return;
 }
-int waitPID(int pid)
+void waitPID(int pid)
 {
     blockCurrent(pid, PID);
 }
@@ -373,13 +376,14 @@ PCB * terminated(PCB *pcb)
     closePID(pcb->PID, 1);
     PCB * next;
     listElem_t l = removeElement(&readyHeader, *pcb);
-    next = l.next;
+    next = &l.next->data;
     if (l.priority == -1)
         return;
     for (int i = 0; i < l.data.argc; i++)
     {
         pFree(l.data.argv[i]);
     }
-    pFree((l.data.StackBase - stackSize + sizeof(uint64_t)));
+    pFree(l.data.argv);
+    pFree(l.data.toFree);
     return next;
 }

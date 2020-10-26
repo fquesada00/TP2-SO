@@ -62,9 +62,6 @@ void pipe()
     pipePrint();
     return;
 }
-void phylo(){
-    return;
-}
 void mem(uint64_t address){
     printMemoryFromAddress(address);
 }

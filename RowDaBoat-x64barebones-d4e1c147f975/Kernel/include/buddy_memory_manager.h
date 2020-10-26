@@ -1,3 +1,5 @@
+
+#ifdef MM_BUDDY2 || MM_BUDDY
 #ifndef _BUDDY_MEMORY_MANAGER_H_
 #define _BUDDY_MEMORY_MANAGER_H_
 
@@ -90,4 +92,5 @@ void initialize();
 //     Return value on success is 1, if not, 0
 // */
 // int isBlocked(a_block *block);
+#endif
 #endif

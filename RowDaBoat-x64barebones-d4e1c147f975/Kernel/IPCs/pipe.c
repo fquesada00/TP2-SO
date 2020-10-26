@@ -75,10 +75,11 @@ int pipeOpen(int fds[2], const char *name)
 }
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode, int fg) //mode en r9
 {
-    uint64_t rsp = (uint64_t)pMalloc(stackSize * sizeof(uint64_t));
+    void * toFree = pMalloc(stackSize * sizeof(uint64_t));
+    void * rsp = toFree;
     if ((size_t *)rsp != NULL)
     {
-        rsp += stackSize - (sizeof(uint64_t));
+        rsp += stackSize*sizeof(uint64_t) - (sizeof(uint64_t));
         int pid = currentPIDs++;
         init_registers(entry, argc, argv, rsp);
         int i = 0;
@@ -91,21 +92,22 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
         }
         if (i == MAX_PIPE)
             return -1;
-        init_PCBwithPipe(rsp, pid, argv[0], fd, &pipes[i], mode, fg);
+        init_PCBwithPipe(rsp, pid, argv[0], fd, &pipes[i], mode, fg, toFree);
         return pid;
     }
     return -1;
 }
-int init_PCBwithPipe(uint64_t rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode, int fg)
+int init_PCBwithPipe(void * rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode, int fg, void * toFree)
 {
     if (fd > MAX_FDS || fd < 0)
         return -1;
-    elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0,0};
     e.PID = pid;
-    e.rsp = rsp - sizeof(Swapping);
-    e.StackBase = rsp;
+    e.rsp = (uint64_t)rsp - sizeof(Swapping);
+    e.StackBase = (uint64_t)rsp;
     e.privilege = 5;
     e.fg = fg;
+    e.toFree = toFree;
     if (fg)
     {
         e.fds[0] = stdin;

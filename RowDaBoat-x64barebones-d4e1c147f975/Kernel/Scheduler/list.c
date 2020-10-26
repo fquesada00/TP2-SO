@@ -157,7 +157,7 @@ listElem_t removeElement(Header *head, elem_t elem)
 
 listElem_t removeCurrent(Header *head)
 {
-    listElem_t e = {{{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0, 0};
+    listElem_t e = {{{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0, 0,0};
     if (isEmpty(head) || head->first == NULL)
         return e;
     listElem_t *next = head->current;
@@ -165,10 +165,8 @@ listElem_t removeCurrent(Header *head)
     {
         e = *(head->first);
         pop(head);
-        //printList(head);
         return e;
     }
-    //printList(head);
     if (head->current->next == NULL)
     {
         head->current->prev->next = NULL;
@@ -179,7 +177,6 @@ listElem_t removeCurrent(Header *head)
         head->current->next->prev = head->current->prev;
         head->current = head->current->prev;
     }
-    //printList(head);
     e = *next;
     pFree(next);
     return e;

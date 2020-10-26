@@ -1,3 +1,4 @@
+#if !defined MM_BUDDY && !defined MM_BUDDY2
 #ifndef _MEMORY_MANAGER_H_
 #define _MEMORY_MANAGER_H_
 
@@ -38,4 +39,5 @@ int removeBlock(a_block *remove);
 int isBlocked(a_block *block);
 
 
+#endif
 #endif

@@ -22,14 +22,11 @@ void test_processes(int argc, char * argv[]){
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
-  printf("Starting process test\n");
   while (1){
-    printf("hoal");
     // Create MAX_PROCESSES processes
     for(rq = 0; rq < MAX_PROCESSES; rq++){
         char * argv[] = {"endless_loop",NULL};
       p_rqs[rq].pid = _execv(endless_loop,1,argv,0);  // TODO: Port this call as required
-      printf("execv of process %d return\n",p_rqs[rq].pid);
       if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
         printf("Error creating process\n");               // TODO: Port this as required
         _exit();;
@@ -52,6 +49,7 @@ void test_processes(int argc, char * argv[]){
                 printf("Error killing process\n");        // TODO: Port this as required
                 _exit();
               }
+              _yield();
               p_rqs[rq].state = KILLED; 
               alive--;
             }

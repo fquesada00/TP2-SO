@@ -304,7 +304,7 @@ int findLevel(size_t requestedBytes)
 
 size_t getBlockNumber(a_block *header)
 {
-    size_t relativeStart = (uint8_t *)kernelStart - (uint8_t *)BASE_ADDRESS;
+    size_t relativeStart = (uint8_t *)header - (uint8_t *)BASE_ADDRESS;
     size_t relativeBlockNumber = relativeStart / BLOCK_SIZE(header->level);
     /*
             Add one so blocks are numbered: 1, 2, 3, 4 ...

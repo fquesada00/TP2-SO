@@ -10,7 +10,7 @@
 #include "test_util.h"
 #include "memoryLib.h"
 char *cmdName[] = {"ps", "loop", "help", "sem", "cat", "wc", "filter", "pipe", "phylo", "leo", "escribo", "test_mm", "test_prio", "test_processes", "test_no_sync", "test_sync", "mem", "kill", "nice", "block"};
-void *cmd[] = {ps, loop, help, sem, cat, wc, filter, pipe, phylo, leo, escribo, test_mm, test_prio, test_processes, test_no_sync, test_sync, mem, kill, nice, block};
+void *cmd[] = {ps, loop, help, sem, cat, wc, filter, pipe, philosopherTable, leo, escribo, test_mm, test_prio, test_processes, test_no_sync, test_sync, mem, kill, nice, block};
 int getCmd(char *cmd)
 {
     for (int i = 0; i < CANT_CMDS; i++)
@@ -49,7 +49,7 @@ void shell()
 {
     printf("\nInitializing shell\n");
     printf("\nType 'help' to see the shell commands list\n");
-
+    _yield();
     char FirstCommand[256] = {0};
     char SecondCommand[256] = {0};
     char ThirdCommand[256] = {0};
@@ -136,6 +136,7 @@ void shell()
 
                     if (strcmp(SecondCommand, "&") != 0)
                     {
+        
                         strcpy(argv[1], SecondCommand);
                     }
                     else
@@ -147,6 +148,8 @@ void shell()
 
                     argv[argsRead] = NULL;
                     waiting = _execv(cmd[cmdIdx1], argsRead, argv, foreground);
+                    printf("Sali");
+                    _yield();
                     if (wait)
                         _waitPID(waiting);
                     break;
