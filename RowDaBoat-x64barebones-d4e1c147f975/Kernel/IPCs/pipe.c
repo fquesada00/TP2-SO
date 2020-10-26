@@ -23,17 +23,26 @@ pipe_t pipes[MAX_PIPE] = {{0}};
 
 int pipeOpen(int fds[2], const char *name)
 {
-    int i = 0;
-    while (i < MAX_PIPE && strcmp(pipes[i].name, "") != 0)
+    int i = 0, isOpen = 0, pos = -1;
+    while (i < MAX_PIPE)
     {
+        if (pos == -1 && strcmp(pipes[i].name, "") == 0)
+        {
+            pos = i;
+        }
+        if (strcmp(pipes[i].name, name) == 0)
+        {
+            isOpen = 1;
+            break;
+        }
         i++;
     }
-    if (i == MAX_PIPE)
+    if (i == MAX_PIPE || isOpen)
         return -1;
     pipe_t p = {0};
-    pipes[i] = p;
-    pipes[i].buff = (char *)pMalloc(BUFF_SIZE);
-    strcpy(pipes[i].name, name);
+    pipes[pos] = p;
+    pipes[pos].buff = (char *)pMalloc(BUFF_SIZE);
+    strcpy(pipes[pos].name, name);
     int j = 0;
     while (j < MAX_FDS && readyHeader.current->data.fds[j] != NULL)
     {
@@ -43,12 +52,12 @@ int pipeOpen(int fds[2], const char *name)
         return -1;
     fds[0] = j;
     file_t *fd1 = (file_t *)pMalloc(sizeof(file_t));
-    fd1->read = pipes[i].buff;
+    fd1->read = pipes[pos].buff;
     fd1->reading = 1;
     fd1->write = NULL;
     fd1->writing = 0;
-    fd1->idxWrite = &pipes[i].idxW;
-    fd1->idxRead = &pipes[i].idxR;
+    fd1->idxWrite = &pipes[pos].idxW;
+    fd1->idxRead = &pipes[pos].idxR;
     fd1->type = PIPE;
     fd1->id = idFds;
     readyHeader.current->data.fds[j] = fd1;
@@ -60,27 +69,27 @@ int pipeOpen(int fds[2], const char *name)
         return -1;
     fds[1] = j;
     file_t *fd2 = (file_t *)pMalloc(sizeof(file_t));
-    fd2->write = pipes[i].buff;
+    fd2->write = pipes[pos].buff;
     fd2->writing = 1;
     fd2->read = NULL;
     fd2->reading = 0;
-    fd2->idxWrite = &pipes[i].idxW;
-    fd2->idxRead = &pipes[i].idxR;
+    fd2->idxWrite = &pipes[pos].idxW;
+    fd2->idxRead = &pipes[pos].idxR;
     fd2->type = PIPE;
     fd2->id = idFds++;
     readyHeader.current->data.fds[j] = fd2;
-    pipes[i].fd[0] = fd1;
-    pipes[i].fd[1] = fd2;
-    add(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[i].openedPID);
+    pipes[pos].fd[0] = fd1;
+    pipes[pos].fd[1] = fd2;
+    add(MAX_BLOCKED_PID, &readyHeader.current->data, pipes[pos].openedPID);
     return 0;
 }
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode, int fg) //mode en r9
 {
-    void * toFree = pMalloc(stackSize * sizeof(uint64_t));
-    void * rsp = toFree;
+    void *toFree = pMalloc(stackSize * sizeof(uint64_t));
+    void *rsp = toFree;
     if ((size_t *)rsp != NULL)
     {
-        rsp += stackSize*sizeof(uint64_t) - (sizeof(uint64_t));
+        rsp += stackSize * sizeof(uint64_t) - (sizeof(uint64_t));
         int pid = currentPIDs++;
         init_registers(entry, argc, argv, rsp);
         int i = 0;
@@ -98,11 +107,11 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
     }
     return -1;
 }
-int init_PCBwithPipe(void * rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode, int fg, void * toFree)
+int init_PCBwithPipe(void *rsp, int pid, const char *name, int fd, pipe_t *pipe, int mode, int fg, void *toFree)
 {
     if (fd > MAX_FDS || fd < 0)
         return -1;
-    elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0,0};
+    elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     e.PID = pid;
     e.rsp = (uint64_t)rsp - sizeof(Swapping);
     e.StackBase = (uint64_t)rsp;
@@ -122,7 +131,7 @@ int init_PCBwithPipe(void * rsp, int pid, const char *name, int fd, pipe_t *pipe
     {
         if (mode)
             e.fds[fd]->writing--;
-        else if(fg)
+        else if (fg)
             e.fds[fd]->reading--;
     }
     e.fds[fd] = pipe->fd[mode];
