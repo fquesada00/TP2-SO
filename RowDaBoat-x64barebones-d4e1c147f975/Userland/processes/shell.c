@@ -9,8 +9,8 @@
 #include "stringLib.h"
 #include "test_util.h"
 #include "memoryLib.h"
-char *cmdName[] = {"ps", "loop", "help", "sem", "cat", "wc", "filter", "pipe", "phylo", "leo", "escribo", "test_mm", "test_prio", "test_processes", "test_no_sync", "test_sync", "mem", "kill", "nice", "block"};
-void *cmd[] = {ps, loop, help, sem, cat, wc, filter, pipe, philosopherTable, leo, escribo, test_mm, test_prio, test_processes, test_no_sync, test_sync, mem, kill, nice, block};
+char *cmdName[] = {"sh","myPid","ps", "loop", "help", "sem", "cat", "wc", "filter", "pipe", "phylo", "leo", "escribo", "test_mm", "test_prio", "test_processes", "test_no_sync", "test_sync", "mem", "kill", "nice", "block"};
+void *cmd[] = {shell,myPid,ps, loop, help, sem, cat, wc, filter, pipePrint, philosopherTable, leo, escribo, test_mm, test_prio, test_processes, test_no_sync, test_sync, mem, kill, nice, block};
 int getCmd(char *cmd)
 {
     for (int i = 0; i < CANT_CMDS; i++)
@@ -22,6 +22,8 @@ int getCmd(char *cmd)
 }
 typedef enum ShellCmd
 {
+    SH,
+    MYPID,
     PS,
     LOOP,
     HELP,
@@ -45,33 +47,37 @@ typedef enum ShellCmd
 
 } ShellCmd;
 //agregar testeos
-void shell()
+void shell(int argc, char * argv[])
 {
     printf("\nInitializing shell\n");
     printf("\nType 'help' to see the shell commands list\n");
     char FirstCommand[256] = {0};
     char SecondCommand[256] = {0};
     char ThirdCommand[256] = {0};
+    char ForthCommand[256] = {0};
     int argsRead;
     int cmdIdx1, cmdIdx3;
     int waiting;
     int wait = 1;
     int foreground = 1;
     int pipe[2];
+    int actualPipe = 0;
     uint64_t memory;
     int pid, p, blockFlag;
-    char *argv[MAX_ARGS];
-    argv[0] =(char *) pMalloc(MAXLENGHT * sizeof(char));
-    argv[1] =(char *) pMalloc(MAXLENGHT * sizeof(char));
-    argv[2] =(char *) pMalloc(MAXLENGHT * sizeof(char));
+    char *argv1[MAX_ARGS];
+    argv1[0] =(char *) pMalloc(MAXLENGHT * sizeof(char));
+    argv1[1] =(char *) pMalloc(MAXLENGHT * sizeof(char));
+    argv1[12] =(char *) pMalloc(MAXLENGHT * sizeof(char));
     char *user =(char *) pMalloc(MAXLENGHT * sizeof(char));
+    char pipeName[256]={0};
+    strcpy(pipeName,"MyPipe");
     printf("\nBienvenido! Ingrese un nombre de usuario:\n\n");
     scanf("%s", user);
 
     do
     {
         printf(" /%s:~$ ", user);
-        argsRead = scanf("%s %s %s", FirstCommand, SecondCommand, ThirdCommand);
+        argsRead = scanf("%s %s %s %s", FirstCommand, SecondCommand, ThirdCommand, ForthCommand);
         putchar('\n');
         cmdIdx1 = getCmd(FirstCommand);
         if (cmdIdx1 != -1)
@@ -88,6 +94,12 @@ void shell()
                     break;
                 case SEM:
                     sem();
+                    break;
+                case PIPE:
+                    pipePrint();
+                    break;
+                case MYPID:
+                    myPid();
                     break;
                 case MEM:
                     memory = myAtoi(SecondCommand);
@@ -124,19 +136,19 @@ void shell()
                 {
                 case 1:
                     printf("%s",FirstCommand);
-                    strcpy(argv[0], FirstCommand);
-                    argv[argsRead] = NULL;
-                    waiting = _execv(cmd[cmdIdx1], argsRead, argv, foreground);
+                    strcpy(argv1[0], FirstCommand);
+                    argv1[argsRead] = NULL;
+                    waiting = _execv(cmd[cmdIdx1], argsRead, argv1, foreground);
                     _waitPID(waiting);
                     break;
                 case 2:
 
-                    strcpy(argv[0], FirstCommand);
+                    strcpy(argv1[0], FirstCommand);
 
                     if (strcmp(SecondCommand, "&") != 0)
                     {
         
-                        strcpy(argv[1], SecondCommand);
+                        strcpy(argv1[1], SecondCommand);
                     }
                     else
                     {
@@ -145,11 +157,14 @@ void shell()
                         argsRead = 1;
                     }
 
-                    argv[argsRead] = NULL;
-                    waiting = _execv(cmd[cmdIdx1], argsRead, argv, foreground);
+                    argv1[argsRead] = NULL;
+                    waiting = _execv(cmd[cmdIdx1], argsRead, argv1, foreground);
                     if (wait)
                         _waitPID(waiting);
                     break;
+                case 4:
+                    if(strcmp(ForthCommand, "&") == 0)
+                        foreground = 0;
                 case 3:
                     cmdIdx1 = getCmd(FirstCommand);
                     if (cmdIdx1 != -1)
@@ -159,29 +174,35 @@ void shell()
                             cmdIdx3 = getCmd(ThirdCommand);
                             if (cmdIdx3 != -1)
                             {
-                                pipeOpen(pipe, "MyPipe");
-                                strcpy(argv[0], FirstCommand);
-                                argv[1] = NULL;
-                                waiting = initProcessWithPipe(cmd[cmdIdx1], ARGSPIPE, argv, STDOUT_FILENO,
-                                                              "MyPipe", W, foreground);
-                                strcpy(argv[0], ThirdCommand);
-                                argv[1] = NULL;
-                                initProcessWithPipe(cmd[cmdIdx3], ARGSPIPE, argv, STDIN_FILENO,
-                                                    "MyPipe", R, foreground);
-                                _waitPID(waiting);
-                                pipeClose(pipe, "MyPipe");
+                                char pipeNum[256] = {0};
+                                uintToBase(actualPipe++,pipeNum,10);
+                                strcat(pipeName,pipeNum);
+                                pipeOpen(pipe, pipeName);
+                                strcpy(argv1[0], FirstCommand);
+                                argv1[1] = NULL;
+                                waiting = initProcessWithPipe(cmd[cmdIdx1], ARGSPIPE, argv1, STDOUT_FILENO,
+                                                              pipeName, W, foreground);
+                                strcpy(argv1[0], ThirdCommand);
+                                argv1[1] = NULL;
+                                initProcessWithPipe(cmd[cmdIdx3], ARGSPIPE, argv1, STDIN_FILENO,
+                                                    pipeName, R, foreground);
+                                if(foreground)
+                                    _waitPID(waiting);
+                                pipeClose(pipe, pipeName);
+                                strcpy(pipeName,"myPipe");
                             }
                         }
                         else
                         {
-                            strcpy(argv[0], FirstCommand);
-                            strcpy(argv[1], SecondCommand);
-                            strcpy(argv[2], ThirdCommand);
-                            argv[3] = NULL;
-                            waiting = _execv(cmd[cmdIdx1], argsRead, argv, foreground);
+                            strcpy(argv1[0], FirstCommand);
+                            strcpy(argv1[1], SecondCommand);
+                            strcpy(argv1[2], ThirdCommand);
+                            argv1[3] = NULL;
+                            waiting = _execv(cmd[cmdIdx1], argsRead, argv1, foreground);
                         }
                     }
                     break;
+
                 default:
                     break;
                 }
@@ -201,5 +222,6 @@ int isBuiltIn(int idx)
            idx == MEM ||
            idx == KILL ||
            idx == NICE ||
-           idx == BLOCK;
+           idx == BLOCK ||
+           idx == MYPID;
 }

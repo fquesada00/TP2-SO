@@ -1,7 +1,7 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
-#define MAX_ARGS 3
-#define CANT_CMDS 20
+#define MAX_ARGS 4
+#define CANT_CMDS 21
 #define MAXLENGHT 256
 #include <stdint.h>
 void ps(void);
@@ -14,4 +14,5 @@ void sem();
 void mem(uint64_t address);
 void pipe();
 int isBuiltIn(int idx);
+void myPid();
 #endif

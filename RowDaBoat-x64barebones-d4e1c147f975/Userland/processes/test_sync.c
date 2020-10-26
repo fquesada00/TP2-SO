@@ -53,7 +53,7 @@ void test_sync(int argc, char *argv[])
 
     globalVar = 0;
 
-    printf("CREATING PROCESSES...(WITHOUT SEM)\n");
+    printf("CREATING PROCESSES...(WITH SEM)\n");
 
     char *argv1[4];
     char *argv2[4];

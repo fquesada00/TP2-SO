@@ -151,3 +151,19 @@ int isNum(int a){
            a == '9';
 
 }
+int strcat(char* destination, const char* source)
+{
+	// make ptr point to the end of destination string
+	char* ptr = destination + strlen(destination);
+
+	// Appends characters of source to the destination string
+	while (*source != '\0')
+		*ptr++ = *source++;
+
+	// null terminate destination string
+	*ptr = '\0';
+    int i  = strlen(destination);
+
+	// destination is returned by standard strcat()
+	return i;
+}

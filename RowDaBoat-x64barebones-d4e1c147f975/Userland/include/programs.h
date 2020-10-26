@@ -1,6 +1,6 @@
 #ifndef _PROGRAMS_H_
 #define _PROGRAMS_H_
-
+void shell(int argc,char * argv[]);
 extern void wc(int argc,char * argv[]);
 extern void filter(int argc,char * argv[]);
 extern void leo(int argc,char * argv[]);
