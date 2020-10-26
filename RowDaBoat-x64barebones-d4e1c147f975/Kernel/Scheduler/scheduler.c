@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "memory_manager.h"
+#include "buddy_memory_manager.h"
 #include "video_driver.h"
 #include "fds.h"
 #include "interrupts.h"

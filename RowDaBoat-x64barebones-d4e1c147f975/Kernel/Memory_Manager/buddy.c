@@ -1,6 +1,6 @@
 #ifdef MM_BUDDY
     #include "buddy_memory_manager.h"
-    #include "memory.h"
+    #include "memory_manager_lib.h"
     /*
         This buddy memory manager works with lists of blocks
         of different size.
@@ -127,7 +127,7 @@
                 }
                 return;
             }
-            block = block->nextBlock;
+            block = block->pNextFreeBlock;
         }
     }
 
@@ -141,28 +141,28 @@
         */
         if (block == toRemove)
         {
-            headers[level] = block->nextBlock;
+            headers[level] = block->pNextFreeBlock;
             return;
         }
         /*
             Lookup to obtain the block to remove from the level
         */
-        while (block->nextBlock != NULL)
+        while (block->pNextFreeBlock != NULL)
         {
-            if (block->nextBlock == toRemove)
+            if (block->pNextFreeBlock == toRemove)
             {
-                block->nextBlock = toRemove->nextBlock;
+                block->pNextFreeBlock = toRemove->pNextFreeBlock;
                 return;
             }
             aux = block;
-            block = block->nextBlock;
+            block = block->pNextFreeBlock;
         }
         /*
             Maybe toRemove is the last block
         */
         if (block == toRemove)
         {
-            aux->nextBlock = NULL;
+            aux->pNextFreeBlock = NULL;
             return;
         }
         /*
@@ -181,7 +181,7 @@
             return NULL;
         } 
         void *returnValue = (void *)headers[level];
-        headers[level] = headers[level]->nextBlock;
+        headers[level] = headers[level]->pNextFreeBlock;
         return returnValue;
     }
 
@@ -212,20 +212,20 @@
         if (block == NULL)
         {
             block = (a_block *)header;
-            block->nextBlock = NULL;
+            block->pNextFreeBlock = NULL;
             block->level = level;
             headers[level] = block;
         }
         else
         {
-            while (block->nextBlock != NULL)
+            while (block->pNextFreeBlock != NULL)
             {
-                block = block->nextBlock;
+                block = block->pNextFreeBlock;
             }
-            block->nextBlock = (a_block *)header;
-            block = block->nextBlock;
+            block->pNextFreeBlock = (a_block *)header;
+            block = block->pNextFreeBlock;
             block->level = level;
-            block->nextBlock = NULL;
+            block->pNextFreeBlock = NULL;
         }
     }
 

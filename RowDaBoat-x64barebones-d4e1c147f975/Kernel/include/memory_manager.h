@@ -2,7 +2,7 @@
 #ifndef _MEMORY_MANAGER_H_
 #define _MEMORY_MANAGER_H_
 
-#include "memory.h"
+#include "memory_manager_lib.h"
 
 typedef struct a_block
 {
