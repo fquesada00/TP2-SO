@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "memory_manager.h"
+#include "buddy_memory_manager.h"
 #include "video_driver.h"
 #include "fds.h"
 #include "interrupts.h"
@@ -74,7 +75,7 @@ int init_process(void *entry_point, int argc, char *argv[], int fg)
         char **args = pMalloc(argc * sizeof(char *));
         for (int i = 0; i < argc; i++)
         {
-            args[i] = pMalloc(strlen(argv[i]) * sizeof(char));
+            args[i] = pMalloc((strlen(argv[i])+1) * sizeof(char));
             strcpy(args[i], argv[i]);
         }
         init_registers(entry_point, argc, args, rsp);

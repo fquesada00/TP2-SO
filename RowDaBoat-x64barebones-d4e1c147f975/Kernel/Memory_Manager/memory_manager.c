@@ -1,5 +1,6 @@
 #if !defined MM_BUDDY && !defined MM_BUDDY2
 #include "memory_manager.h"
+#include "memory_manager_lib.h"
 #include "standardLib.h"
 #include "video_driver.h"
 
@@ -19,8 +20,6 @@
             heapHeaderSize = sizeof(a_block) + ((WORD_ALIGN - sizeof(a_block)%WORD_ALIGN))%WORD_ALIGN
     */
 static const size_t heapHeaderSize = (sizeof(a_block) + (size_t)(WORD_ALIGN - 1)) & ~(WORD_ALIGN_MASK);
-
-a_block * last = NULL;
 
 static size_t remainingBytes = HEAP_SIZE;
 
@@ -154,10 +153,10 @@ void *pMalloc(size_t requestedSize)
     /*
             Throw error not enough space
         */
-    // if (pActualBlock->pNextFreeBlock == NULL)
-    // {
-    //     return NULL;
-    // }
+    if (pActualBlock->pNextFreeBlock == NULL)
+    {
+        return NULL;
+    }
 
     /*
             Set block to be returned without header as well
@@ -191,13 +190,17 @@ void *pMalloc(size_t requestedSize)
 
     insertBlock(pActualBlock);
 
-    // puts("en malloc : ");
-
-    // char buff[255]={0};
-    // uintToBase(pReturnBlock,buff,16);
-    // puts(buff);
+    // a_block *start = &heapStart;
+    // puts("EN MALLOC : ");
+    // while (start != NULL)
+    // {
+    //     char buff[255] = {0};
+    //     uintToBase(start, buff, 16);
+    //     puts(buff);
+    //     puts("---");
+    //     start = start->pNextFreeBlock;
+    // }
     // putChar('\n');
-    last = pReturnBlock;
     return pReturnBlock;
 }
 
@@ -252,13 +255,19 @@ void pFree(void *pointer)
 
     remainingBytes += pLinkBlock->blockSize;
 
-    // puts("en Free : ");
-    // char buff[255]={0};
-    // uintToBase(pointer,buff,16);
-    // puts(buff);
-    // putChar('\n');
+    a_block *start = &heapStart;
 
     pInsertBlockIntoList(pLinkBlock);
+    // puts("EN FREE : ");
+    // while (start != NULL)
+    // {
+    //     char buff[255] = {0};
+    //     uintToBase(start, buff, 16);
+    //     puts(buff);
+    //     puts("---");
+    //     start = start->pNextFreeBlock;
+    // }
+    // putChar('\n');
 }
 
 void pInsertBlockIntoList(a_block *pInsertBlock)

@@ -1,5 +1,8 @@
 #ifdef MM_BUDDY2
 #include "buddy_memory_manager.h"
+#include "memory_manager_lib.h"
+#include "standardLib.h"
+#include "video_driver.h"
 /*
         This buddy memory manager works with lists of blocks
         of different size.
@@ -23,70 +26,21 @@
 static a_block *headers[LEVELS + 1];
 static char initialized = 0;
 static size_t remainingBytes = MAXIMUM_BLOCK_SIZE;
-
-// void insertBlock(a_block *insert)
-// {
-//     a_block *start = heapStart.pNextBlocked;
-//     if (start == NULL)
-//     {
-//         heapStart.pNextBlocked = insert;
-//         return;
-//     }
-//     while (start->pNextBlocked != NULL && start->pNextBlocked < insert)
-//     {
-//         start = start->pNextBlocked;
-//     }
-//     if (start->pNextBlocked == NULL)
-//     {
-//         start->pNextBlocked = insert;
-//         insert->pNextBlocked = NULL;
-//     }
-//     insert->pNextBlocked = start->pNextBlocked;
-//     start->pNextBlocked = insert;
-
-//     return;
-// }
-
-// int removeBlock(a_block *remove)
-// {
-//     a_block *start = heapStart.pNextBlocked;
-//     if (start == NULL || remove == NULL || (a_block *)BASE_ADDRESS > remove || (a_block *)END_ADDRESS < remove)
-//     {
-//         return 0;
-//     }
-//     if (start == remove)
-//     {
-//         heapStart.pNextBlocked = heapStart.pNextBlocked->pNextBlocked;
-//         return 1;
-//     }
-
-//     while (start->pNextBlocked != NULL && start->pNextBlocked != remove)
-//     {
-//         start = start->pNextBlocked;
-//     }
-
-//     if (start->pNextBlocked == NULL)
-//     {
-//         return 0;
-//     }
-//     start->pNextBlocked = start->pNextBlocked->pNextBlocked;
-//     return 1;
-// }
-
-// int isBlocked(a_block *block)
-// {
-//     a_block *start = heapStart.pNextBlocked;
-//     while (start != NULL)
-//     {
-//         if (start == block)
-//         {
-//             return 1;
-//         }
-
-//         start = start->pNextBlocked;
-//     }
-//     return 0;
-// }
+void printList(){
+    for(int i = 0 ; i < LEVELS ; i++){
+        puts("NIVEL");
+        putChar('0'+i);
+        putChar('\n');
+        a_block *start=headers[i];
+        while(start != NULL){
+            char buff[255] = {0};
+            uintToBase(start, buff, 16);
+            puts(buff);
+            puts("---");
+            start = start->pNextFreeBlock;
+        }
+    }
+}
 void *pMalloc(size_t requestedSize)
 {
     /*
@@ -201,6 +155,9 @@ void insertSpecificHeaderIntoList(void *header, size_t level)
 {
     a_block *block = headers[level];
     a_block *toInsert = (a_block *)header;
+    if(header == NULL){
+        return;
+    }
     /*
             List is not initialized, then do it
         */

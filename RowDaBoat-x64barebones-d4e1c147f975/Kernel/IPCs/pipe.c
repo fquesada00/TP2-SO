@@ -7,7 +7,8 @@
 #include "arrayCircular.h"
 #include "arrayPCBOrdenN.h"
 #include "standardstring.h"
-#include "memory.h"
+#include "memory_manager.h"
+#include "buddy_memory_manager.h"
 #include "syscalls.h"
 #include "standardLib.h"
 typedef PCB elem_t;

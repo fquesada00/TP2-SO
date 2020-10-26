@@ -3,7 +3,7 @@
 #ifndef _BUDDY_MEMORY_MANAGER_H_
 #define _BUDDY_MEMORY_MANAGER_H_
 
-#include "memory.h"
+#include "memory_manager_lib.h"
 
 /*
     Set minimun size of block
@@ -22,16 +22,15 @@
 */
 #define LEVELS (MAXIMUM_BLOCK_SIZE_LOG2 - MINIMUM_BLOCK_SIZE_LOG2) + 1
 
-#define HEADER_SIZE sizeof(a_block)
-
 #define BLOCK_SIZE(level) (size_t)(1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level))
 
 typedef struct A_BLOCK
 {
     struct A_BLOCK *pNextFreeBlock;
-    struct A_BLOCK *pNextBlocked;
     size_t level;
 } a_block;
+
+#define HEADER_SIZE sizeof(a_block)
 
 /*
     Auxiliar function to iterate through each list
