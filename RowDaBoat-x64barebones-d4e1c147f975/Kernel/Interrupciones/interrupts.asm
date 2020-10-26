@@ -49,6 +49,7 @@ EXTERN yield
 EXTERN pExit
 EXTERN printPipe
 EXTERN flushFD
+EXTERN syscall_mem
 
 SECTION .text
 
@@ -244,7 +245,7 @@ _syscallHandler:
 	cmp rax,5 ;syscall tmp
 	je .tmp
 	cmp rax,6
-	je .read_mem ;syscall read memory
+	je .read_mem
 	cmp rax,7
 	je .kill
 	cmp rax,8
@@ -319,8 +320,7 @@ _syscallHandler:
 	call syscall_tmp
 	jmp .end
 .read_mem:
-	mov rcx, rsp
-	call syscall_read_mem
+	call syscall_mem
 	jmp .end
 .execv:
 	call init_process

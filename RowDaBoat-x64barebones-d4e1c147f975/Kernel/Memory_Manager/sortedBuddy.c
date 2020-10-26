@@ -26,21 +26,9 @@
 static a_block *headers[LEVELS + 1];
 static char initialized = 0;
 static size_t remainingBytes = MAXIMUM_BLOCK_SIZE;
-void printList(){
-    for(int i = 0 ; i < LEVELS ; i++){
-        puts("NIVEL");
-        putChar('0'+i);
-        putChar('\n');
-        a_block *start=headers[i];
-        while(start != NULL){
-            char buff[255] = {0};
-            uintToBase(start, buff, 16);
-            puts(buff);
-            puts("---");
-            start = start->pNextFreeBlock;
-        }
-    }
-}
+
+size_t heap_size = MAXIMUM_BLOCK_SIZE;
+size_t free_size = remainingBytes;
 void *pMalloc(size_t requestedSize)
 {
     /*
@@ -65,6 +53,7 @@ void *pMalloc(size_t requestedSize)
         */
     void *returnPointer = recursiveMalloc(level) + HEADER_SIZE;
     remainingBytes -= requestedSize;
+    free_size = remainingBytes;
     return returnPointer;
 }
 
@@ -100,6 +89,7 @@ void pFree(void *pointer)
     a_block *blockToFree = (a_block *)toFree;
     recursiveFree(toFree, blockToFree->level);
     remainingBytes += BLOCK_SIZE(blockToFree->level);
+    free_size = remainingBytes;
 }
 
 void recursiveFree(void *header, size_t level)

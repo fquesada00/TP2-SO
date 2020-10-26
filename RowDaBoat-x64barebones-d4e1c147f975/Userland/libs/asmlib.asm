@@ -24,6 +24,7 @@ GLOBAL _yield
 GLOBAL _exit
 GLOBAL pipePrint
 GLOBAL flushFD
+GLOBAL syscall_mem
 
 SECTION .text
 
@@ -70,7 +71,7 @@ invalidOpCode:
     pop rbp
     ret
     ; -----------------------------------------------------------------------------
-read_mem:
+syscall_mem:
     push rbp
     mov rbp,rsp
     mov rax,6

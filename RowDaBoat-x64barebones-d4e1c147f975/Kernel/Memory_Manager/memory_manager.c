@@ -28,7 +28,8 @@ static size_t remainingBytes = HEAP_SIZE;
         of the heap, we can move through it
     */
 static a_block heapStart, *heapEnd = NULL;
-
+size_t heap_size = HEAP_SIZE;
+size_t free_size = HEAP_SIZE;
 void insertBlock(a_block *insert)
 {
     a_block *start = heapStart.pNextBlocked;
@@ -187,20 +188,8 @@ void *pMalloc(size_t requestedSize)
     }
 
     remainingBytes -= pActualBlock->blockSize;
-
+    free_size = remainingBytes;
     insertBlock(pActualBlock);
-
-    // a_block *start = &heapStart;
-    // puts("EN MALLOC : ");
-    // while (start != NULL)
-    // {
-    //     char buff[255] = {0};
-    //     uintToBase(start, buff, 16);
-    //     puts(buff);
-    //     puts("---");
-    //     start = start->pNextFreeBlock;
-    // }
-    // putChar('\n');
     return pReturnBlock;
 }
 
@@ -224,6 +213,8 @@ void pInitHeap(void *baseAddress, void *endAddress)
     pFirstBlock->pNextBlocked = NULL;
 
     remainingBytes = pFirstBlock->blockSize;
+
+    free_size = remainingBytes;
 }
 
 void pFree(void *pointer)
@@ -254,20 +245,8 @@ void pFree(void *pointer)
     }
 
     remainingBytes += pLinkBlock->blockSize;
-
-    a_block *start = &heapStart;
-
+    free_size = remainingBytes;
     pInsertBlockIntoList(pLinkBlock);
-    // puts("EN FREE : ");
-    // while (start != NULL)
-    // {
-    //     char buff[255] = {0};
-    //     uintToBase(start, buff, 16);
-    //     puts(buff);
-    //     puts("---");
-    //     start = start->pNextFreeBlock;
-    // }
-    // putChar('\n');
 }
 
 void pInsertBlockIntoList(a_block *pInsertBlock)

@@ -62,9 +62,6 @@ void pipe()
     pipePrint();
     return;
 }
-void mem(uint64_t address){
-    printMemoryFromAddress(address);
-}
 void myPid(){
     char pidStr[MAXLENGHT] = {0};
     int pid = _getPID();
