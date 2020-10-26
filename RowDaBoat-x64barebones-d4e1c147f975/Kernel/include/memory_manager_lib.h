@@ -6,7 +6,7 @@
 
 #define BASE_ADDRESS (size_t) 0x1000000
 #define END_ADDRESS (size_t) 0x2800000
-#define HEAP_SIZE (size_t) BASE_ADDRESS - (size_t)END_ADDRESS 
+#define HEAP_SIZE (size_t) END_ADDRESS - (size_t)BASE_ADDRESS 
 
 #define WORD_ALIGN 8 
 #define WORD_ALIGN_MASK 7

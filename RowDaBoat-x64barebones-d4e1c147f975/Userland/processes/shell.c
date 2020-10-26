@@ -10,7 +10,7 @@
 #include "test_util.h"
 #include "memoryLib.h"
 char *cmdName[] = {"sh","myPid","ps", "loop", "help", "sem", "cat", "wc", "filter", "pipe", "phylo", "leo", "escribo", "test_mm", "test_prio", "test_processes", "test_no_sync", "test_sync", "mem", "kill", "nice", "block"};
-void *cmd[] = {shell,myPid,ps, loop, help, sem, cat, wc, filter, pipePrint, philosopherTable, leo, escribo, test_mm, test_prio, test_processes, test_no_sync, test_sync, mem, kill, nice, block};
+void *cmd[] = {shell,myPid,ps, loop, help, sem, cat, wc, filter, pipePrint, philosopherTable, leo, escribo, test_mm, test_prio, test_processes, test_no_sync, test_sync, syscall_mem, kill, nice, block};
 int getCmd(char *cmd)
 {
     for (int i = 0; i < CANT_CMDS; i++)
@@ -102,10 +102,7 @@ void shell(int argc, char * argv[])
                     myPid();
                     break;
                 case MEM:
-                    memory = myAtoi(SecondCommand);
-                    if (memory < 0)
-                        break;
-                    mem(memory);
+                    syscall_mem();
                     break;
                 case KILL:
                     pid = myAtoi(SecondCommand);

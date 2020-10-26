@@ -13,6 +13,7 @@ void help();
 void sem();
 void mem(uint64_t address);
 void pipe();
+void syscall_mem();
 int isBuiltIn(int idx);
 void myPid();
 #endif

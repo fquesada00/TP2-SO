@@ -6,7 +6,6 @@
 extern int syswrite(int fd, const char *buff, int n);
 extern int sysread(int fd, char *buff, int bytes);
 extern int read_mem(uint64_t address, char *buff);
-void printMemoryFromAddress(uint64_t address);
 #endif
 
 
