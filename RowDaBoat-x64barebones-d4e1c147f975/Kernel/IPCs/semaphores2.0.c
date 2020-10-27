@@ -14,12 +14,12 @@ extern Header readyHeader;
 sem_t semaphores[MAX_SEM] = {{0}};
 void acquire(sem_t *sem)
 {
-    while (_xchg(&(sem->lock), 0) != 1)
+    while (_xchg((uint64_t)&(sem->lock), 0) != 1)
         _int20();
 }
 void release(sem_t *sem)
 {
-    _xchg(&(sem->lock), 1);
+    _xchg((uint64_t)&(sem->lock), 1);
 }
 int sem_open(const char *name, size_t value, char created)
 {

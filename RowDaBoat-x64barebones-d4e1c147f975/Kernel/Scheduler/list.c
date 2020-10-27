@@ -104,12 +104,11 @@ void push(Header *head, elem_t d, int p, int tickets)
 // Function to check is list is empty
 int isEmpty(Header *head)
 {
-    return head->first == NULL;
+    return (head == NULL || (head->first) == NULL);
 }
 
 elem_t * next(Header *head)
 {
-    elem_t ret = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     if (isEmpty(head) || head == NULL)
         return NULL;
 
@@ -119,8 +118,8 @@ elem_t * next(Header *head)
         head->current = start;
     else
         head->current = head->current->next;
-    elem_t e = (head->current->data);
-    return &e;
+    elem_t * e = &(head->current->data);
+    return e;
 }
 
 //gets element and removes the node from the list
@@ -133,41 +132,42 @@ listElem_t removeElement(Header *head, elem_t elem)
         return le;
 
     listElem_t *current = head->first;
-    listElem_t *next = current;
+    listElem_t *nextNode = current;
 
-    while (next != NULL && next->data.PID != elem.PID)
+    while (nextNode != NULL && nextNode->data.PID != elem.PID)
     {
-        current = next;
-        next = current->next;
+        current = nextNode;
+        nextNode = current->next;
     }
-    if (next == NULL)
+    if (nextNode == NULL)
         return le;
-    if (current == next)
+    if (current == nextNode)
     {
         le = (*current);
         pop(head);
         return le;
     }
-    if(head->current == next)
+    if(head->current == nextNode){
         if(head->current->next != NULL)
             head->current=head->current->next;
         else
             head->current=head->first;
+    }
             
-    current->next = next->next;
-    le = *next;
-    pFree(next);
+    current->next = nextNode->next;
+    le = *nextNode;
+    pFree(nextNode);
 
     return le;
 }
 
 listElem_t removeCurrent(Header *head)
 {
-    listElem_t e = {{{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, 0, 0, 0,0};
+    listElem_t e = {{{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0,0}, 0, 0, 0, 0};
     if (isEmpty(head) || head->first == NULL)
         return e;
-    listElem_t *next = head->current;
-    if (next == head->first)
+    listElem_t *nextNode = head->current;
+    if (nextNode == head->first)
     {
         e = *(head->first);
         pop(head);
@@ -183,8 +183,8 @@ listElem_t removeCurrent(Header *head)
         head->current->next->prev = head->current->prev;
         head->current = head->current->prev;
     }
-    e = *next;
-    pFree(next);
+    e = *nextNode;
+    pFree(nextNode);
     return e;
 }
 listElem_t *get(Header *head, elem_t elem)

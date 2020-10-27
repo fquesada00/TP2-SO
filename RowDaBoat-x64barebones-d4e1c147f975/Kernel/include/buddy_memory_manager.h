@@ -1,5 +1,5 @@
 
-#ifdef MM_BUDDY2 || MM_BUDDY
+#ifdef MM_BUDDY
 #ifndef _BUDDY_MEMORY_MANAGER_H_
 #define _BUDDY_MEMORY_MANAGER_H_
 

@@ -202,7 +202,12 @@ void pInitHeap(void *baseAddress, void *endAddress)
     heapStart.blockSize = (size_t)0;
     heapStart.pNextBlocked = NULL;
 
-    heapEnd = endAddress - heapHeaderSize;
+
+    uint64_t aux = (uint64_t)endAddress;
+
+    aux -=heapHeaderSize;
+    
+    heapEnd = (void*) aux;
     heapEnd->pNextFreeBlock = NULL;
     heapEnd->blockSize = (size_t)0;
     heapEnd->pNextBlocked = NULL;

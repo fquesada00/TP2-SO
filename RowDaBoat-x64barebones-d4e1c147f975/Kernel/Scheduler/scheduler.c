@@ -18,8 +18,8 @@ int currentPIDs = 1;
 int initializing = 1;
 uint64_t stackSize = 0x10000;
 void closeCurrentProcess(int fd);
-PCB* terminated(PCB *pcb);
-int schedule(void * rsp)
+PCB *terminated(PCB *pcb);
+int schedule(void *rsp)
 {
     if (!initializing && readyHeader.current->data.state != Terminated)
     {
@@ -53,41 +53,46 @@ int schedule(void * rsp)
     else
     {
         readyHeader.current->tickets = (MAX_PRIORITY - readyHeader.current->priority);
-        elem_t * e;
+        elem_t *e;
         do
         {
             e = next(&readyHeader);
             if (e->state == Terminated)
-                e=terminated(e);
-        } while (e->state == Blocked);
+                e = terminated(e);
+        } while (e == NULL || e->state == Blocked);
         return e->rsp;
     }
 }
 
 int init_process(void *entry_point, int argc, char *argv[], int fg)
 {
-    void * toFree = pMalloc(stackSize * sizeof(uint64_t));
-    void * rsp = toFree;
+    void *Free = pMalloc(stackSize * sizeof(uint64_t));
+    void *rsp = Free;
     if (rsp != NULL)
     {
-        rsp += stackSize * sizeof(uint64_t) - (sizeof(uint64_t));
-        int pid = currentPIDs++;
+        uint64_t aux = (uint64_t)Free;
+        aux += stackSize * sizeof(uint64_t) - (sizeof(uint64_t));
+        rsp = (void *)aux;
+            int pid = currentPIDs++;
         char **args = pMalloc(argc * sizeof(char *));
         for (int i = 0; i < argc; i++)
         {
-            args[i] = pMalloc((strlen(argv[i])+1) * sizeof(char));
+            args[i] = pMalloc((strlen(argv[i]) + 1) * sizeof(char));
             strcpy(args[i], argv[i]);
         }
         init_registers(entry_point, argc, args, rsp);
-        init_PCB(rsp, pid, args, argc, fg,toFree);
+        init_PCB(rsp, pid, args, argc, fg, Free);
         return pid;
     }
     return -1;
 }
 
-void init_registers(void *entry_point, int argc, char *argv[], void * rsp)
+void init_registers(void *entry_point, int argc, char *argv[], void *rsp)
 {
-    Swapping *init = (void *)rsp - sizeof(Swapping);
+    uint64_t aux = (uint64_t)rsp;
+    aux -=sizeof(Swapping);
+    rsp = (void*) aux;
+    Swapping *init = rsp ;
     init->ss = 0x0;
     init->rsp = (uint64_t)rsp;
     init->flags = 0x202;
@@ -110,9 +115,9 @@ void init_registers(void *entry_point, int argc, char *argv[], void * rsp)
     init->r15 = 15;
 }
 
-void init_PCB(void * rsp, int pid, char **args, int argcount, int fg, void * toFree)
+void init_PCB(void *rsp, int pid, char **args, int argcount, int fg, void *Free)
 {
-    elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    elem_t e = {{0}, 0, {0}, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     e.PID = pid;
     e.rsp = (uint64_t)rsp - sizeof(Swapping);
     e.StackBase = (uint64_t)rsp;
@@ -132,7 +137,7 @@ void init_PCB(void * rsp, int pid, char **args, int argcount, int fg, void * toF
     e.argv = args;
     e.argc = argcount;
     e.fg = fg;
-    e.toFree = toFree;
+    e.toFree = Free;
     if (initializing)
     {
         initList(&readyHeader, e, 5, 5);
@@ -227,7 +232,10 @@ void blockCurrent(int id, BlockReason reason)
 }
 void waitPID(int pid)
 {
+    int fg = readyHeader.current->data.fg;
+    readyHeader.current->data.fg = 0;
     blockCurrent(pid, PID);
+    readyHeader.current->data.fg = fg;
 }
 void yield()
 {
@@ -341,17 +349,17 @@ void processStatus()
         syscall_write(1, separation, width - length);
         length = uintToBase(next->priority, buffer, 10);
         syscall_write(1, buffer, length);
-        syscall_write(1, separation, width - length-1);
+        syscall_write(1, separation, width - length - 1);
         length = strcpy(buffer, "0x");
         length += uintToBase(next->data.rsp, auxBuff, 16);
         strcat(buffer, auxBuff);
         syscall_write(1, buffer, length);
-        syscall_write(1, separation, width - length+1);
+        syscall_write(1, separation, width - length + 1);
         length = strcpy(buffer, "0x");
         length += uintToBase(next->data.StackBase, auxBuff, 16);
         strcat(buffer, auxBuff);
         syscall_write(1, buffer, length);
-        syscall_write(1, separation, width - length+1);
+        syscall_write(1, separation, width - length + 1);
         length = uintToBase(next->data.fg, buffer, 10);
         syscall_write(1, buffer, length);
         syscall_write(1, separation, width - length);
@@ -375,17 +383,17 @@ void processStatus()
     }
 }
 
-PCB * terminated(PCB *pcb)
+PCB *terminated(PCB *pcb)
 {
     if (pcb->PID == idle_pid)
         idle_pid = 0;
     closePID(pcb->PID, 0);
     closePID(pcb->PID, 1);
-    PCB * next;
+    PCB *next;
     listElem_t l = removeElement(&readyHeader, *pcb);
     next = &l.next->data;
     if (l.priority == -1)
-        return;
+        return NULL;
     for (int i = 0; i < l.data.argc; i++)
     {
         pFree(l.data.argv[i]);

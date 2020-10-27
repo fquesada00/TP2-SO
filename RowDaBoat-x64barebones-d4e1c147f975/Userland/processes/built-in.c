@@ -5,6 +5,7 @@
 #include "sysLib.h"
 #include <stdint.h>
 #include "stdioLib.h"
+#include "stringLib.h"
 void help()
 {
     printf("\n\n\t\t\t\t\t\t\t\t\t\tSHELL COMMANDS LIST\n\n\n");

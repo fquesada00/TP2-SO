@@ -17,7 +17,7 @@ void keyboardHandler()
     static int shift = 0;
     static int control = 0;
     //Los codigos de los scan code de apretar una tecla van de 0 a 0x56
-    if (scan >= 0 && scan <= 0x56)
+    if (scan >= 0 && scan < 0x56)
     {
         //scan code de los shifts
         if (scan == 0x2A || scan == 0x36)

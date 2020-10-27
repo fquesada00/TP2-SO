@@ -3,6 +3,7 @@
 #include "memory_manager_lib.h"
 #include "standardLib.h"
 #include "video_driver.h"
+#include <stdint.h>
 /*
         This buddy memory manager works with lists of blocks
         of different size.
@@ -51,7 +52,9 @@ void *pMalloc(size_t requestedSize)
     /*
             Must skip header
         */
-    void *returnPointer = recursiveMalloc(level) + HEADER_SIZE;
+    uint64_t aux =(unint64_t) recursiveMalloc(level);
+    aux+=HEADER_SIZE;
+    void *returnPointer = (void *)aux;
     remainingBytes -= requestedSize;
     free_size = remainingBytes;
     return returnPointer;
@@ -59,10 +62,10 @@ void *pMalloc(size_t requestedSize)
 
 void *recursiveMalloc(size_t level)
 {
-    void *returnPointer;
+    
     if (headers[level] == NULL)
     {
-        returnPointer = recursiveMalloc(level - 1);
+        void * returnPointer = recursiveMalloc(level - 1);
         /*
                 Not enough space
             */
@@ -77,8 +80,10 @@ void *recursiveMalloc(size_t level)
         /*
                 Now we are in the "child", so it has to be splitted in two
             */
+        uint64_t aux = (uint64_t) returnPointer;
+        aux += blockSize;
         insertSpecificHeaderIntoList(returnPointer, level);
-        insertSpecificHeaderIntoList(returnPointer + blockSize, level);
+        insertSpecificHeaderIntoList(aux, level);
     }
     return removeHeaderFromList(level);
 }

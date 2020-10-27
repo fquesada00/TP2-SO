@@ -25,8 +25,8 @@ void test_processes(int argc, char * argv[]){
   while (1){
     // Create MAX_PROCESSES processes
     for(rq = 0; rq < MAX_PROCESSES; rq++){
-        char * argv[] = {"endless_loop",NULL};
-      p_rqs[rq].pid = _execv(endless_loop,1,argv,0);  // TODO: Port this call as required
+        char * argv1[] = {"endless_loop",NULL};
+      p_rqs[rq].pid = _execv(endless_loop,1,argv1,0);  // TODO: Port this call as required
       if (p_rqs[rq].pid == -1){                           // TODO: Port this as required
         printf("Error creating process\n");               // TODO: Port this as required
         _exit();;

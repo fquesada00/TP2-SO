@@ -55,7 +55,7 @@ int doubleToString(double num, char *buffer)
     int integer_part = num;
     double decimal_part = num - integer_part;
 
-    int aux;
+    
 
     do
     {
@@ -75,6 +75,7 @@ int doubleToString(double num, char *buffer)
         p2--;
     }
     p++;
+    int aux;
     for (int i = 0; i < 5; i++)
     {
         decimal_part *= 10;

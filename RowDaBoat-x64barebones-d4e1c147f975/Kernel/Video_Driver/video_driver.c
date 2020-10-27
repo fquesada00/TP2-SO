@@ -186,7 +186,6 @@ void clear()
 
     current[current_screen] = START_POS;
 }
-//TOCHECK
 /*Elimina una linea*/
 void clearLine(int line)
 {
@@ -248,10 +247,4 @@ int screenNumber()
     if (screens_in_use >= SCREENS)
         return -1;
     return screens_in_use++;
-}
-void changeScreen(int num)
-{
-    if (num >= SCREENS)
-        return;
-    current_screen = num;
 }

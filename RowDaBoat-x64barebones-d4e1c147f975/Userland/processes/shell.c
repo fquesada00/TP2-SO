@@ -62,7 +62,6 @@ void shell(int argc, char * argv[])
     int foreground = 1;
     int pipe[2];
     int actualPipe = 0;
-    uint64_t memory;
     int pid, p, blockFlag;
     char *argv1[MAX_ARGS];
     argv1[0] =(char *) pMalloc(MAXLENGHT * sizeof(char));
@@ -72,7 +71,7 @@ void shell(int argc, char * argv[])
     char pipeName[256]={0};
     strcpy(pipeName,"MyPipe");
     printf("\nBienvenido! Ingrese un nombre de usuario:\n\n");
-    scanf("%s", user);
+    int cant = scanf("%s", user);
 
     do
     {

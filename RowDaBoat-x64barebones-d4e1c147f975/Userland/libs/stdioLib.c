@@ -100,16 +100,23 @@ int scanf(const char *fmt, ...)
     }
     buffer[idxBuffer] = 0;
     if (idxBuffer == 0)
+    {
+        va_end(arg_param);
         return argsRead;
+    }
     idxBuffer = 0;
     while (fmt[idxFmt])
     {
         if (buffer[idxBuffer] == 0)
+        {
+            va_end(arg_param);
             return argsRead;
+        }
         if (fmt[idxFmt] != '%')
         {
             if (buffer[idxBuffer] != fmt[idxFmt])
             {
+                va_end(arg_param);
                 return argsRead;
             }
             idxFmt++;
@@ -145,6 +152,7 @@ int scanf(const char *fmt, ...)
                     }
                     else if (nAtBuffer == '-')
                     {
+                        va_end(arg_param);
                         return argsRead;
                     }
                     number *= 10;
@@ -152,13 +160,19 @@ int scanf(const char *fmt, ...)
                     nAtBuffer = buffer[idxBuffer++];
                 }
                 if (idxNumber == 0)
+                {
+                    va_end(arg_param);
                     return argsRead;
+                }
                 if (negative)
                     number *= -1;
                 *((int *)va_arg(arg_param, int *)) = number;
                 argsRead++;
                 if (buffer[idxBuffer] == 0 && fmt[idxFmt + 2] == 0)
+                {
+                    va_end(arg_param);
                     return argsRead;
+                }
                 idxFmt += 2;
                 idxBuffer--;
                 break;
@@ -171,6 +185,7 @@ int scanf(const char *fmt, ...)
                     if (cAtBuffer == 0)
                     {
                         auxPointer[idxAuxPointer] = cAtBuffer;
+                        va_end(arg_param);
                         return argsRead + 1;
                     }
                     else if (cAtBuffer == fmt[idxFmt + 2])
@@ -213,6 +228,7 @@ int scanf(const char *fmt, ...)
                     }
                     else if (fAtBuffer == '-' && idxFloat > 0)
                     {
+                        va_end(arg_param);
                         return argsRead;
                     }
                     if (!decimal)
@@ -228,14 +244,20 @@ int scanf(const char *fmt, ...)
                     fAtBuffer = buffer[idxBuffer++];
                 }
                 if (idxFloat == 0)
+                {
+                    va_end(arg_param);
                     return argsRead;
+                }
                 if (negative)
                     floatNumber *= -1;
                 doublePointer = va_arg(arg_param, double *);
                 *doublePointer = floatNumber;
                 argsRead++;
                 if (buffer[idxBuffer] == 0 && fmt[idxFmt + 2] == 0)
+                {
+                    va_end(arg_param);
                     return argsRead;
+                }
                 idxFmt += 2;
                 idxBuffer--;
                 break;
@@ -247,11 +269,13 @@ int scanf(const char *fmt, ...)
                 }
                 break;
             default:
+                va_end(arg_param);
                 return -1;
                 break;
             }
         }
     }
+    va_end(arg_param);
     return argsRead;
 }
 int getchar()
