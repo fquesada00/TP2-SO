@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "stdioLib.h"
 #include "sysLib.h"
 #include "processLib.h"
@@ -12,5 +14,6 @@ void filter(int argc, char **argv)
             syswrite(1,writeB,1);
         }
     }
+    getchar();
     _exit();
 }

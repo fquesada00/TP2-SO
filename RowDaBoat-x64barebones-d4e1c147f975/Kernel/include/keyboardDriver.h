@@ -4,6 +4,5 @@
 void keyboardHandler();
 void writeToBuff(char c);
 extern char getKeyboardScanCode();
-//static void int_20();
 void int_21();
 #endif

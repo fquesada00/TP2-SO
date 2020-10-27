@@ -1,7 +1,6 @@
 GLOBAL syswrite
 GLOBAL sysread
 GLOBAL divExc
-GLOBAL invalidOpCode
 GLOBAL read_mem
 GLOBAL _execv
 GLOBAL pMalloc
@@ -59,14 +58,6 @@ divExc:
     mov rdi,0
     mov rax,0x123
     div rdi
-    mov rsp,rbp
-    pop rbp
-    ret
-    ; -----------------------------------------------------------------------------
-invalidOpCode:
-    push rbp
-    mov rbp,rsp
-    UD2
     mov rsp,rbp
     pop rbp
     ret

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "standardstring.h"
 /* return 1 if s is greater than v
 ** 0 if s is equal to v

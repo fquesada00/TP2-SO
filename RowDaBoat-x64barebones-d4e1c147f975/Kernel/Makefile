@@ -9,8 +9,6 @@ SOURCES_ASM_INT=$(wildcard Interrupciones/*.asm)
 SOURCES_VIDEO=$(wildcard Video_Driver/*.c)
 SOURCES_KEYBOARD=$(wildcard Keyboard_Driver/*.c)
 SOURCES_ASM_KEYBOARD=$(wildcard Keyboard_Driver/*.asm)
-SOURCES_EXCEP=$(wildcard Exceptions/*.c)
-SOURCES_ASM_EXCEP=$(wildcard Exceptions/*.asm)
 SOURCES_MM =$(wildcard Memory_Manager/*.c)
 SOURCES_scheduler=$(wildcard Scheduler/*.c)
 SOURCES_ARRAYS=$(wildcard Arrays/*.c)
@@ -62,6 +60,6 @@ bin:$(KERNEL_GDB)
 	objcopy -O binary $(KERNEL_GDB) kernel.bin
 
 clean:
-	rm -rf ./*.o *.bin *.elf Interrupciones/*.o Keyboard_Driver/*.o Video_Driver/*.o Exceptions/*.o Scheduler/*.o Memory_Manager/*.o Arrays/*.o Files_Descriptors/*.o IPCs/*.o Processes/*.o Libs/*.o
+	rm -rf ./*.o *.bin *.elf Interrupciones/*.o Keyboard_Driver/*.o Video_Driver/*.o Scheduler/*.o Memory_Manager/*.o Arrays/*.o Files_Descriptors/*.o IPCs/*.o Processes/*.o Libs/*.o
 
 .PHONY: all gdb clean bin

@@ -7,7 +7,6 @@
 typedef struct a_block
 {
     struct a_block *pNextFreeBlock;
-    struct a_block *pNextBlocked;
     size_t blockSize;
 } a_block;
 

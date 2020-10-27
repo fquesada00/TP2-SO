@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "standardlib.h"
 #include "stringLib.h"
 #include <stddef.h>
@@ -49,6 +51,9 @@ typedef enum ShellCmd
 //agregar testeos
 void shell(int argc, char * argv[])
 {
+
+    display_welcome_message();
+
     printf("\nInitializing shell\n");
     printf("\nType 'help' to see the shell commands list\n");
     char FirstCommand[256] = {0};
@@ -66,15 +71,15 @@ void shell(int argc, char * argv[])
     char *argv1[MAX_ARGS];
     argv1[0] =(char *) pMalloc(MAXLENGHT * sizeof(char));
     argv1[1] =(char *) pMalloc(MAXLENGHT * sizeof(char));
-    argv1[12] =(char *) pMalloc(MAXLENGHT * sizeof(char));
+    argv1[2] =(char *) pMalloc(MAXLENGHT * sizeof(char));
     char *user =(char *) pMalloc(MAXLENGHT * sizeof(char));
     char pipeName[256]={0};
     strcpy(pipeName,"MyPipe");
     printf("\nBienvenido! Ingrese un nombre de usuario:\n\n");
-    int cant = scanf("%s", user);
-
+    scanf("%s", user);
     do
     {
+        foreground =1;
         printf(" /%s:~$ ", user);
         argsRead = scanf("%s %s %s %s", FirstCommand, SecondCommand, ThirdCommand, ForthCommand);
         putchar('\n');
@@ -111,10 +116,7 @@ void shell(int argc, char * argv[])
                     break;
                 case NICE:
                     pid = myAtoi(SecondCommand);
-                    printf("pid es %d", pid);
                     p = myAtoi(ThirdCommand);
-                    printf("p es %d", p);
-
                     if (pid <= 0 || p < 0 || p > MAXPRIVILAGE)
                         break;
                     nice(pid, p);
@@ -131,7 +133,6 @@ void shell(int argc, char * argv[])
                 switch (argsRead)
                 {
                 case 1:
-                    printf("%s",FirstCommand);
                     strcpy(argv1[0], FirstCommand);
                     argv1[argsRead] = NULL;
                     waiting = _execv(cmd[cmdIdx1], argsRead, argv1, foreground);
@@ -205,7 +206,7 @@ void shell(int argc, char * argv[])
             }
         }
         else
-            printf("\n%s no es un comando valido o la cantidad de argumentos no es valida\n", FirstCommand);
+            printf("\n%s: No es un comando valido o la cantidad de argumentos no es valida\n", FirstCommand);
     } while (1);
 }
 

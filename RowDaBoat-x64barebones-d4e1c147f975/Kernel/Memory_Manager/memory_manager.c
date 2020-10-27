@@ -1,9 +1,22 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #if !defined MM_BUDDY
 #include "memory_manager.h"
 #include "memory_manager_lib.h"
 #include "standardLib.h"
 #include "video_driver.h"
 
+/*    
+        This memory manager works with a list of headers with a pointer to the next free header.
+        When a block is reserved, it starts looking from the first free header, this algorithm is called
+        first fit. If it cannot fit, then there is not enough space to storage the requestedSize (plus the header).
+        Here we can have external fragmentation, meaning the space can be enough but its the sum of 2 or more
+        free headers, and it cannot fit in one single header, so pMalloc returns NULL.
+        If the space is available, then it returns the header pointer plus the header size.
+
+        To free a block, it substracts the size of the header, and looks if the left and right header are free,
+        so they can merge a make a big free block.
+    */
 /*
         LINKS DE INTERES
         https://courses.cs.washington.edu/courses/cse351/10sp/lectures/15-memallocation.pdf
@@ -30,70 +43,6 @@ static size_t remainingBytes = HEAP_SIZE;
 static a_block heapStart, *heapEnd = NULL;
 size_t heap_size = HEAP_SIZE;
 size_t free_size = HEAP_SIZE;
-void insertBlock(a_block *insert)
-{
-    a_block *start = heapStart.pNextBlocked;
-    if (start == NULL)
-    {
-        heapStart.pNextBlocked = insert;
-        return;
-    }
-    while (start->pNextBlocked != NULL && start->pNextBlocked < insert)
-    {
-        start = start->pNextBlocked;
-    }
-    if (start->pNextBlocked == NULL)
-    {
-        start->pNextBlocked = insert;
-        insert->pNextBlocked = NULL;
-        return;
-    }
-    insert->pNextBlocked = start->pNextBlocked;
-    start->pNextBlocked = insert;
-
-    return;
-}
-
-int removeBlock(a_block *remove)
-{
-    a_block *start = heapStart.pNextBlocked;
-    if (start == NULL || remove == NULL || (a_block *)BASE_ADDRESS > remove || (a_block *)END_ADDRESS < remove)
-    {
-        return 0;
-    }
-    if (start == remove)
-    {
-        heapStart.pNextBlocked = heapStart.pNextBlocked->pNextBlocked;
-        return 1;
-    }
-
-    while (start->pNextBlocked != NULL && start->pNextBlocked != remove)
-    {
-        start = start->pNextBlocked;
-    }
-
-    if (start->pNextBlocked == NULL)
-    {
-        return 0;
-    }
-    start->pNextBlocked = start->pNextBlocked->pNextBlocked;
-    return 1;
-}
-
-int isBlocked(a_block *block)
-{
-    a_block *start = heapStart.pNextBlocked;
-    while (start != NULL)
-    {
-        if (start == block)
-        {
-            return 1;
-        }
-
-        start = start->pNextBlocked;
-    }
-    return 0;
-}
 
 void *pMalloc(size_t requestedSize)
 {
@@ -189,7 +138,6 @@ void *pMalloc(size_t requestedSize)
 
     remainingBytes -= pActualBlock->blockSize;
     free_size = remainingBytes;
-    insertBlock(pActualBlock);
     return pReturnBlock;
 }
 
@@ -200,22 +148,18 @@ void pInitHeap(void *baseAddress, void *endAddress)
         */
     heapStart.pNextFreeBlock = (a_block *)baseAddress;
     heapStart.blockSize = (size_t)0;
-    heapStart.pNextBlocked = NULL;
-
 
     uint64_t aux = (uint64_t)endAddress;
 
-    aux -=heapHeaderSize;
-    
-    heapEnd = (void*) aux;
+    aux -= heapHeaderSize;
+
+    heapEnd = (void *)aux;
     heapEnd->pNextFreeBlock = NULL;
     heapEnd->blockSize = (size_t)0;
-    heapEnd->pNextBlocked = NULL;
 
     a_block *pFirstBlock = (a_block *)baseAddress;
     pFirstBlock->pNextFreeBlock = heapEnd;
     pFirstBlock->blockSize = (size_t)heapEnd - (size_t)pFirstBlock;
-    pFirstBlock->pNextBlocked = NULL;
 
     remainingBytes = pFirstBlock->blockSize;
 
@@ -244,11 +188,6 @@ void pFree(void *pointer)
     pNextABlock -= heapHeaderSize;
     pLinkBlock = (a_block *)pNextABlock;
 
-    if (!removeBlock(pLinkBlock))
-    {
-        return;
-    }
-
     remainingBytes += pLinkBlock->blockSize;
     free_size = remainingBytes;
     pInsertBlockIntoList(pLinkBlock);
@@ -256,7 +195,7 @@ void pFree(void *pointer)
 
 void pInsertBlockIntoList(a_block *pInsertBlock)
 {
-    if (pInsertBlock == heapEnd || isBlocked(pInsertBlock))
+    if (pInsertBlock == heapEnd)
     {
         return;
     }
@@ -324,6 +263,5 @@ void pInsertBlockIntoList(a_block *pInsertBlock)
     {
         pPrevBlock->pNextFreeBlock = pInsertBlock;
     }
-    pInsertBlock->pNextBlocked = NULL;
 }
 #endif

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "pipe.h"
 #include <stdint.h>
 #include "fds.h"
@@ -23,7 +25,8 @@ pipe_t pipes[MAX_PIPE] = {{0}};
 
 int pipeOpen(int fds[2], const char *name)
 {
-    int i = 0, isOpen = 0, pos = -1;
+    int i = 0, pos = -1;
+
     while (i < MAX_PIPE)
     {
         if (pos == -1 && strcmp(pipes[i].name, "") == 0)
@@ -32,12 +35,11 @@ int pipeOpen(int fds[2], const char *name)
         }
         if (strcmp(pipes[i].name, name) == 0)
         {
-            isOpen = 1;
-            break;
+            return -1;
         }
         i++;
     }
-    if ((i == MAX_PIPE && pos == -1) || isOpen)
+    if (pos == -1)
         return -1;
     pipe_t p = {0};
     pipes[pos] = p;
@@ -85,20 +87,19 @@ int pipeOpen(int fds[2], const char *name)
 }
 int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const char *pipe, int mode, int fg) //mode en r9
 {
-    void * toFree = pMalloc(stackSize * sizeof(uint64_t));
-    void * rsp = toFree;
+    void *toFree = pMalloc(stackSize * sizeof(uint64_t));
+    void *rsp = toFree;
     uint64_t aux = (uint64_t)toFree;
     if (rsp != NULL)
     {
-        aux+= stackSize * sizeof(uint64_t) - (sizeof(uint64_t));
-        rsp =(void *) aux;
+        aux += stackSize * sizeof(uint64_t) - (sizeof(uint64_t));
+        rsp = (void *)aux;
         int pid = currentPIDs++;
-        init_registers(entry, argc, argv, rsp);
         char **args = pMalloc(argc * sizeof(char *));
         int len;
         for (int i = 0; i < argc; i++)
         {
-            len=strlen(argv[i])+1;
+            len = strlen(argv[i]) + 1;
             args[i] = pMalloc(len * sizeof(char));
             strcpy(args[i], argv[i]);
         }
@@ -112,13 +113,14 @@ int init_process_with_pipe(void *entry, int argc, char *argv[], int fd, const ch
         }
         if (i == MAX_PIPE)
             return -1;
-        if(init_PCBwithPipe(rsp, pid, fd, &pipes[i], mode,argc,argv, fg, toFree) == -1)
-            return-1;
+        init_registers(entry, argc, argv, rsp);
+        if (init_PCBwithPipe(rsp, pid, fd, &pipes[i], mode, argc, args, fg, toFree) == -1)
+            return -1;
         return pid;
     }
     return -1;
 }
-int init_PCBwithPipe(void * rsp, int pid, int fd, pipe_t *pipe, int mode,int argc, char ** argv, int fg, void * toFree)
+int init_PCBwithPipe(void *rsp, int pid, int fd, pipe_t *pipe, int mode, int argc, char **argv, int fg, void *toFree)
 {
     if (fd > MAX_FDS || fd < 0)
         return -1;

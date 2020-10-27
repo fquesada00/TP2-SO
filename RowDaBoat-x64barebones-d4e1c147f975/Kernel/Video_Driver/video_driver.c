@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "video_driver.h"
 #include "font8x8_basic.h"
 struct vbe_mode_info_structure

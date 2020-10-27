@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "stringLib.h"
 /* return 1 if s is greater than v
 ** 0 if s is equal to v
@@ -60,7 +62,7 @@ int doubleToString(double num, char *buffer)
     do
     {
         int remainder = integer_part % 10;
-        *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
+        *p++ = remainder + '0';
         digits++;
     } while (integer_part /= 10);
     *p = '.';

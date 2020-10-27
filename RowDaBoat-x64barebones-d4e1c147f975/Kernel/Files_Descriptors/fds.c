@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "fds.h"
 #include "memory_manager.h"
 #include "keyboardDriver.h"
@@ -35,7 +37,7 @@ void init_fds()
 void closeCurrentProcess(int fd)
 {
     PCB *pcb = &readyHeader.current->data;
-    if (pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL)
+    if (fd != 0 && pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL)
     {
         char buffer[2] = {0};
         buffer[0] = EOF;
@@ -56,7 +58,7 @@ void closeCurrentProcess(int fd)
 void closePID(size_t pid, int fd)
 {
     PCB *pcb = getPCB(pid);
-    if (pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL)
+    if (pcb->fds[fd] != NULL && pcb->fds[fd]->write != NULL) 
     {
         char buffer[2] = {0};
         buffer[0] = EOF;

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #ifdef MM_BUDDY
 #include "buddy_memory_manager.h"
 #include "memory_manager_lib.h"
@@ -29,7 +31,7 @@ static char initialized = 0;
 static size_t remainingBytes = MAXIMUM_BLOCK_SIZE;
 
 size_t heap_size = MAXIMUM_BLOCK_SIZE;
-size_t free_size = remainingBytes;
+size_t free_size = MAXIMUM_BLOCK_SIZE;
 void *pMalloc(size_t requestedSize)
 {
     /*
@@ -52,7 +54,7 @@ void *pMalloc(size_t requestedSize)
     /*
             Must skip header
         */
-    uint64_t aux =(unint64_t) recursiveMalloc(level);
+    uint64_t aux =(uint64_t) recursiveMalloc(level);
     aux+=HEADER_SIZE;
     void *returnPointer = (void *)aux;
     remainingBytes -= requestedSize;

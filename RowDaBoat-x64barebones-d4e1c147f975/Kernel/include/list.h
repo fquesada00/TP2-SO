@@ -38,7 +38,7 @@ void push(Header * head, elem_t d, int p, int tickets);
 
 int isEmpty(Header * head); 
 
-elem_t * next(Header * head); //Este anda bien
+elem_t * next(Header * head);
 
 listElem_t removeCurrent(Header * head);
 

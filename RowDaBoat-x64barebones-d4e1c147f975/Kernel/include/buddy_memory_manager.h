@@ -22,7 +22,7 @@
 */
 #define LEVELS (MAXIMUM_BLOCK_SIZE_LOG2 - MINIMUM_BLOCK_SIZE_LOG2) + 1
 
-#define BLOCK_SIZE(level) (size_t)(1 << (MAXIMUM_BLOCK_SIZE_LOG2 - level))
+#define BLOCK_SIZE(level) ((size_t)(1 << (MAXIMUM_BLOCK_SIZE_LOG2 - (level))))
 
 typedef struct A_BLOCK
 {
@@ -74,22 +74,5 @@ size_t getBlockNumber(a_block *header);
     Initialize heap and its first list of level 0
 */
 void initialize();
-
-// /*
-//     Receive a block and insert it into the blocked list
-// */
-// void insertBlock(a_block *insert);
-
-// /*
-//     Receive a block and try to remove it from the blocked list.
-//     Return value on success is 1, if not, 0
-// */
-// int removeBlock(a_block *remove);
-
-// /*
-//     Receive a block and check if its present into the blocked list.
-//     Return value on success is 1, if not, 0
-// */
-// int isBlocked(a_block *block);
 #endif
 #endif

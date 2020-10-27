@@ -14,14 +14,11 @@ GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
 GLOBAL _syscallHandler
-GLOBAL _exception0Handler
-GLOBAL _exception6Handler
 GLOBAL initProcessManager
 GLOBAL execvAuxi
 GLOBAL _int20
 
 EXTERN irqDispatcher
-EXTERN exceptionDispatcher
 EXTERN syscall_read
 EXTERN syscall_write
 EXTERN syscall_registers
@@ -137,22 +134,6 @@ SECTION .text
 	iretq
 %endmacro
 
-%macro exceptionHandler 1
-	pushState
-	mov rdi, %1 ; pasaje de parametro
-	mov rsi,rsp
-	;call exceptionDispatcher
-	popState
-	iretq
-%endmacro
-
-;Zero Division Exception
-_exception0Handler:
-	exceptionHandler 0
-
-;Invalid Op Code Exception
-_exception6Handler:
-	exceptionHandler 6
 
 _hlt:
 	sti
