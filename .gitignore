@@ -1,3 +1,6 @@
 *.o
 .bash_history
 .gdb_history
+RowDaBoat-x64barebones-d4e1c147f975/PVS-Studio.log
+RowDaBoat-x64barebones-d4e1c147f975/report.tasks
+RowDaBoat-x64barebones-d4e1c147f975/strace_out
